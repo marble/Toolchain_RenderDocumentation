@@ -36,4 +36,9 @@ them in alphabetical order. It then processes the subfolders
 in alphabetical order in the same way. So we have a recursion
 here and proceed in "top-down first" fashion.
 
+Definition: A toolchain is a folder with its files and subfolders.
+
+TCT recreates the folder structure of the toolchain for all the
+actual tools it finds in a temporary file space.
+
 ((to be continued))
