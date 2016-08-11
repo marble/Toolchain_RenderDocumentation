@@ -1,0 +1,82 @@
+# ------------------------------------------------------
+#
+# This function takes care of compiling the project
+# as PDF, removing any intermediate LaTeX files.
+#
+# ------------------------------------------------------
+function compilepdf() {
+    local EXITCODE
+    local PDFFILE
+    local TARGETPDF
+
+    if ((0)); then true;
+        # do we need this kind of check here?
+        # with the new 2015-10 buildchain PDF rendering is alway configured
+        # if not explicitely unset by someone
+        grep -A3 latex_elements $MAKE_DIRECTORY/10+20+30_conf_py.yml | egrep "^    preamble: \\\\usepackage{typo3}" >/dev/null
+        if [ $? -ne 0 ]; then
+            echo "PDF rendering is not configured, skipping."
+            return
+        fi
+    fi
+
+    # Create LATEX file and helper files
+    make -e latex
+    # Fix generated Makefile for batch processing
+    sed -i"" 's/pdflatex /pdflatex -interaction=nonstopmode -halt-on-error /' $BUILDDIR/latex/Makefile
+    # Fix color of links inside the TOC; at this place make them black
+    sed -i"" 's/\\tableofcontents/\\hypersetup{linkcolor=black}\n\\tableofcontents\n\\hypersetup{linkcolor=typo3orange}/' $BUILDDIR/latex/$PROJECT.tex
+    # Create PDF
+    make -C $BUILDDIR/latex all-pdf
+    EXITCODE=$?
+
+
+
+    # we have to overcome this problem:
+    #
+    # Output written on t3shortname.pdf (384 pages, 1394901 bytes).
+    # Transcript written on t3shortname.log.
+    # # # make: Leaving directory `/tmp/-home-mbless-public_html-typo3cms-TyposcriptReference-latest/latex'
+    # PDFFILE:, /tmp/-home-mbless-public_html-typo3cms-TyposcriptReference-latest/latex/t3tsref.pdf
+    # TARGETPDF:, manual.t3tsref-latest.pdf
+    # Could not find output PDF, skipping.
+
+
+    # output name is always 'PROJECT'!
+    PDFFILE=$BUILDDIR/latex/PROJECT.pdf
+    if [ "$PACKAGE_LANGUAGE" == "default" ]; then
+        TARGETPDF=manual.$PROJECT-$VERSION.pdf
+    else
+        TARGETPDF=manual.$PROJECT-$VERSION.${PACKAGE_LANGUAGE}.pdf
+    fi
+    if [ $EXITCODE -ne 0 ]; then
+        # Store log into pdf.log, may be useful to investigate
+        cat $BUILDDIR/latex/*.log >> $BUILDDIR/pdf.log
+        echo "Could not compile as PDF, skipping."
+    elif [ ! -f "$PDFFILE" ]; then
+        EXITCODE=1
+        echo "Could not find output PDF, skipping."
+    else
+        # Store log even though no fatal errors occured
+        cat $BUILDDIR/latex/*.log >> $BUILDDIR/pdf.log
+        # Move PDF to a directory "_pdf" (instead of "latex")
+        mkdir $BUILDDIR/_pdf
+        mv $PDFFILE $BUILDDIR/_pdf/$TARGETPDF
+
+        # Create a .htaccess that redirects everything to the real PDF
+        # Remove "/home/mbless/public_html" at the beginning
+        TARGETDIR=$(echo $ORIG_BUILDDIR | cut -b25-)/_pdf
+
+        pushd $BUILDDIR/_pdf >/dev/null
+        echo "RewriteEngine On"                                    >  .htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-f"                 >> .htaccess
+        echo "RewriteRule ^(.*)\$ $TARGETDIR/$TARGETPDF [L,R=301]" >> .htaccess
+        popd >/dev/null
+    fi
+
+    # Remove LaTeX intermediate files
+    rm -rf $BUILDDIR/latex
+
+    return $EXITCODE
+}
+

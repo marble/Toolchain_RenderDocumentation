@@ -1,0 +1,68 @@
+# ------------------------------------------------------
+#
+# This function takes care of packaging the
+# HTML documentatin as a zip file and recreates
+# the index of available packages.
+#
+# ------------------------------------------------------
+function packagedocumentation() {
+    local PACKAGEDIR
+    if [ "${PACKAGE_LANGUAGE}" == "default" ]; then
+        PACKAGEDIR=$ORIG_BUILDDIR/../packages
+    else
+        PACKAGEDIR=$ORIG_BUILDDIR/../../packages
+    fi
+    local LANGUAGE_SEGMENT=$(echo ${PACKAGE_LANGUAGE//_/-} | tr '[A-Z]' '[a-z]')
+    local ARCHIVE=${PROJECT}-${VERSION}-${LANGUAGE_SEGMENT}.zip
+
+    rm -rf /tmp/$PACKAGE_KEY /tmp/$ARCHIVE
+    mkdir -p /tmp/$PACKAGE_KEY/$PACKAGE_LANGUAGE/html
+    cp -r $BUILDDIR/* /tmp/$PACKAGE_KEY/$PACKAGE_LANGUAGE/html
+
+    # Move PDF if needed
+    if [ -d "$BUILDDIR/_pdf" ]; then
+        mkdir -p /tmp/$PACKAGE_KEY/$PACKAGE_LANGUAGE/pdf
+        pushd /tmp/$PACKAGE_KEY/$PACKAGE_LANGUAGE > /dev/null
+        find html/_pdf/ -type f -name \*.pdf -exec mv {} pdf/ \;
+        rm -rf html/_pdf/
+        popd >/dev/null
+    fi
+
+    pushd /tmp >/dev/null
+    zip -r -9 -q $ARCHIVE $PACKAGE_KEY
+    mkdir -p $PACKAGEDIR
+    mv $ARCHIVE $PACKAGEDIR/
+    rm -rf /tmp/$PACKAGE_KEY
+    popd >/dev/null
+
+    # Create documentation pack index
+    pushd $PACKAGEDIR >/dev/null
+    rm -f packages.xml
+    touch packages.xml
+
+    echo -e "<?xml version=\"1.0\" standalone=\"yes\" ?>"                   >> packages.xml
+    echo -e "<documentationPackIndex>"                                      >> packages.xml
+    echo -e "\t<meta>"                                                      >> packages.xml
+    echo -e "\t\t<timestamp>$(date +"%s")</timestamp>"                      >> packages.xml
+    echo -e "\t\t<date>$(date +"%F %T")</date>"                             >> packages.xml
+    echo -e "\t</meta>"                                                     >> packages.xml
+    echo -e "\t<languagePackIndex>"                                         >> packages.xml
+
+    for p in $(find . -name \*.zip | sort);
+    do
+            local _VERSION=$(echo $p | $SED_EXTENDED "s/.*-([0-9.]*|latest)-([a-z-]*)\.zip\$/\1/")
+            local _LANGUAGE=$(echo $p | $SED_EXTENDED "s/.*-([0-9.]*|latest)-([a-z-]*)\.zip\$/\2/")
+            if [ "$_LANGUAGE" != "default" ]; then
+                _LANGUAGE=$(echo $_LANGUAGE | sed 's/..$/\U&/' | sed 's/-/_/')
+            fi
+            echo -e "\t\t<languagepack version=\"$_VERSION\" language=\"$_LANGUAGE\">" >> packages.xml
+            echo -e "\t\t\t<md5>$(md5sum $p | cut -d" " -f1)</md5>"         >> packages.xml
+            echo -e "\t\t</languagepack>"                                   >> packages.xml
+    done
+
+    echo -e "\t</languagePackIndex>"                                        >> packages.xml
+    echo -e "</documentationPackIndex>"                                     >> packages.xml
+
+    popd >/dev/null
+}
+
