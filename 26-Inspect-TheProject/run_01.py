@@ -122,8 +122,9 @@ if exitcode == CONTINUE:
     if emails_found:
         for filename, emails in emails_found:
             for email in emails:
-                if email not in emails_user:
-                    emails_user.append(email)
+                if email not in ['documentation@typo3.org']:
+                    if email not in emails_user:
+                        emails_user.append(email)
 
 
 if exitcode == CONTINUE:

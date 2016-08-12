@@ -89,8 +89,8 @@ if exitcode == CONTINUE:
     thank you very much for providing a TYPO3 project that contains documentation.
 
     I am '""" + params['toolchainname'] + """', the toolchain that renders (builds) the documentation for you
-    on our documentation server http://docs.typo3.org/. You can find me ((soon))
-    at https://github.com/TYPO3-Documentation/ToolchainRenderDocumentation.
+    on our documentation server http://docs.typo3.org/. You can find me currently
+    at https://github.com/marble/TCT. This may change in future.
 
     """)
 
