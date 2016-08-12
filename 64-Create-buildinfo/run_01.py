@@ -89,7 +89,7 @@ if exitcode == CONTINUE:
     thank you very much for providing a TYPO3 project that contains documentation.
 
     I am '""" + params['toolchainname'] + """', the toolchain that renders (builds) the documentation for you
-    on our documentation server http://docs.typo3.org/. You can find me currently
+    on the TYPO3 documentation server http://docs.typo3.org/. You can find me currently
     at https://github.com/marble/TCT. This may change in future.
 
     """)
@@ -147,30 +147,44 @@ if exitcode == CONTINUE:
         These are the build results:
         """)
     assembled = milestones_get('assembled', [])
+
     if 'html' in assembled:
-        tell_owner("   HTML      : %s/\n" % builddir_url, ltrim=False)
+        tell_owner("   HTML      : success : %s/\n" % builddir_url, ltrim=False)
+    else:
+        tell_owner("   HTML      : failure : %s/\n" % builddir_url, ltrim=False)
+
     if 'singlehtml' in assembled:
-        tell_owner("   SINGLEHTML: %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+        tell_owner("   SINGLEHTML: success : %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+    else:
+        tell_owner("   SINGLEHTML: failure : %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+
     if 'pdf' in assembled:
-        tell_owner("   PDF       : %s/%s\n" % (builddir_url, '_pdf/'), ltrim=False)
+        tell_owner("   PDF       : success : %s/%s\n" % (builddir_url, '_pdf/'), ltrim=False)
+    else:
+        tell_owner("   PDF       : success : %s/%s\n" % (builddir_url, '_pdf/'), ltrim=False)
+
     if package_url:
-        tell_owner("   PACKAGE   : %s\n" % package_url, ltrim=False)
+        tell_owner("   PACKAGE   : success : %s\n" % package_url, ltrim=False)
+    else:
+        tell_owner("   PACKAGE   : failure : %s\n" % package_url, ltrim=False)
+
     if 1:
-        tell_owner("   BUILDINFO : %s/%s\n" % (builddir_url, '_buildinfo/'), ltrim=False)
+        tell_owner("   BUILDINFO : success : %s/%s\n" % (builddir_url, '_buildinfo/'), ltrim=False)
     tell_owner('\n')
 
 
 
     tell_owner("""\
-        PACKAGE: The package Index has to be updated!
+        ((Todo marble: PACKAGE: The package Index has to be updated!))
 
-        Look at the BUILDINFO, to find warnings.txt
+        Hints:
+           Look at the BUILDINFO to see if there's something
+           in file 'warnings.txt'.
 
-        Look at the BUILDINFO, to find info about the PDF generation
+           Look at the BUILDINFO to find details about the
+           PDF generation process.
 
     """)
-
-
 
 
     # list buildsettings
