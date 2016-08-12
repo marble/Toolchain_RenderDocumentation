@@ -63,9 +63,9 @@ if exitcode == CONTINUE:
     with codecs.open(os.path.join(workdir, 'cmd-01-cmd.txt'   ), 'wb', 'utf-8') as f2:
         f2.write(cmd)
     with codecs.open(os.path.join(workdir, 'cmd-01-stdout.txt'), 'wb', 'utf-8') as f2:
-        f2.write(out.decode('utf-8', errors='replace'))
+        f2.write(out.decode('utf-8', 'replace'))
     with codecs.open(os.path.join(workdir, 'cmd-01-stderr.txt'), 'wb', 'utf-8') as f2:
-        f2.write(err.decode('utf-8', errors='replace'))
+        f2.write(err.decode('utf-8', 'replace'))
 
 if exitcode == CONTINUE:
 
