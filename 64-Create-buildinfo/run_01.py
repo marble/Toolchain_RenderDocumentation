@@ -90,7 +90,7 @@ if exitcode == CONTINUE:
 
     I am '""" + params['toolchainname'] + """', the toolchain that renders (builds) the documentation for you
     on the TYPO3 documentation server http://docs.typo3.org/. You can find me currently
-    at https://github.com/marble/TCT. This may change in future.
+    at https://github.com/marble/Toolchain_RenderDocumentation. This may change in future.
 
     """)
 
