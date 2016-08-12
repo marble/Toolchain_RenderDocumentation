@@ -94,7 +94,7 @@ if exitcode == CONTINUE:
 
     """)
 
-    emails_user = milestones['emails_user']
+    emails_user = milestones.get('emails_user')
     if emails_user:
         if len(emails_user) == 1:
             tell_owner("""\
