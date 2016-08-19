@@ -1,3 +1,0 @@
-
-
-email_admin = martin.bless@gmail.com
