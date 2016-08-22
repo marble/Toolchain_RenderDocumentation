@@ -50,9 +50,12 @@ if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
     email_admin = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin')
-    email_user_to = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to')
-    email_user_cc = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc')
-    email_user_bcc = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc')
+    email_user_to = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to') or
+                     tct.deepget(facts, 'run_command', 'email_user_to') )
+    email_user_cc = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc') or
+                     tct.deepget(facts, 'run_command', 'email_user_cc'))
+    email_user_bcc = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc') or
+                      tct.deepget(facts, 'run_command', 'email_user_bcc'))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
 
