@@ -19,6 +19,13 @@ toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+final_exitcode = None
+
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
@@ -39,7 +46,6 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
     D = {}
     cnt = 0
     for k in sorted(tools_exitcodes):
@@ -51,14 +57,21 @@ if exitcode == CONTINUE:
     publish_dir_buildinfo_exitcodes = os.path.join(publish_dir_buildinfo, 'exitcodes.json')
     tct.writejson(D, publish_dir_buildinfo_exitcodes)
 
+if exitcode == CONTINUE:
+    for k, v in tools_exitcodes.items():
+        final_exitcode = 0 if v == 0 else 1
+        if final_exitcode > 0:
+            break
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    result['MILESTONES'].append({
-        'publish_dir_buildinfo_exitcodes': publish_dir_buildinfo_exitcodes})
+    result['MILESTONES'].append({'publish_dir_buildinfo_exitcodes': publish_dir_buildinfo_exitcodes})
+
+    if final_exitcode is not None:
+        result['MILESTONES'].append({'FINAL_EXITCODE': final_exitcode})
 
 # ==================================================
 # save result
