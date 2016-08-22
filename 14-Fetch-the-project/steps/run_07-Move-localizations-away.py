@@ -17,8 +17,6 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Check required milestone(s)
@@ -31,7 +29,7 @@ def milestones_get(name, default=None):
 if exitcode == CONTINUE:
     localization_has_localization = milestones_get('localization_has_localization')
     if not localization_has_localization:
-        exitcode = 2
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
     localization_folders = []
