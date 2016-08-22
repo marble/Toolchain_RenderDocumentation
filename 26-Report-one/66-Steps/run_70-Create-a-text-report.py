@@ -141,6 +141,7 @@ if exitcode == CONTINUE:
             tell_owner("""\
                 I am sending this mail because I found an email
                 address in the project:
+
                    %s
 
                 Write to documentation@typo3.org if this is not
@@ -151,6 +152,7 @@ if exitcode == CONTINUE:
             tell_owner("""\
                 I am sending this mail because I found email
                 addresses in the project:
+
                    %s
 
                 Write to documentation@typo3.org if this is not
@@ -181,7 +183,8 @@ if exitcode == CONTINUE:
             ----------
 
             The file format of the settings configuration file
-            has changed.
+            has changed:
+
                Settings.yml is the OLD format.
                Settings.cfg is the NEW format.
 
@@ -190,15 +193,19 @@ if exitcode == CONTINUE:
             Settings.cfg file from the old Settings.yml file.
 
             Please grab the new file from:
+
                """ + builddir_url + """/_buildinfo/Settings.cfg
 
             and add it to your project as:
+
                Documentation/Settings.cfg
 
-            You can then remove:
-               Documentation/Settings.yml
+            Please keap the old Yaml file as well. The reason
+            for this is that right at the moment BOTH rendering
+            processes are in action. So keep this file. We will
+            tell you when it's not needed any more:
 
-            The Settings.yml file will not hurt though.
+               Documentation/Settings.yml
 
             Thank you in advance!
 
@@ -266,7 +273,7 @@ if exitcode == CONTINUE:
         if warnings_file_size is not None:
             if warnings_file_size:
                 tell_owner("""\
-                'warnings.txt' is %s bytes long. This means
+                The file 'warnings.txt' is %s bytes long. This means
                 that Sphinx has reported warnings which you should
                 look at.
 
@@ -274,8 +281,10 @@ if exitcode == CONTINUE:
             else:
                 tell_owner("""\
                     Congratulations!
+
                     The file 'warnings.txt' is empty. This means
                     that Sphinx didn't find errors and there wasn't even a warning.
+
                     Great!
 
                     """)
@@ -299,7 +308,9 @@ if exitcode == CONTINUE:
     else:
         tell_owner(u"""\
             Look at the buildinfo
-            %s/%s
+
+               %s/%s
+
             for details about the PDF generation process.
 
             """ % (builddir_url, '_buildinfo/'))
@@ -307,7 +318,8 @@ if exitcode == CONTINUE:
             filename = os.path.split(TheProjectResultBuildinfoPdfLogFile)[1]
             tell_owner(u"""\
                 The logfile probably is most interesting:
-                %s/%s/%s
+
+                   %s/%s/%s
 
                 """ % (builddir_url, '_buildinfo/', filename))
 
