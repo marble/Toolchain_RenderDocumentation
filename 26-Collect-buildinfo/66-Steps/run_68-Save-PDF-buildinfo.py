@@ -53,10 +53,13 @@ if exitcode == CONTINUE:
         filename = os.path.split(file)[1]
         src = os.path.join(build_latex_folder, file)
         dest = os.path.join(TheProjectResultBuildinfo, 'PDF' + filename)
-        shutil.copy(src, dest)
-        TheProjectResultBuildinfoPdfFilesCnt += 1
-        if dest.endswith('.log'):
-            TheProjectResultBuildinfoPdfLogFile = dest
+        fileext = os.path.splitext(dest)[1]
+        if fileext.lower() in ['.tex', '.log']:
+            dest = dest + '.txt'
+            shutil.copy(src, dest)
+            TheProjectResultBuildinfoPdfFilesCnt += 1
+            if dest.endswith('.log.txt'):
+                TheProjectResultBuildinfoPdfLogFile = dest
 
 # ==================================================
 # Set MILESTONE

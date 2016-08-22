@@ -29,20 +29,36 @@ def milestones_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+    toolchain_name = facts.get('toolchain_name')
+    loglist.append(toolchain_name)
+    if not toolchain_name:
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
     buildsettings = milestones_get('buildsettings')
 
-if not (TheProjectResult and TheProjectResultVersion and buildsettings):
-    exitcode = 2
+    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir')
+    loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
+
+    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot')
+    loglist.append(('url_of_webroot', url_of_webroot))
+
+    if not (TheProjectResult and TheProjectResultVersion and
+            TheProjectResultBuildinfo and buildsettings and
+            webroot_part_of_builddir and url_of_webroot):
+        exitcode = 2
 
 if exitcode == CONTINUE:
+    loglist.append('PARAMS exist')
     build_html = milestones_get('build_html')
     settingscfg_file = milestones_get('settingscfg_file')
     warnings_file = milestones_get('warnings_file')
     warnings_file_size = milestones_get('warnings_file_size')
     TheProjectLog = milestones_get('TheProjectLog')
-    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     TheProjectResultBuildinfoPdfFilesCnt = milestones_get('TheProjectResultBuildinfoPdfFilesCnt')
     TheProjectResultBuildinfoPdfLogFile = milestones_get('TheProjectResultBuildinfoPdfLogFile')
 
@@ -58,7 +74,7 @@ import codecs
 import shutil
 
 letter_to_owner = [u'']
-subject = u'Documentation rendered for: '
+subject = u'Documentation rendered: '
 
 def create_letter_writer(letter=None, ltrim=True):
     if letter is None:
@@ -82,17 +98,16 @@ tell_owner = create_letter_writer(letter_to_owner)
 
 if exitcode == CONTINUE:
     bs = buildsettings
-    TheProjectResultBuildinfo = os.path.join(TheProjectResult, '_buildinfo')
     if not os.path.exists(TheProjectResultBuildinfo):
         os.makedirs(TheProjectResultBuildinfo)
 
 if exitcode == CONTINUE:
-    # "builddir": "/home/mbless/public_html/typo3cms/extensions/sphinx/latest",
     builddir = buildsettings['builddir']
     builddir_parent = os.path.split(builddir)[0]
-    builddir_parent_url = builddir_parent.replace('/home/mbless/public_html/', 'https://docs.typo3.org/typo3cms/')
-    builddir_url = builddir.replace('/home/mbless/public_html/', 'https://docs.typo3.org/typo3cms/')
-    packages_url = builddir_parent_url + 'packages/'
+
+    builddir_parent_url = builddir_parent.replace(webroot_part_of_builddir, url_of_webroot)
+    builddir_url = builddir.replace(webroot_part_of_builddir, url_of_webroot)
+    packages_url = builddir_parent_url + '/packages/'
     package_url = None
     package_file = milestones_get('package_file')
     if package_file:
@@ -175,7 +190,7 @@ if exitcode == CONTINUE:
             Settings.cfg file from the old Settings.yml file.
 
             Please grab the new file from:
-               """ + builddir_url + """_buildinfo/Settings.cfg
+               """ + builddir_url + """/_buildinfo/Settings.cfg
 
             and add it to your project as:
                Documentation/Settings.cfg
@@ -185,7 +200,7 @@ if exitcode == CONTINUE:
 
             The Settings.yml file will not hurt though.
 
-            Thank you for your collaboration!
+            Thank you in advance!
 
 
         """)
@@ -209,9 +224,9 @@ if exitcode == CONTINUE:
         tell_owner("   Failure! : SINGLEHTML: %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
 
     if 'pdf' in assembled:
-        tell_owner("   Success! : PDF       : %s/%s\n" % (builddir_url, '_pdf/'), ltrim=False)
+        tell_owner("   Success! : PDF       : %s/%s\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
     else:
-        tell_owner("   Failure! : PDF       : %s/%s\n" % (builddir_url, '_pdf/'), ltrim=False)
+        tell_owner("   Failure! : PDF       : %s/%s\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
 
     if package_url:
         tell_owner("   Success! : PACKAGE   : %s\n" % package_url, ltrim=False)
@@ -246,7 +261,7 @@ if exitcode == CONTINUE:
             Find the warnings file at
             %s%s
 
-            """ % (builddir_url, '_buildinfo/warnings.txt'))
+            """ % (builddir_url, '/_buildinfo/warnings.txt'))
 
         if warnings_file_size is not None:
             if warnings_file_size:

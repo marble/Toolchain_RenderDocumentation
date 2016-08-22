@@ -30,19 +30,27 @@ def milestones_get(name, default=None):
 
 if exitcode == CONTINUE:
     tools_exitcodes = facts.get('tools_exitcodes')
-    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
+    publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
 
-if not (TheProjectResultBuildinfo and tools_exitcodes):
-    CONTINUE = -1
+if not (publish_dir_buildinfo and tools_exitcodes):
+    exitcode = 2
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    TheProjectResultBuildinfoExitcodesFile = os.path.join(TheProjectResultBuildinfo, 'exitcodes.json')
-    tct.writejson(tools_exitcodes, TheProjectResultBuildinfoExitcodesFile)
 
+    D = {}
+    cnt = 0
+    for k in sorted(tools_exitcodes):
+        cnt += 1
+        v = tools_exitcodes[k]
+        k2 = '%3d | %3s | %s' % (cnt, v, k)
+        D[k2] = v
+
+    publish_dir_buildinfo_exitcodes = os.path.join(publish_dir_buildinfo, 'exitcodes.json')
+    tct.writejson(D, publish_dir_buildinfo_exitcodes)
 
 
 # ==================================================
@@ -51,7 +59,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     result['MILESTONES'].append({
-        'TheProjectResultBuildinfoExitcodesFile': TheProjectResultBuildinfoExitcodesFile})
+        'publish_dir_buildinfo_exitcodes': publish_dir_buildinfo_exitcodes})
 
 # ==================================================
 # save result

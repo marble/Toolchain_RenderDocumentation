@@ -125,6 +125,24 @@ if exitcode == CONTINUE:
     with codecs.open(settingscfg_file, 'w') as configfile:
         config.write(configfile)
 
+        configfile.write("""\
+
+# About Settings.cfg
+
+# normal:
+# https://github.com/marble/typo3-docs-typo3-org-resources/blob/master/TemplatesForCopying/ExampleFiles/Settings-minimal.cfg
+
+# extensive:
+# https://github.com/marble/typo3-docs-typo3-org-resources/blob/master/TemplatesForCopying/ExampleFiles/Settings-extensive.cfg
+
+# Example files:
+# https://github.com/marble/typo3-docs-typo3-org-resources/tree/master/TemplatesForCopying/ExampleFiles
+
+# More:
+# http://mbless.de/blog/2015/10/24/a-new-task-for-an-old-server.html#ini-files
+""")
+
+
 
 # ==================================================
 # Set MILESTONE

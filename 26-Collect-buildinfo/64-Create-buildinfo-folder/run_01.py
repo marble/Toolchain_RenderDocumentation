@@ -19,8 +19,6 @@ toolname = params["toolname"]
 toolfolderabspath = params["toolfolderabspath"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Check required milestone(s)
@@ -31,9 +29,9 @@ def milestones_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    TheProjectResult = milestones_get('TheProjectResult')
+    TheProjectResultVersion = milestones_get('TheProjectResultVersion')
 
-if not (TheProjectResult):
+if not (TheProjectResultVersion):
     exitcode = 2
 
 # ==================================================
@@ -43,7 +41,7 @@ if not (TheProjectResult):
 import shutil
 
 if exitcode == CONTINUE:
-    TheProjectResultBuildinfo = os.path.join(TheProjectResult, '_buildinfo')
+    TheProjectResultBuildinfo = os.path.join(TheProjectResultVersion, '_buildinfo')
     if not os.path.exists(TheProjectResultBuildinfo):
         os.makedirs(TheProjectResultBuildinfo)
 

@@ -38,8 +38,9 @@ if exitcode == CONTINUE:
     TheProject = milestones_get('TheProject')
     version = buildsettings.get('version')
 
-if not (build_html and build_html_folder and TheProject and version):
-    exitcode = 2
+if exitcode == CONTINUE:
+    if not (build_html and build_html_folder and TheProject and version):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     build_singlehtml = milestones_get('build_singlehtml')

@@ -22,21 +22,29 @@ exitcode = CONTINUE = 0
 # ==================================================
 # Check required milestone(s)
 # --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     create_buildinfo = milestones_get('create_buildinfo')
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
-    toolchain_name = tct.deepget(params, 'toolchain_name')
-    loglist.append(('toolchain_name', toolchain_name))
+    publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
+    toolchain_name = params_get('toolchain_name')
 
-if not (create_buildinfo and TheProjectResultBuildinfo and TheProjectResultBuildinfoMessage
-        and toolchain_name):
-    CONTINUE = -1
+if exitcode == CONTINUE:
+    if not (create_buildinfo and TheProjectResultBuildinfo and TheProjectResultBuildinfoMessage
+            and publish_dir_buildinfo and toolchain_name):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
@@ -48,22 +56,26 @@ if exitcode == CONTINUE:
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
 
+    publish_dir_buildinfo_message = (publish_dir_buildinfo +
+                                     TheProjectResultBuildinfoMessage[len(TheProjectResultBuildinfo):])
+
 # ==================================================
 # work
 # --------------------------------------------------
+
 
 if exitcode == CONTINUE:
     import codecs
     import smtplib
     from email.mime.text import MIMEText
 
-    if not os.path.exists(TheProjectResultBuildinfoMessage):
+    if not os.path.exists(publish_dir_buildinfo_message):
         exitcode = 2
 
 if exitcode == CONTINUE:
 
     # body
-    with codecs.open(TheProjectResultBuildinfoMessage, 'r', 'utf-8', 'replace') as f1:
+    with codecs.open(publish_dir_buildinfo_message, 'r', 'utf-8', 'replace') as f1:
         msgbody = f1.read()
 
     # from
@@ -71,7 +83,7 @@ if exitcode == CONTINUE:
 
     # subject
     if not subject:
-        subject = os.path.split(TheProjectResultBuildinfoMessage)[1]
+        subject = os.path.split(publish_dir_buildinfo_message)[1]
 
     # cc
     cclist = []
@@ -125,7 +137,6 @@ if exitcode == CONTINUE:
 
     loglist.append('Now send an email!')
     send_the_mail()
-
 
 
 # ==================================================
