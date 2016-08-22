@@ -79,20 +79,20 @@ if exitcode == CONTINUE:
     pdf_dest_folder = None
     if pdf_file:
         srcname = os.path.split(pdf_file)[1]
+        destname = srcname
         NAMING = milestones.get('NAMING')
-        naming_project_name = NAMING.get('project_name')
-        naming_project_version = NAMING.get('project_version')
-        if naming_project_name and naming_project_version:
-            destname = 'manual.' + naming_project_name + '-' + naming_project_version + '.pdf'
-        else:
-            destname = srcname
-        if pdf_file:
-            pdf_dest_folder = os.path.join(TheProjectResultVersion, '_pdf')
-            pdf_dest_file = os.path.join(pdf_dest_folder, destname)
-            if not os.path.exists(pdf_dest_folder):
-                os.makedirs(pdf_dest_folder)
-            shutil.move(pdf_file, pdf_dest_file)
-            assembled.append('pdf')
+        if NAMING:
+            naming_project_name = NAMING.get('project_name')
+            naming_project_version = NAMING.get('project_version')
+            if naming_project_name and naming_project_version:
+                destname = 'manual.' + naming_project_name + '-' + naming_project_version + '.pdf'
+    if pdf_file:
+        pdf_dest_folder = os.path.join(TheProjectResultVersion, '_pdf')
+        pdf_dest_file = os.path.join(pdf_dest_folder, destname)
+        if not os.path.exists(pdf_dest_folder):
+            os.makedirs(pdf_dest_folder)
+        shutil.move(pdf_file, pdf_dest_file)
+        assembled.append('pdf')
 
     if package_file:
         TheProjectResultPackages = os.path.join(TheProjectResult, 'packages')
