@@ -22,7 +22,7 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-known_target_folders = ['typo3cms', 'extensions']
+known_target_folders = ['/typo3cms']
 publish_dir_planned = ''
 publish_package_dir_planned = ''
 publish_parent_dir_planned = ''
@@ -42,6 +42,7 @@ if exitcode == CONTINUE:
     publish_parent_dir = None
 
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     toolchain_name = facts.get('toolchain_name')
     loglist.append(('toolchain_name', toolchain_name))
     if not toolchain_name:
@@ -60,8 +61,9 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
-    loglist.append('REQUIREMENTS satisfied')
-
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
 
 # ==================================================
 # work
@@ -75,13 +77,13 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     publish_dir_planned = webroot_abspath + buildsettings_builddir[len(webroot_part_of_builddir):]
     loglist.append(('publish_dir_planned', publish_dir_planned))
-    parts = publish_dir_planned.split('/')
-    if not len(parts) >= 4:
-        loglist.append('publish_dir_planned too short')
-        exitcode = 2
-
-if exitcode == CONTINUE:
-    if not parts[-3]  in known_target_folders:
+    url_relpath = publish_dir_planned[len(webroot_abspath):]
+    ok = False
+    for knownpath in known_target_folders:
+        if url_relpath.startswith(knownpath):
+            ok = True
+            break
+    if not ok:
         loglist.append('can only install to known target folders')
         loglist.append(('known_target_folders', known_target_folders))
         exitcode = 2
