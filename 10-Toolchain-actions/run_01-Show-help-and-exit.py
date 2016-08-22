@@ -53,8 +53,9 @@ Options:
 Toolchain options:
   -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
   -c rebuild_needed 1            Force rebuild regardless of checksum
-  -T help                        Tell the toolchain to show this help, then exit.
-  -T unlock                      Tell the toolchain to remove existing locks, then exit
+  -T clean                       Let the toolchain delete prior builds, then exit.
+  -T help                        Let the toolchain show this help, then exit.
+  -T unlock                      Let the toolchain remove existing locks, then exit
   -c email_user_to  "email1,email2,..."  instead of real user
   -c email_user_cc  "email1,email2,..."  additionally, publicly
   -c email_user_bcc "email1,email2,..."  additionally, secretly

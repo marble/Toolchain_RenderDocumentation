@@ -18,47 +18,69 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
 
 # ==================================================
-# Get and check required milestone(s)
+# define
 # --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
-if exitcode == CONTINUE:
-    toolchain_name = params.get('toolchain_name')
-    toolchain_temp_home = params.get('toolchain_temp_home')
-    loglist.append(('toolchain_name', toolchain_name))
-    loglist.append(('toolchain_temp_home', toolchain_temp_home))
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+lockfiles_removed = []
+toolchain_actions = params_get('toolchain_actions', [])
+removed_dirs = []
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
-    if not (toolchain_name and toolchain_temp_home):
+    loglist.append('CHECK PARAMS')
+    toolchain_name = params_get('toolchain_name')
+    toolchain_temp_home = params_get('toolchain_temp_home')
+    run_id = facts_get('run_id')
+
+if exitcode == CONTINUE:
+    if not (toolchain_name and toolchain_temp_home and run_id):
         exitcode = 2
 
 if exitcode == CONTINUE:
-    toolchain_actions = params.get('toolchain_actions', [])
     lockfile_name = tct.deepget(facts, 'tctconfig', toolchain_name, 'lockfile_name')
-    loglist.append(('toolchain_actions', toolchain_actions))
     loglist.append(('lockfile_name', lockfile_name))
 
 if exitcode == CONTINUE:
     if not (lockfile_name):
         exitcode = 2
 
-if 1:
-    lockfiles_removed = []
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import shutil
+
 if exitcode == CONTINUE:
     for action in toolchain_actions:
+
         if action == 'help':
             'Should not occurr'
+
         elif action == 'unlock':
             for top, dirs, files in os.walk(toolchain_temp_home):
                 dirs[:] = [] # stop recursion
@@ -70,9 +92,25 @@ if exitcode == CONTINUE:
             exitcode = 99
             break
 
+        elif action == 'clean':
+            for top, dirs, files in os.walk(toolchain_temp_home):
+                dirs.sort()
+                for adir in dirs:
+                    fpath = os.path.join(top, adir)
+                    if not run_id in adir:
+                        if os.path.isdir(fpath):
+                            shutil.rmtree(fpath)
+                dirs[:] = [] # stop recursion
+            exitcode = 99
+            break
+
+
 # ==================================================run_01.py
 # Set MILESTONE
 # --------------------------------------------------
+
+if exitcode == 99:
+    result['MILESTONES'].append({'FINAL_EXITCODE': 0})
 
 if lockfiles_removed:
     result['MILESTONES'].append({'lockfiles_removed': lockfiles_removed})

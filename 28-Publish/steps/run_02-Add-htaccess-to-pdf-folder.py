@@ -40,19 +40,25 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
-    pdf_dest_file = milestones_get('pdf_dest_file')
-    pdf_dest_folder = milestones_get('pdf_dest_folder')
-    publish_dir_pdf_planned = milestones_get('publish_dir_pdf_planned')
     webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
     loglist.append(('webroot_abspath', webroot_abspath))
-
-if exitcode == CONTINUE:
-    if not (pdf_dest_file and pdf_dest_folder and publish_dir_pdf_planned and webroot_abspath):
-        loglist.append(('parameter PROBLEM'))
+    if not webroot_abspath:
         exitcode = 2
 
 if exitcode == CONTINUE:
-    loglist.append(('PARAMS are ok'))
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
+
+
+if exitcode == CONTINUE:
+    pdf_dest_file = milestones_get('pdf_dest_file')
+    pdf_dest_folder = milestones_get('pdf_dest_folder')
+    publish_dir_pdf_planned = milestones_get('publish_dir_pdf_planned')
+
+if exitcode == CONTINUE:
+    if not (pdf_dest_file and pdf_dest_folder and publish_dir_pdf_planned):
+        CONTINUE = -1
 
 # ==================================================
 # work
