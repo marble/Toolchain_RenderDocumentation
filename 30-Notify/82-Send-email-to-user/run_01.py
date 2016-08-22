@@ -50,7 +50,7 @@ if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
     email_admin = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin')
-    email_user_forced = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_forced')
+    email_user_to = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to')
     email_user_cc = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc')
     email_user_bcc = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc')
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
@@ -128,8 +128,8 @@ if exitcode == CONTINUE:
 
     #to
     receivers = []
-    if email_user_forced:
-        for item in email_user_forced.replace(',', ' ').split(' '):
+    if email_user_to:
+        for item in email_user_to.replace(',', ' ').split(' '):
             if item and item not in receivers:
                 receivers.append(item)
     else:
