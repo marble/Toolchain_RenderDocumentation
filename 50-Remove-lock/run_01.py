@@ -36,7 +36,7 @@ def milestones_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    lockfile = milestones_get('lockfiles')
+    lockfile = milestones_get('lockfile')
     if not (lockfile):
         CONTINUE = -1
 
