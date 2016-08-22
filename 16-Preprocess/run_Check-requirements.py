@@ -17,8 +17,6 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Get and check required milestone(s)
@@ -27,7 +25,6 @@ def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
-
 
 if exitcode == CONTINUE:
     requirements = [

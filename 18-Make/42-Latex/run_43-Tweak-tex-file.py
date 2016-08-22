@@ -32,8 +32,8 @@ def milestones_get(name, default=None):
 if exitcode == CONTINUE:
     latex_file = milestones_get('latex_file')
 
-if not (latex_file):
-    exitcode = 2
+    if not (latex_file):
+        exitcode = 2
 
 # ==================================================
 # work

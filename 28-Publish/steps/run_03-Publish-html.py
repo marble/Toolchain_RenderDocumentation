@@ -46,12 +46,11 @@ if exitcode == CONTINUE:
     publish_dir_planned = milestones_get('publish_dir_planned')
     publish_parent_dir_planned = milestones_get('publish_parent_dir_planned')
     publish_parent_parent_dir = milestones_get('publish_parent_parent_dir')
-
-if not (publish_dir_planned and publish_parent_dir_planned and
-        publish_parent_parent_dir and
-        TheProjectResult and TheProjectResultVersion):
-    exitcode = 2
-    loglist.append(('PROBLEM with params'))
+    if not (publish_dir_planned and publish_parent_dir_planned and
+            publish_parent_parent_dir and
+            TheProjectResult and TheProjectResultVersion):
+        exitcode = 2
+        loglist.append(('PROBLEM with params'))
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

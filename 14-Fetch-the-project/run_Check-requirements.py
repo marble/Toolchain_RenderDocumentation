@@ -31,9 +31,9 @@ def milestones_get(name, default=None):
 if exitcode == CONTINUE:
     buildsettings = milestones_get('buildsettings')
 
-if not buildsettings:
-    loglist.append('No buildsettings')
-    exitcode = 2
+    if not buildsettings:
+        loglist.append('No buildsettings')
+        exitcode = 2
 
 # ==================================================
 # work

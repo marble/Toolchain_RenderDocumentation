@@ -28,7 +28,6 @@ def milestones_get(name):
     loglist.append((name, result))
     return result
 
-
 if exitcode == CONTINUE:
     documentation_folder = milestones_get('documentation_folder')
     masterdoc = milestones_get('masterdoc')

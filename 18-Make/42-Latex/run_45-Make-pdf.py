@@ -33,8 +33,8 @@ if exitcode == CONTINUE:
     latex_file_tweaked = milestones_get('latex_file_tweaked')
     latex_make_file_tweaked  = milestones_get('latex_make_file_tweaked')
 
-if not (latex_file_folder and latex_file_tweaked and latex_make_file_tweaked):
-    exitcode = 2
+    if not (latex_file_folder and latex_file_tweaked and latex_make_file_tweaked):
+        exitcode = 2
 
 # ==================================================
 # work

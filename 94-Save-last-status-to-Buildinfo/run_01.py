@@ -18,11 +18,11 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
 
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
@@ -31,9 +31,8 @@ def milestones_get(name, default=None):
 if exitcode == CONTINUE:
     tools_exitcodes = facts.get('tools_exitcodes')
     publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
-
-if not (publish_dir_buildinfo and tools_exitcodes):
-    exitcode = 2
+    if not (publish_dir_buildinfo and tools_exitcodes):
+        exitcode = 2
 
 # ==================================================
 # work

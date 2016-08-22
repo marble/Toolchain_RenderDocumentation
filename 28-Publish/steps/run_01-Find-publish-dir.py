@@ -55,10 +55,9 @@ if exitcode == CONTINUE:
     loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
     webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
     loglist.append(('webroot_abspath', webroot_abspath))
-
-if not (TheProjectResult and buildsettings_builddir and
-    webroot_part_of_builddir and webroot_abspath):
-    exitcode = 2
+    if not (TheProjectResult and buildsettings_builddir and
+        webroot_part_of_builddir and webroot_abspath):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('REQUIREMENTS satisfied')

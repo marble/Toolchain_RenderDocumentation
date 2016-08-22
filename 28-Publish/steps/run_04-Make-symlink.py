@@ -28,7 +28,6 @@ publish_latest_file_target_old = None
 publish_stable_file = None
 publish_stable_file_created = False
 
-
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------

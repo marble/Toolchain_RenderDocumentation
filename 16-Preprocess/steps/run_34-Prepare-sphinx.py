@@ -18,8 +18,6 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Get and check required milestone(s)
@@ -36,8 +34,8 @@ if exitcode == CONTINUE:
     masterdoc = milestones_get('masterdoc')
     TheProject = milestones.get('TheProject')
 
-if not (buildsettings_file_fixed and makedir and masterdoc and TheProject):
-    exitcode = 2
+    if not (buildsettings_file_fixed and makedir and masterdoc and TheProject):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     has_settingscfg = milestones.get('has_settingscfg')

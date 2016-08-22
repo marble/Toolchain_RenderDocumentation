@@ -30,9 +30,8 @@ def milestones_get(name, default=None):
 
 if exitcode == CONTINUE:
     localization_has_localization = milestones_get('localization_has_localization')
-
-if not localization_has_localization:
-    exitcode = 2
+    if not localization_has_localization:
+        exitcode = 2
 
 if exitcode == CONTINUE:
     localization_folders = []

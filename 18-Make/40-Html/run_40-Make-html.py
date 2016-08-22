@@ -18,8 +18,6 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Get and check required milestone(s)
@@ -33,9 +31,8 @@ if exitcode == CONTINUE:
     ready_for_build = milestones_get('ready_for_build')
     rebuild_needed = milestones_get('rebuild_needed')
     included_files_check = milestones_get('included_files_check')
-
-if not (ready_for_build and rebuild_needed and included_files_check):
-    exitcode = 2
+    if not (ready_for_build and rebuild_needed and included_files_check):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     masterdoc = milestones.get('masterdoc')
