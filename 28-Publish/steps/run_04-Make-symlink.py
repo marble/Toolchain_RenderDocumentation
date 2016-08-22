@@ -96,17 +96,15 @@ if exitcode == CONTINUE:
     publish_existing_versions.sort(key=tct.versiontuple, reverse=True)
 
 if exitcode == CONTINUE:
+    publish_stable_file = os.path.join(publish_parent_dir, 'stable')
     if ter_extension:
         # for extensions 'stable' should always point to the highest
         # version denoted by numbers
-        publish_stable_file = os.path.join(publish_parent_dir, 'stable')
         if os.path.islink(publish_stable_file):
             os.remove(publish_stable_file)
         if publish_existing_versions:
             os.symlink(publish_existing_versions[0], publish_stable_file)
             publish_stable_file_created = publish_stable_file
-
-if exitcode == CONTINUE:
     if not ter_extension:
         if os.path.islink(publish_stable_file):
             # handled manually
@@ -118,7 +116,6 @@ if exitcode == CONTINUE:
             elif publish_existing_versions:
                 os.symlink(publish_existing_versions[0], publish_stable_file)
                 publish_stable_file_created = publish_stable_file
-
 
 # ==================================================
 # Set MILESTONE
