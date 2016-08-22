@@ -17,8 +17,6 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Check required milestone(s)
@@ -29,12 +27,15 @@ def milestones_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     TheProject = milestones_get('TheProject')
     localization_locales = milestones_get('localization_locales')
     buildsettings = milestones.get('buildsettings')
-
     if not (TheProject and localization_locales and buildsettings):
-        exitcode = 2
+        CONTINUE = -1
+        loglist.append('DON\'T DO ANYTHING: not all params given')
+    else:
+        loglist.append('PARAMS ARE OK')
 
 if exitcode == CONTINUE:
     TheProjectTodos = milestones.get('TheProjectTodos', TheProject + 'Todos')
