@@ -83,7 +83,7 @@ if exitcode == CONTINUE:
 
     cmd = 'make -C "' + latex_file_folder + '" all-pdf'
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+    exitcode, cmd, out, err = cmdline(cmd, cwd=latex_file_folder)
 
     loglist.append([exitcode, cmd, out, err])
 
