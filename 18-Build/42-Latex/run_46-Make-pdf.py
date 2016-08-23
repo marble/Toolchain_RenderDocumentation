@@ -20,6 +20,12 @@ loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
+# ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
 
@@ -28,13 +34,33 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     latex_file_folder = milestones_get('latex_file_folder')
     latex_file_tweaked = milestones_get('latex_file_tweaked')
     latex_make_file_tweaked  = milestones_get('latex_make_file_tweaked')
-
-    if not (latex_file_folder and latex_file_tweaked and latex_make_file_tweaked):
+    toolname = params_get('toolname')
+    if not (latex_file_folder and latex_file_tweaked and
+            latex_make_file_tweaked and toolname):
         exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
+
+if exitcode == CONTINUE:
+    toolname_short = os.path.splitext(toolname)[0][4:]
 
 # ==================================================
 # work
@@ -60,11 +86,16 @@ if exitcode == CONTINUE:
     exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
 
     loglist.append([exitcode, cmd, out, err])
-    with codecs.open(os.path.join(workdir, 'cmd-01-cmd.txt'   ), 'wb', 'utf-8') as f2:
-        f2.write(cmd)
-    with codecs.open(os.path.join(workdir, 'cmd-01-stdout.txt'), 'wb', 'utf-8') as f2:
+
+    xeq_name_cnt += 1
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+        f2.write(cmd.decode('utf-8', 'replace'))
+    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
-    with codecs.open(os.path.join(workdir, 'cmd-01-stderr.txt'), 'wb', 'utf-8') as f2:
+    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
 
 if exitcode == CONTINUE:

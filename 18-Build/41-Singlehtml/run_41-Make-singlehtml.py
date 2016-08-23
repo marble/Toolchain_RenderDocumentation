@@ -20,6 +20,12 @@ loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
+# ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
 def milestones_get(name, default=None):
@@ -27,21 +33,42 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     ready_for_build = milestones_get('ready_for_build')
     rebuild_needed = milestones_get('rebuild_needed')
     included_files_check = milestones_get('included_files_check')
-    if not (ready_for_build and rebuild_needed and included_files_check):
+    toolname = params_get('toolname')
+    if not (ready_for_build and rebuild_needed and
+            toolname and included_files_check):
         exitcode = 2
 
 if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
+
+if exitcode == CONTINUE:
+    toolname_short = os.path.splitext(toolname)[0][4:]
     masterdoc = milestones.get('masterdoc')
     has_settingscfg = milestones.get('has_settingscfg')
+    rebuild_needed = milestones.get('rebuild_needed')
     TheProject = milestones.get('TheProject')
     TheProjectLog = milestones.get('TheProjectLog')
     TheProjectBuild = milestones.get('TheProjectBuild')
     TheProjectMakedir = milestones.get('TheProjectMakedir')
     SPHINXBUILD = milestones.get('SPHINXBUILD')
+
 
 # ==================================================
 # work
@@ -63,7 +90,7 @@ if exitcode == CONTINUE:
         return exitcode, cmd, out, err
 
 if exitcode == CONTINUE:
-    builder = 'html'
+    builder = 'singlehtml'
     sourcedir = milestones['documentation_folder']
     outdir = build_builder_folder = os.path.join(TheProjectBuild, builder)
     warnings_file_folder = os.path.join(TheProjectLog, builder)
@@ -95,12 +122,17 @@ if exitcode == CONTINUE:
     exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
 
     loglist.append([exitcode, cmd, out, err])
-    with codecs.open(os.path.join(workdir, 'cmd-01-cmd.txt'), 'w', 'utf-8') as f2:
-        f2.write(cmd_multiline)
-    with codecs.open(os.path.join(workdir, 'cmd-01-stdout.txt'), 'w', 'utf-8') as f2:
-        f2.write(out)
-    with codecs.open(os.path.join(workdir, 'cmd-01-stderr.txt'), 'w', 'utf-8') as f2:
-        f2.write(err)
+
+    xeq_name_cnt += 1
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+        f2.write(cmd_multiline.decode('utf-8', 'replace'))
+    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+        f2.write(out.decode('utf-8', 'replace'))
+    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+        f2.write(err.decode('utf-8', 'replace'))
 
 
 
@@ -110,9 +142,9 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     builds_successful = milestones.get('builds_successful', [])
-    builds_successful.append('html')
+    builds_successful.append('singlehtml')
     result['MILESTONES'].append({
-        'build_html': 'success',
+        'build_singlehtml': 'success',
         'builds_successful': builds_successful,
         'build_' + builder + '_folder': build_builder_folder,
     })
