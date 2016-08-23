@@ -50,12 +50,12 @@ if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
     email_admin = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin')
-    email_user_to = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to') or
-                     tct.deepget(facts, 'run_command', 'email_user_to') )
-    email_user_cc = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc') or
-                     tct.deepget(facts, 'run_command', 'email_user_cc'))
-    email_user_bcc = (tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc') or
-                      tct.deepget(facts, 'run_command', 'email_user_bcc'))
+    email_user_to = (tct.deepget(facts, 'run_command', 'email_user_to') or
+                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to'))
+    email_user_cc = (tct.deepget(facts, 'run_command', 'email_user_cc') or
+                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc'))
+    email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
+                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
 
@@ -102,27 +102,31 @@ if exitcode == CONTINUE:
             if item and item not in bcclist:
                 bcclist.append(item)
 
+    # host
+    host = 'localhost'
+
     def send_the_mail():
+        msg_to_value = ', '.join(receivers) if receivers else ''
+        msg_cc_value = ', '.join(cclist) if cclist else ''
+        msg_bcc_value = ', '.join(bcclist) if bcclist else ''
+        loglist.append(('actual mailparams', {
+            'from': sender,
+            'host': host,
+            'msg_bcc_value': msg_bcc_value,
+            'msg_cc_value': msg_cc_value,
+            'msg_to_value': msg_to_value,
+            'subject': subject,
+        }))
+
         msg = MIMEText(msgbody)
-
         msg['From'] = sender
-        loglist.append(('sender:', sender))
-
-        msg['To'] = ', '.join(receivers)
-        loglist.append(('receivers:', receivers))
-
+        msg['To'] = msg_to_value
         msg['Subject'] = subject
-        loglist.append(('subject:', subject))
-
-        if cclist:
-            msg['Cc'] = ', '.join(cclist)
-            loglist.append(('cc:', cclist))
-
-        if bcclist:
-            msg['Bcc'] = ', '.join(bcclist)
-            loglist.append(('bcc:', bcclist))
-
-        s = smtplib.SMTP('localhost')
+        if msg_cc_value:
+            msg['Cc'] = msg_cc_value
+        if msg_bcc_value:
+            msg['Bcc'] = msg_bcc_value
+        s = smtplib.SMTP(host)
         sendmail_result = s.sendmail(sender, receivers, msg.as_string())
         loglist.append(('sendmail_result:', sendmail_result))
 
