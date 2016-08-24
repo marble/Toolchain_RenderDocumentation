@@ -165,7 +165,10 @@ if exitcode == CONTINUE:
             receivers = bcclist
             send_the_mail()
     if email_user_send_to_admin_too and email_admin:
-        receivers = email_admin
+        if type(email_admin) == type([]):
+            receivers = email_admin
+        else:
+            receivers = [email_admin]
         send_the_mail()
 
 # ==================================================

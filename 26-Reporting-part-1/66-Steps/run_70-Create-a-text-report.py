@@ -113,7 +113,7 @@ if exitcode == CONTINUE:
     if package_file:
         package_url = packages_url + os.path.split(package_file)[1]
 
-    subject = u'Documentation rendered for: %s %s' % (bs['project'], bs['version'])
+    subject = u'Documentation rendered: %s %s' % (bs['project'], bs['version'])
 
     tell_owner(u"""\
     From: Toolchain_RenderDocumentation@typo3.org
@@ -221,27 +221,27 @@ if exitcode == CONTINUE:
     assembled = milestones_get('assembled', [])
 
     if 'html' in assembled:
-        tell_owner("   Success! : HTML      : %s/\n" % builddir_url, ltrim=False)
+        tell_owner("   Success! : HTML\n%s/\n\n" % builddir_url, ltrim=False)
     else:
-        tell_owner("   Failure! : HTML      : %s/\n" % builddir_url, ltrim=False)
+        tell_owner("   Failure! : HTML\n\n")
 
     if 'singlehtml' in assembled:
-        tell_owner("   Success! : SINGLEHTML: %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+        tell_owner("   Success! : SINGLEHTML\n%s/%s\n\n" % (builddir_url, 'singlehtml/'), ltrim=False)
     else:
-        tell_owner("   Failure! : SINGLEHTML: %s/%s\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+        tell_owner("   Failure! : SINGLEHTML\n\n")
 
     if 'pdf' in assembled:
-        tell_owner("   Success! : PDF       : %s/%s\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
+        tell_owner("   Success! : PDF\n%s/%s\n\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
     else:
-        tell_owner("   Failure! : PDF       : %s/%s\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
+        tell_owner("   Failure! : PDF\n\n")
 
     if package_url:
-        tell_owner("   Success! : PACKAGE   : %s\n" % package_url, ltrim=False)
+        tell_owner("   Success! : PACKAGE\n%s\n\n" % package_url, ltrim=False)
     else:
-        tell_owner("   Failure! : PACKAGE   : %s\n" % package_url, ltrim=False)
+        tell_owner("   Failure! : PACKAGE\n\n")
 
     if 1:
-        tell_owner("   Success! : BUILDINFO : %s/%s\n" % (builddir_url, '_buildinfo/'), ltrim=False)
+        tell_owner("   Success! : BUILDINFO\n%s/%s\n\n" % (builddir_url, '_buildinfo/'), ltrim=False)
     tell_owner('\n')
 
     if warnings_file:
@@ -322,6 +322,15 @@ if exitcode == CONTINUE:
                    %s/%s/%s
 
                 """ % (builddir_url, '_buildinfo/', filename))
+        if not 'pdf' in assembled:
+            tell_owner(u"""\
+                If the PDF logfile has a line '! LaTeX Error: Too deeply nested.'
+                this propably means that the nesting of lists is too deep in
+                your manuscript. The indentation of the lists sums up and
+                doesn't fit on the PDF page. To overcome this you should
+                rearrange the lists.
+
+""")
 
     # Localization
 
