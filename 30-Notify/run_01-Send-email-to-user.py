@@ -78,8 +78,10 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     import codecs
+    from email.Header import Header
     import smtplib
     from email.mime.text import MIMEText
+
 
     if not os.path.exists(publish_dir_buildinfo_message):
         exitcode = 2
@@ -115,6 +117,10 @@ if exitcode == CONTINUE:
     host = 'localhost'
 
     def send_the_mail():
+
+        # todo: bugfix!
+        # see http://mg.pov.lt/blog/unicode-emails-in-python.html
+
         msg_to_value = ', '.join(receivers) if receivers else ''
         msg_cc_value = ', '.join(cclist) if cclist else ''
         msg_bcc_value = ', '.join(bcclist) if bcclist else ''
@@ -127,10 +133,10 @@ if exitcode == CONTINUE:
             'subject': subject,
         }))
 
-        msg = MIMEText(msgbody.decode('utf-8', 'replace'))
+        msg = MIMEText(msgbody.encode('utf-8'), 'plain', 'utf-8')
         msg['From'] = sender
         msg['To'] = msg_to_value
-        msg['Subject'] = subject
+        msg['Subject'] = Header(subject, 'utf-8')
         if msg_cc_value:
             msg['Cc'] = msg_cc_value
         if msg_bcc_value:

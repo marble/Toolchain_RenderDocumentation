@@ -142,7 +142,7 @@ if exitcode == CONTINUE:
                 I am sending this mail because I found an email
                 address in the project:
 
-                   %s
+                %s
 
                 Write to documentation@typo3.org if this is not
                 appropriate.
@@ -153,12 +153,19 @@ if exitcode == CONTINUE:
                 I am sending this mail because I found email
                 addresses in the project:
 
-                   %s
+                %s
 
                 Write to documentation@typo3.org if this is not
                 appropriate.
 
                 """ % emails_user)
+    else:
+        tell_owner("""\
+            I would have like to notify somebody about the
+            following by mail but I couldn't find an email
+            address to do so.
+
+            """)
 
     tell_owner("""\
     -----
@@ -185,8 +192,8 @@ if exitcode == CONTINUE:
             The file format of the settings configuration file
             has changed:
 
-               Settings.yml is the OLD format.
-               Settings.cfg is the NEW format.
+            Settings.yml is the OLD format.
+            Settings.cfg is the NEW format.
 
             I have found the old format but I did not find the
             new format in your project. So I generated a new
@@ -194,18 +201,18 @@ if exitcode == CONTINUE:
 
             Please grab the new file from:
 
-               """ + builddir_url + """/_buildinfo/Settings.cfg
+            """ + builddir_url + """/_buildinfo/Settings.cfg
 
             and add it to your project as:
 
-               Documentation/Settings.cfg
+            Documentation/Settings.cfg
 
             Please keap the old Yaml file as well. The reason
             for this is that right at the moment BOTH rendering
             processes are in action. So keep this file. We will
             tell you when it's not needed any more:
 
-               Documentation/Settings.yml
+            Documentation/Settings.yml
 
             Thank you in advance!
 
@@ -309,7 +316,7 @@ if exitcode == CONTINUE:
         tell_owner(u"""\
             Look at the buildinfo
 
-               %s/%s
+            %s/%s
 
             for details about the PDF generation process.
 
@@ -319,7 +326,7 @@ if exitcode == CONTINUE:
             tell_owner(u"""\
                 The logfile probably is most interesting:
 
-                   %s/%s/%s
+                %s/%s/%s
 
                 """ % (builddir_url, '_buildinfo/', filename))
         if not 'pdf' in assembled:
@@ -368,7 +375,7 @@ if exitcode == CONTINUE:
         maxlen = max([len(k) for k in bs.keys()])
         filler = ' ' * maxlen
         for k in sorted(bs.keys()):
-            tell_owner(u'   %s%s: %s\n' % (k, filler[0:(maxlen - len(k))], bs[k]), ltrim=False)
+            tell_owner(u'%s%s: %s\n' % (k, filler[0:(maxlen - len(k))], bs[k]), ltrim=False)
         tell_owner(u'\n')
 
     tell_owner("""\
@@ -382,23 +389,26 @@ if exitcode == CONTINUE:
 
         About output formats:
 
-           HTML       is the usual html output. Paths to static
-                      files for css, js, fonts are absolute
-                      so manuals on the server in general share
-                      the same static files.
+        HTML
+        is the usual html output. Paths to static files for css,
+        js, fonts are absolute so manuals on the server in general
+        share the same static files.
 
-           SINGLEHTML has everything in one html file.
+        SINGLEHTML
+        has everything in one html file.
 
-           PDF        is a pdf file generated from LaTeX.
+        PDF
+        is a pdf file generated from LaTeX.
 
-           PACKAGE    is a zip archive with the HTML output.
-                      It is well suited for offline reading
-                      since css and js files are included and
-                      paths are relative. If a PDF was generated
-                      that file is included too.
+        PACKAGE
+        is a zip archive with the HTML output. It is well suited
+        for offline reading since css and js files are included
+        and paths are relative. If a PDF was generated that file
+        is included too.
 
-           BUILDINFO  is a folder on the server with
-                      information about the last build.
+        BUILDINFO
+        is a folder on the server with information about the last
+        build.
 
         """)
 
