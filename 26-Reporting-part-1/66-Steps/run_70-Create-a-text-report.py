@@ -221,27 +221,27 @@ if exitcode == CONTINUE:
     assembled = milestones_get('assembled', [])
 
     if 'html' in assembled:
-        tell_owner("   Success! : HTML\n%s/\n\n" % builddir_url, ltrim=False)
+        tell_owner("HTML: Success!\n%s/\n\n" % builddir_url, ltrim=False)
     else:
-        tell_owner("   Failure! : HTML\n\n")
+        tell_owner("HTML: Failure!\n\n")
 
     if 'singlehtml' in assembled:
-        tell_owner("   Success! : SINGLEHTML\n%s/%s\n\n" % (builddir_url, 'singlehtml/'), ltrim=False)
+        tell_owner("SINGLEHTML: Success!\n%s/%s\n\n" % (builddir_url, 'singlehtml/'), ltrim=False)
     else:
-        tell_owner("   Failure! : SINGLEHTML\n\n")
+        tell_owner("SINGLEHTML: Failure!\n\n")
 
     if 'pdf' in assembled:
-        tell_owner("   Success! : PDF\n%s/%s\n\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
+        tell_owner("PDF: Success!\n%s/%s\n\n" % (builddir_url, '_pdf/manual.pdf'), ltrim=False)
     else:
-        tell_owner("   Failure! : PDF\n\n")
+        tell_owner("PDF: Failure!\n\n")
 
     if package_url:
-        tell_owner("   Success! : PACKAGE\n%s\n\n" % package_url, ltrim=False)
+        tell_owner("PACKAGE: Success!\n%s\n\n" % package_url, ltrim=False)
     else:
-        tell_owner("   Failure! : PACKAGE\n\n")
+        tell_owner("PACKAGE: Failure!\n\n")
 
     if 1:
-        tell_owner("   Success! : BUILDINFO\n%s/%s\n\n" % (builddir_url, '_buildinfo/'), ltrim=False)
+        tell_owner("BUILDINFO: Success!\n%s/%s\n\n" % (builddir_url, '_buildinfo/'), ltrim=False)
     tell_owner('\n')
 
     if warnings_file:
