@@ -328,7 +328,11 @@ if exitcode == CONTINUE:
                 this propably means that the nesting of lists is too deep in
                 your manuscript. The indentation of the lists sums up and
                 doesn't fit on the PDF page. To overcome this you should
-                rearrange the lists.
+                rearrange the lists. As this FAQ [1] puts it to words:
+                "What can be done about the problem? Not much, short of
+                rewriting LaTeX — you really need to rewrite your document
+                in a slightly less labyrinthine way."
+                [1] http://www.tex.ac.uk/FAQ-toodeep.html
 
 """)
 
