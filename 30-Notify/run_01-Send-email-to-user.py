@@ -19,6 +19,7 @@ toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+email_user_send_to_admin = False
 # ==================================================
 # Check required milestone(s)
 # --------------------------------------------------
@@ -49,13 +50,16 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
-    email_admin = tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin')
+    email_admin = (tct.deepget(facts, 'run_command', 'email_admin') or
+                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin'))
     email_user_to = (tct.deepget(facts, 'run_command', 'email_user_to') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to'))
     email_user_cc = (tct.deepget(facts, 'run_command', 'email_user_cc') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc'))
     email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
                       tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
+    email_user_send_to_admin = (tct.deepget(facts, 'run_command', 'email_user_send_to_admin') or
+                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_to_admin'))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
 
@@ -142,9 +146,22 @@ if exitcode == CONTINUE:
     else:
         receivers = emails_user
 
-    loglist.append('Now send an email!')
-    send_the_mail()
-
+    if receivers:
+        loglist.append('Now send an email!')
+        send_the_mail()
+    else:
+        loglist.append('There is no primary receiver we could notify by mail')
+        if cclist:
+            loglist.append('Send to cclist')
+            receivers = cclist
+            send_the_mail()
+        elif bcclist:
+            loglist.append('Send to bcclist')
+            receivers = bcclist
+            send_the_mail()
+    if email_user_send_to_admin and email_admin:
+        receivers = email_admin
+        send_the_mail()
 
 # ==================================================
 # Set MILESTONE
@@ -152,7 +169,6 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     result['MILESTONES'].append({'email_to_user_send': True})
-
 
 # ==================================================
 # save result
