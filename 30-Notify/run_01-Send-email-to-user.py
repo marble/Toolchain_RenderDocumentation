@@ -127,7 +127,7 @@ if exitcode == CONTINUE:
             'subject': subject,
         }))
 
-        msg = MIMEText(msgbody)
+        msg = MIMEText(msgbody.decode('utf-8', 'replace'))
         msg['From'] = sender
         msg['To'] = msg_to_value
         msg['Subject'] = subject
