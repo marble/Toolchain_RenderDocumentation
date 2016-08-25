@@ -162,9 +162,9 @@ if exitcode == CONTINUE:
                 """ % emails_user)
     else:
         tell_owner("""\
-            I would have like to notify somebody about the
-            following by mail but I couldn't find an email
-            address to do so.
+            I would have like to notify somebody about the following by
+            mail but I couldn't identify an email address in the project
+            to do so.
 
             """)
 
@@ -173,11 +173,10 @@ if exitcode == CONTINUE:
 
     FOR YOUR INFORMATION
 
-    A new build was run and finished right now.
+    A new build was run and finished right now: """ + logstamp_finish + """
 
     PROJECT: """ + bs['project'] + """
     VERSION: """ + bs['version'] + """
-    DONE   : """ + logstamp_finish + """
 
     """)
 
