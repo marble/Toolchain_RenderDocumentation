@@ -144,7 +144,7 @@ if exitcode == CONTINUE:
             I am sending this mail because I found an entry like
 
             [notify]
-            about_new_builds = email-1, email-2, ...
+            about_new_build = email-1, email-2, ...
 
             in the file PROJECT/Documentation/Settings.cfg. Therefore I'm
             sending this report to:
@@ -159,7 +159,7 @@ if exitcode == CONTINUE:
             an entry like:
 
             [notify]
-            about_new_builds = email-1, email2, ...
+            about_new_build = email-1, email2, ...
 
             But I couldn't find email addresses.
 
@@ -188,11 +188,11 @@ if exitcode == CONTINUE:
 
         [notify]
         # have one or more receivers notified
-        about_new_builds = email-1 [, email2, ...]
+        about_new_build = email-1 [, email2, ...]
 
         [notify]
         # turn off notification mails like so:
-        about_new_builds = no
+        about_new_build = no
 
         """)
 

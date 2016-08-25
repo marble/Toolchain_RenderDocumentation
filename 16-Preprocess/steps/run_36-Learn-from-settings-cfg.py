@@ -69,7 +69,7 @@ if exitcode == CONTINUE:
             settings_cfg_data[s][o] = config.get(s,o)
 
 if exitcode == CONTINUE:
-    v = tct.deepget(settings_cfg_data, 'notify', 'about_new_builds')
+    v = tct.deepget(settings_cfg_data, 'notify', 'about_new_build')
     if v:
         for email in v.split(','):
             email = email.strip()
