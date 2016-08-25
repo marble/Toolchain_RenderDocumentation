@@ -23,7 +23,7 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-email_user_send_to_admin_too = False
+email_user_send_extra_mail_to_admin = False
 
 # ==================================================
 # Check required milestone(s)
@@ -63,8 +63,8 @@ if exitcode == CONTINUE:
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc'))
     email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
                       tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
-    email_user_send_to_admin_too = (tct.deepget(facts, 'run_command', 'email_user_send_to_admin_too') or
-                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_to_admin_too'))
+    email_user_send_extra_mail_to_admin = (tct.deepget(facts, 'run_command', 'email_user_send_extra_mail_to_admin') or
+                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_extra_mail_to_admin'))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
 
@@ -170,7 +170,7 @@ if exitcode == CONTINUE:
             loglist.append('Send to bcclist')
             receivers = bcclist
             send_the_mail()
-    if email_user_send_to_admin_too and email_admin:
+    if email_user_send_extra_mail_to_admin and email_admin:
         if type(email_admin) == type([]):
             receivers = email_admin
         else:
