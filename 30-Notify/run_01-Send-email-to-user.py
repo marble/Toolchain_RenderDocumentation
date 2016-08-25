@@ -150,10 +150,12 @@ if exitcode == CONTINUE:
 
     #to
     receivers = []
+    email_user_receivers_exlude_list = ['documentation@typo3.org']
     if email_user_to:
         for item in email_user_to.replace(',', ' ').split(' '):
-            if item and item not in receivers:
-                receivers.append(item)
+            if item not in email_user_receivers_exlude_list:
+                if item and item not in receivers:
+                    receivers.append(item)
     else:
         receivers = emails_user
 
