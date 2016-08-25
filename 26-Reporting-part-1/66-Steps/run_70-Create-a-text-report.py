@@ -115,6 +115,8 @@ if exitcode == CONTINUE:
 
     subject = u'Documentation rendered: %s %s' % (bs['project'], bs['version'])
 
+    # try to keep line length <= 60 chars
+
     tell_owner(u"""\
     From: Toolchain_RenderDocumentation@typo3.org
 
@@ -144,8 +146,7 @@ if exitcode == CONTINUE:
 
                 %s
 
-                Write to documentation@typo3.org if this is not
-                appropriate.
+                Write to documentation@typo3.org if this is not appropriate.
 
                 """ % emails_user[0])
         else:

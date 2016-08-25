@@ -17,24 +17,58 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
 
+xeq_name_cnt = 0
+checksum_new = None
+rebuild_needed = False
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    documentation_folder = milestones.get('documentation_folder')
-    checksum_old = milestones.get('checksum_old', '')
-    checksum_time = milestones.get('checksum_time')
-    checksum_new = None
-    checksum_file = milestones.get('checksum_file')
+    loglist.append('CHECK PARAMS')
+    toolname = params_get('toolname')
+    workdir = params_get('workdir')
+    documentation_folder = milestones_get('documentation_folder')
+    if not (workdir and toolname and documentation_folder):
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
+
+if exitcode == CONTINUE:
+    toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 02-Name
+    checksum_old = milestones_get('checksum_old', '')
+    checksum_time = milestones_get('checksum_time')
+    checksum_file = milestones_get('checksum_file')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import codecs
 import subprocess
 import time
 
@@ -46,17 +80,32 @@ def cmdline(cmd, cwd=None):
     exitcode = process.returncode
     return exitcode, cmd, out, err
 
-rebuild_needed = False
-
 if exitcode == CONTINUE:
     if documentation_folder:
-        # http://unix.stackexchange.com/questions/35832/how-do-i-get-the-md5-sum-of-a-directorys-contents-as-one-sum
-        theline = "find . -type f | LC_ALL=C sort | cpio -o --quiet | md5sum | awk '{ print $1 }'"
-        exitcode, cmd, out, err = cmdline(theline, cwd=documentation_folder)
+
+        # This one isn't stable, it seems.
+        # # http://unix.stackexchange.com/questions/35832/how-do-i-get-the-md5-sum-of-a-directorys-contents-as-one-sum
+        # theCmd = u"find . -type f | LC_ALL=C sort | cpio -o --quiet | md5sum | awk '{ print $1 }'"
+
+        # what we used in the old 'cron_rebuild.sh'
+        theCmd = u"""find . -type f -exec md5sum {} \; | md5sum | awk '{ print $1 }'"""
+
+        exitcode, cmd, out, err = cmdline(theCmd, cwd=documentation_folder)
         loglist.append([exitcode, cmd, out, err])
         checksum_new = out.strip()
         loglist.append('checksum_old: ' + checksum_old)
         loglist.append('checksum_new: ' + checksum_new)
+
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(theCmd)
+        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(unicode(out))
+        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(unicode(err))
 
 if exitcode == CONTINUE:
 
