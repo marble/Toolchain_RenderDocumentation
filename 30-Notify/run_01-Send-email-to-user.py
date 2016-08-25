@@ -53,6 +53,11 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
+    email_user_do_not_send = milestones_get('email_user_do_not_send')
+    if email_user_do_not_send:
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
     email_admin = (tct.deepget(facts, 'run_command', 'email_admin') or

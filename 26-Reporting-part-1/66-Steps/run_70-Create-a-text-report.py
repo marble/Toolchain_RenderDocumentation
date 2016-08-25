@@ -61,6 +61,8 @@ if exitcode == CONTINUE:
     TheProjectLog = milestones_get('TheProjectLog')
     TheProjectResultBuildinfoPdfFilesCnt = milestones_get('TheProjectResultBuildinfoPdfFilesCnt')
     TheProjectResultBuildinfoPdfLogFile = milestones_get('TheProjectResultBuildinfoPdfLogFile')
+    notify_about_new_build = milestones_get('notify_about_new_build')
+    email_user_do_not_send = milestones_get('email_user_do_not_send')
 
 if exitcode == CONTINUE:
     logstamp_finish = milestones_get('logstamp_finish', tct.logstamp())
@@ -137,36 +139,63 @@ if exitcode == CONTINUE:
 
     """)
 
-    emails_user = milestones.get('emails_user')
-    if emails_user:
-        if len(emails_user) == 1:
-            tell_owner("""\
-                I am sending this mail because I found an email
-                address in the project:
-
-                %s
-
-                Write to documentation@typo3.org if this is not appropriate.
-
-                """ % emails_user[0])
-        else:
-            tell_owner("""\
-                I am sending this mail because I found email
-                addresses in the project:
-
-                %s
-
-                Write to documentation@typo3.org if this is not
-                appropriate.
-
-                """ % emails_user)
-    else:
+    if notify_about_new_build:
         tell_owner("""\
-            I would have like to notify somebody about the following by
-            mail but I couldn't identify an email address in the project
-            to do so.
+            I am sending this mail because I found an entry like
+
+            [notify]
+            about_new_builds = email-1, email-2, ...
+
+            in the file PROJECT/Documentation/Settings.cfg. Therefore I'm
+            sending this report to:
 
             """)
+        for email_address in notify_about_new_build:
+            tell_owner("%s\n" % email_address)
+        tell_owner('\n')
+    else:
+        tell_owner("""\
+            I have looked for file PROJECT/Documentation/Settings.cfg and
+            an entry like:
+
+            [notify]
+            about_new_builds = email-1, email2, ...
+
+            But I couldn't find email addresses.
+
+            """)
+
+    emails_user = milestones.get('emails_user')
+    if not notify_about_new_build and emails_user:
+        tell_owner("""\
+            Therefore I looked around for email addresses in the project.
+            So I'm sending this report to:
+
+            """)
+        for email_address in emails_user:
+            tell_owner("%s\n" % email_address)
+        tell_owner('\n')
+
+    if email_user_do_not_send:
+        tell_owner("""\
+            Actually, I will not really send a mail in the end because I saw that
+            'no' in the list of possible receivers. But I still compile this info.
+
+            """)
+
+    tell_owner("""\
+        Leave an option in file PROJECT/Documentation/Settings.cfg to have control:
+
+        [notify]
+        # have one or more receivers notified
+        about_new_builds = email-1 [, email2, ...]
+
+        [notify]
+        # turn off notification mails like so:
+        about_new_builds = no
+
+        """)
+
 
     tell_owner("""\
     -----
