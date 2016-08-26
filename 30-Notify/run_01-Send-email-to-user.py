@@ -60,6 +60,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     subject = milestones_get('email_user_subject')
     emails_user = milestones_get('emails_user')
+    notify_about_new_build = milestones_get('notify_about_new_build')
     email_admin = (tct.deepget(facts, 'run_command', 'email_admin') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin'))
     email_user_to = (tct.deepget(facts, 'run_command', 'email_user_to') or
@@ -153,16 +154,31 @@ if exitcode == CONTINUE:
         quit_result = s.quit()
         loglist.append(('quit_result:', quit_result))
 
+
+    def as_list(v):
+        if not v:
+            result = []
+        elif type(v) == list:
+            result = v
+        elif isinstance(v, str):
+            result = [s for s in v.replace(',', ' ').split(' ') if s]
+        else:
+            result = []
+        return result
+
     #to
     receivers = []
+
+    A = as_list(email_user_to)
+    B = as_list(notify_about_new_build)
+    C = as_list(emails_user)
+
     email_user_receivers_exlude_list = ['documentation@typo3.org']
-    if email_user_to:
-        for item in email_user_to.replace(',', ' ').split(' '):
-            if item not in email_user_receivers_exlude_list:
-                if item and item not in receivers:
-                    receivers.append(item)
-    else:
-        receivers = emails_user
+    for candidates in [A, B, C]:
+        if not receivers and candidates:
+            for candidate in candidates:
+                if candidate not in email_user_receivers_exlude_list:
+                    receivers.append(candidate)
 
     if receivers:
         loglist.append('Now send an email!')
