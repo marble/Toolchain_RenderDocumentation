@@ -50,6 +50,9 @@ if exitcode == CONTINUE:
     giturl = tct.deepget(milestones, 'buildsettings', 'giturl')
     gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
     gitbranch = tct.deepget(milestones, 'buildsettings', 'gitbranch')
+    loglist.append(('giturl', giturl))
+    loglist.append(('gitdir', gitdir))
+    loglist.append(('gitbranch', gitbranch))
     if not giturl:
         CONTINUE = -1
 
@@ -86,13 +89,13 @@ if exitcode == CONTINUE:
 
 
     if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git reset --hard')
+        exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
 
     if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch)
+        exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch, cwd=gitdir)
 
     if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git pull')
+        exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
 
 
 # ==================================================
