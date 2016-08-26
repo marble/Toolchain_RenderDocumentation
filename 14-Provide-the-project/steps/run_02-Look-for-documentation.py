@@ -15,20 +15,41 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
 
+xeq_name_cnt = 0
+masterdocs = {}
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    gitdir_ready = milestones.get('gitdir_ready', '')
-    if not gitdir_ready:
-        errormsg = "Error: milestone 'gitdir_ready' not found."
-        loglist.append(errormsg)
+    loglist.append('CHECK PARAMS')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    if not gitdir:
         exitcode = 2
 
 # ==================================================
@@ -36,34 +57,30 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    makedir = milestones.get('makedir')
-    buildsettings = milestones.get('buildsettings')
-
-    gitdir = buildsettings['gitdir']
-    locations = [
+    masterdoc_candidates = [
         'Documentation/Index.rst',
         'Documentation/index.rst',
         'Documentation/Index.md',
         'Documentation/index.md',
-        'README.rst',
-        'README.md',
+        #'README.rst',
+        #'README.md',
+        #'doc/manual.pdf',
+        #'doc/manual.sxw',
     ]
-    loglist.append({'locations': locations})
+    loglist.append({'masterdoc_candidates': masterdoc_candidates})
     masterdocs = {}
-    for location in locations:
-        fpath = os.path.join(gitdir, location)
+    for candidate in masterdoc_candidates:
+        fpath = os.path.join(gitdir, candidate)
         if os.path.exists(fpath):
-            masterdocs[location] = True
-    loglist.append({'masterdocs':masterdocs})
-
+            masterdocs[candidate] = 'found'
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    if len(masterdocs):
-        result['MILESTONES'].append({'has_documentation': 1})
+    result['MILESTONES'].append({
+        'masterdocs': masterdocs})
 
 # ==================================================
 # save result

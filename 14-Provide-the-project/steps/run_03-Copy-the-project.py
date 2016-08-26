@@ -17,18 +17,14 @@ result = tct.readjson(resultfile)
 toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
 # Check required milestone(s)
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    has_documentation = milestones.get('has_documentation')
-    if not has_documentation:
-        errormsg = "Error: milestone 'has_documentation' not found."
-        loglist.append(errormsg)
+    masterdocs = milestones.get('masterdocs')
+    if not masterdocs:
         exitcode = 2
 
 # ==================================================

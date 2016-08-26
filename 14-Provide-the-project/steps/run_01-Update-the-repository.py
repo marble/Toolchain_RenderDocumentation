@@ -15,76 +15,84 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
 
+xeq_name_cnt = 0
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    makedir = milestones.get('makedir')
-    buildsettings = milestones.get('buildsettings')
-    loglist.append({'makedir': makedir})
-    loglist.append({'buildsettings': buildsettings})
-    if not buildsettings:
-        errormsg = "Error: milestone 'buildsettings' not found."
-        loglist.append(errormsg)
-        exitcode = 2
+    loglist.append('CHECK PARAMS')
+    giturl = tct.deepget(milestones, 'buildsettings', 'giturl')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    gitbranch = tct.deepget(milestones, 'buildsettings', 'gitbranch')
+    if not giturl:
+        CONTINUE = -1
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import codecs
 import os
 import subprocess
 
-giturl = buildsettings['giturl']
-gitdir = buildsettings['gitdir']
-gitbranch = buildsettings['gitbranch']
 
 if exitcode == CONTINUE:
 
-    if not giturl:
-        loglist.append('Ok, giturl is not given. Assuming gitdir is ready for use.')
-
-if exitcode == CONTINUE:
-    if giturl:
-        if not os.path.isdir(gitdir):
-            errormsg = "Error: Cannot find gitdir ('%s')" % gitdir
-            loglist.append(errormsg)
-            exitcode = 2
-
-        if exitcode == CONTINUE:
-            if not os.path.isdir(os.path.join(gitdir, '.git')):
-                errormsg = 'Error: No GIT repository. gitdir/.git not found.'
-                loglist.append(errormsg)
-                exitcode = 2
-
-        if exitcode == CONTINUE:
-            def cmdline(cmd, cwd=gitdir):
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
-                out, err = process.communicate()
-                exitcode = process.returncode
-                loglist.append([exitcode, cmd, out, err])
-                return exitcode
-
-        if exitcode == CONTINUE:
-            exitcode = cmdline('git reset --hard')
-
-        if exitcode == CONTINUE:
-            exitcode = cmdline('git checkout ' + gitbranch)
-
-        if exitcode == CONTINUE:
-            exitcode = cmdline('git pull')
+    def cmdline(cmd, cwd=None):
+        global xeq_name_cnt
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        out, err = process.communicate()
+        exitcode = process.returncode
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+        return exitcode, cmd, out, err
 
 
+    if exitcode == CONTINUE:
+        exitcode, cmd, out, err = cmdline('git reset --hard')
 
-# ==================================================
-# save result
-# --------------------------------------------------
+    if exitcode == CONTINUE:
+        exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch)
+
+    if exitcode == CONTINUE:
+        exitcode, cmd, out, err = cmdline('git pull')
 
 
 # ==================================================
@@ -92,7 +100,7 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    result['MILESTONES'].append({'gitdir_ready': 1})
+    result['MILESTONES'].append({'git_pull_done': 1})
 
 # ==================================================
 # save result

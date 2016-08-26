@@ -60,7 +60,7 @@ else:
     loglist.append('PROBLEM with params')
 
 if exitcode == CONTINUE:
-    toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 02-Name
+    toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
     masterdoc = milestones.get('masterdoc')
     has_settingscfg = milestones.get('has_settingscfg')
     TheProject = milestones.get('TheProject')
