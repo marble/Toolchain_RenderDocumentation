@@ -95,6 +95,8 @@ if exitcode == CONTINUE:
     replacement = unicode(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version + '/' + '\g<payload>\g<quote>')
 
     for build_folder in [build_html_folder, build_singlehtml_folder]:
+        if not build_folder:
+            continue
         builder_logname = os.path.split(build_folder)[1]
         toplen = len(build_folder)
         for top, dirs, files in os.walk(build_folder):

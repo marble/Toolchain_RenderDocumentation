@@ -46,6 +46,8 @@ if exitcode == CONTINUE:
 
     todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
     for build_folder in todolist:
+        if not build_folder:
+            continue
         fpath = os.path.join(build_folder, '_static')
         if os.path.exists(fpath):
             shutil.rmtree(fpath)
