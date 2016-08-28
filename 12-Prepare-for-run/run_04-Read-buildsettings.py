@@ -76,13 +76,21 @@ if exitcode == CONTINUE:
         buildsettings[option] = config.get(section, option)
 
 if exitcode == CONTINUE:
-    # A fix: do interpolation
+    # A fix: do some interpolation
+
     needle = '$GITDIR/'
     gitdir = buildsettings.get('gitdir', '')
     t3docdir = buildsettings.get('t3docdir', '')
     if needle in t3docdir:
         buildsettings['t3docdir'] = t3docdir.replace(needle, gitdir)
         loglist.append('we replaced $GITDIR in t3docdir')
+
+    needle = '$VERSION'
+    version = buildsettings.get('version', '')
+    builddir = buildsettings.get('builddir', '')
+    if needle in builddir:
+        buildsettings['builddir'] = builddir.replace(needle, version)
+        loglist.append('we replaced $VERSION in builddir')
 
 if exitcode == CONTINUE:
 
