@@ -24,6 +24,8 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 email_user_send_extra_mail_to_admin = False
+email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
+
 
 # ==================================================
 # Check required milestone(s)
@@ -173,7 +175,6 @@ if exitcode == CONTINUE:
     B = as_list(notify_about_new_build)
     C = as_list(emails_user)
 
-    email_user_receivers_exlude_list = ['documentation@typo3.org']
     for candidates in [A, B, C]:
         if not receivers and candidates:
             for candidate in candidates:
