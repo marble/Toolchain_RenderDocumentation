@@ -40,20 +40,25 @@ if exitcode == CONTINUE:
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
     buildsettings = milestones_get('buildsettings')
-
-    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir')
-    loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
-
-    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot')
-    loglist.append(('url_of_webroot', url_of_webroot))
+    webroot_part_of_builddir = milestones_get('webroot_part_of_builddir')
+    url_of_webroot = milestones_get('url_of_webroot')
+    buildsettings_builddir = milestones_get('buildsettings_builddir')
+    relative_part_of_builddir = milestones_get('relative_part_of_builddir')
+    webroot_abspath = milestones_get('webroot_abspath')
 
     if not (TheProjectResult and TheProjectResultVersion and
             TheProjectResultBuildinfo and buildsettings and
-            webroot_part_of_builddir and url_of_webroot):
+            webroot_part_of_builddir and url_of_webroot and
+            buildsettings_builddir and relative_part_of_builddir and webroot_abspath):
         exitcode = 2
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS exist')
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
+if exitcode == CONTINUE:
+    # optional
     build_html = milestones_get('build_html')
     settingscfg_file = milestones_get('settingscfg_file')
     warnings_file = milestones_get('warnings_file')
@@ -104,11 +109,11 @@ if exitcode == CONTINUE:
         os.makedirs(TheProjectResultBuildinfo)
 
 if exitcode == CONTINUE:
-    builddir = buildsettings['builddir']
-    builddir_parent = os.path.split(builddir)[0]
+    builddir = webroot_abspath + relative_part_of_builddir
+    builddir_parent = webroot_abspath + os.path.split(relative_part_of_builddir)[0]
+    builddir_url = url_of_webroot + relative_part_of_builddir
+    builddir_parent_url = url_of_webroot + os.path.split(relative_part_of_builddir)[0]
 
-    builddir_parent_url = builddir_parent.replace(webroot_part_of_builddir, url_of_webroot)
-    builddir_url = builddir.replace(webroot_part_of_builddir, url_of_webroot)
     packages_url = builddir_parent_url + '/packages/'
     package_url = None
     package_file = milestones_get('package_file')

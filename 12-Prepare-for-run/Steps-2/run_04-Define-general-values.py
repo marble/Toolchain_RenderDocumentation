@@ -26,6 +26,11 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+relative_part_of_builddir = ''
+webroot_part_of_builddir = ''
+url_of_webroot = ''
+webroot_abspath = ''
+buildsettings_builddir = ''
 
 # ==================================================
 # Get and check required milestone(s)
@@ -48,46 +53,61 @@ def params_get(name, default=None):
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    masterdoc = milestones_get('masterdoc')
-    TheProjectMakedir = milestones_get('TheProjectMakedir')
+    toolchain_name = facts.get('toolchain_name')
+
+    # is always on srv123
+    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir')
+    loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
+
+    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot')
+    loglist.append(('url_of_webroot', url_of_webroot))
+
+    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
+    loglist.append(('webroot_abspath', webroot_abspath))
+
+    buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir')
+    loglist.append(('buildsettings_builddir', buildsettings_builddir))
+
+if not (toolchain_name and webroot_part_of_builddir and url_of_webroot
+        and webroot_abspath and buildsettings_builddir):
+    exitcode = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
 
-if not (masterdoc and TheProjectMakedir):
-    loglist.append('SKIPPING, because some PARAMS are empty.')
-    CONTINUE = -1
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-import shutil
-import codecs
-
 if exitcode == CONTINUE:
-    buildsettingssh_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
-    original = buildsettingssh_file + '.original'
-    shutil.move(buildsettingssh_file, original)
-
-if exitcode == CONTINUE:
-
-    masterdoc_without_fileext = os.path.splitext(masterdoc)[0]
-    with codecs.open(original, 'r', 'utf-8') as f1:
-        with codecs.open(buildsettingssh_file, 'w', 'utf-8') as f2:
-            for line in f1:
-                if line.startswith('MASTERDOC='):
-                    line = 'MASTERDOC=' + masterdoc_without_fileext + '\n'
-                f2.write(line)
+    if not relative_part_of_builddir:
+        if buildsettings_builddir.startswith(webroot_part_of_builddir):
+            relative_part_of_builddir = buildsettings_builddir[len(webroot_part_of_builddir):]
+        elif buildsettings_builddir.startswith(webroot_abspath):
+            relative_part_of_builddir = buildsettings_builddir[len(webroot_abspath):]
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append('buildsettings_file_fixed')
+if relative_part_of_builddir:
+    result['MILESTONES'].append({'relative_part_of_builddir': relative_part_of_builddir})
+
+if webroot_part_of_builddir:
+    result['MILESTONES'].append({'webroot_part_of_builddir': webroot_part_of_builddir})
+
+if url_of_webroot:
+    result['MILESTONES'].append({'url_of_webroot': url_of_webroot})
+
+if webroot_abspath:
+    result['MILESTONES'].append({'webroot_abspath': webroot_abspath})
+
+if buildsettings_builddir:
+    result['MILESTONES'].append({'buildsettings_builddir': buildsettings_builddir})
+
 
 # ==================================================
 # save result

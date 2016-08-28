@@ -50,14 +50,12 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     TheProjectResult = milestones_get('TheProjectResult')
-    buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir')
-    loglist.append(('buildsettings_builddir', buildsettings_builddir))
-    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir')
-    loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
-    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
-    loglist.append(('webroot_abspath', webroot_abspath))
+    buildsettings_builddir = milestones_get('buildsettings_builddir')
+    webroot_part_of_builddir = milestones_get('webroot_part_of_builddir')
+    webroot_abspath = milestones_get('webroot_abspath')
+    relative_part_of_builddir = milestones_get('relative_part_of_builddir')
     if not (TheProjectResult and buildsettings_builddir and
-        webroot_part_of_builddir and webroot_abspath):
+        webroot_part_of_builddir and webroot_abspath and relative_part_of_builddir):
         exitcode = 2
 
 if exitcode == CONTINUE:
@@ -70,23 +68,13 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    if not buildsettings_builddir.startswith(webroot_part_of_builddir):
-        loglist.append('target path does not start with webroot')
+    if not buildsettings_builddir.startswith(webroot_abspath):
+        loglist.append('target path does not start with webroot_abspath')
         exitcode = 2
 
 if exitcode == CONTINUE:
-    publish_dir_planned = webroot_abspath + buildsettings_builddir[len(webroot_part_of_builddir):]
+    publish_dir_planned = webroot_abspath + relative_part_of_builddir
     loglist.append(('publish_dir_planned', publish_dir_planned))
-    url_relpath = publish_dir_planned[len(webroot_abspath):]
-    ok = False
-    for knownpath in known_target_folders:
-        if url_relpath.startswith(knownpath):
-            ok = True
-            break
-    if not ok:
-        loglist.append('can only install to known target folders')
-        loglist.append(('known_target_folders', known_target_folders))
-        exitcode = 2
 
 if exitcode == CONTINUE:
     publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]
