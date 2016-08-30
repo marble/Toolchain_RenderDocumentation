@@ -31,7 +31,7 @@ def milestones_get(name, default=None):
 
 if exitcode == CONTINUE:
     TheProject = milestones_get('TheProject')
-    if not TheProject:
+    if not (TheProject):
         exitcode = 2
 
 # ==================================================
@@ -47,24 +47,6 @@ if exitcode == CONTINUE:
     import datetime
     import glob
     import re
-
-    locations = [
-        'Documentation/Index.rst',
-        'Documentation/index.rst',
-        'Documentation/Index.md',
-        'Documentation/index.md',
-        'README.rst',
-        'README.md',
-    ]
-    loglist.append({'locations': locations})
-    masterdoc = None
-    for location in locations:
-        fpath = os.path.join(TheProject, location)
-        if os.path.exists(fpath):
-            masterdoc = fpath
-        if masterdoc:
-            break
-
 
     documentation_folder = os.path.join(TheProject, 'Documentation')
     documentation_folder_exists = os.path.isdir(documentation_folder)
@@ -154,8 +136,6 @@ def decode_timestamp(unixtime):
 if exitcode == CONTINUE:
     if documentation_folder_exists:
         result['MILESTONES'].append({'documentation_folder': documentation_folder})
-    if masterdoc:
-        result['MILESTONES'].append({'masterdoc': masterdoc})
     if has_settingscfg:
         result['MILESTONES'].append({'settingscfg_file': settingscfg_file})
     if has_settingsyml:

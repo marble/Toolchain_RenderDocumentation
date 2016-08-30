@@ -25,7 +25,17 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 xeq_name_cnt = 0
-masterdocs = {}
+masterdocs_initial = {}
+masterdoc_candidates = [
+    'Documentation/Index.rst',
+    'Documentation/index.rst',
+    'Documentation/Index.md',
+    'Documentation/index.md',
+    'README.rst',
+    'README.md',
+    'doc/manual.pdf',
+    'doc/manual.sxw',
+]
 
 # ==================================================
 # Get and check required milestone(s)
@@ -57,30 +67,27 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    masterdoc_candidates = [
-        'Documentation/Index.rst',
-        'Documentation/index.rst',
-        'Documentation/Index.md',
-        'Documentation/index.md',
-        #'README.rst',
-        #'README.md',
-        #'doc/manual.pdf',
-        #'doc/manual.sxw',
-    ]
     loglist.append({'masterdoc_candidates': masterdoc_candidates})
-    masterdocs = {}
     for candidate in masterdoc_candidates:
         fpath = os.path.join(gitdir, candidate)
         if os.path.exists(fpath):
-            masterdocs[candidate] = 'found'
+            masterdocs_initial[candidate] = 'found'
+        else:
+            masterdocs_initial[candidate] = False
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if masterdoc_candidates:
     result['MILESTONES'].append({
-        'masterdocs': masterdocs})
+        'masterdoc_candidates': masterdoc_candidates,
+    })
+
+if masterdocs_initial:
+    result['MILESTONES'].append({
+        'masterdocs_initial': masterdocs_initial,
+    })
 
 # ==================================================
 # save result
@@ -91,5 +98,4 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 sys.exit(exitcode)

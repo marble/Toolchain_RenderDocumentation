@@ -31,7 +31,7 @@ if exitcode == CONTINUE:
         "TheProject",
         "TheProjectMakedir",
         "documentation_folder",
-        "masterdocs",
+        "masterdoc",
         "rebuild_needed",
     ]
 

@@ -16,8 +16,19 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+ready_for_build = False
+ready_for_build_vars = None
+SPHINXBUILD = None
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -28,24 +39,41 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     buildsettings_file_fixed = milestones_get('buildsettings_file_fixed')
     makedir = milestones_get('makedir')
     masterdoc = milestones_get('masterdoc')
-    TheProject = milestones.get('TheProject')
+    TheProject = milestones_get('TheProject')
+    TheProjectBuild = milestones_get('TheProjectBuild')
+    TheProjectLog = milestones_get('TheProjectLog')
 
-    if not (buildsettings_file_fixed and makedir and masterdoc and TheProject):
+    if not (buildsettings_file_fixed and makedir and masterdoc and TheProject
+            and TheProjectBuild and TheProjectLog):
         exitcode = 2
 
 if exitcode == CONTINUE:
-    has_settingscfg = milestones.get('has_settingscfg')
-    ready_for_build = False
-    ready_for_build_vars = None
-    rebuild_needed = milestones.get('rebuild_needed')
-    SPHINXBUILD = None
-    TheProjectBuild = None
-    TheProjectLog = None
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
 
+if exitcode == CONTINUE:
+    has_settingscfg = milestones_get('has_settingscfg')
+    rebuild_needed = milestones_get('rebuild_needed')
+
+# ==================================================
+# work
+# --------------------------------------------------
 # ==================================================
 # work
 # --------------------------------------------------
@@ -60,18 +88,7 @@ def cmdline(cmd, cwd=None):
     exitcode = process.returncode
     return exitcode, cmd, out, err
 
-
 if exitcode == CONTINUE:
-
-    if not TheProjectLog:
-        TheProjectLog = TheProject + 'Log'
-        if not os.path.exists(TheProjectLog):
-            os.makedirs(TheProjectLog)
-
-    if not TheProjectBuild:
-        TheProjectBuild = TheProject + 'Build'
-        if not os.path.exists(TheProjectBuild):
-            os.makedirs(TheProjectBuild)
 
     if not SPHINXBUILD:
         this_exitcode, cmd, out, err = cmdline('which sphinx-build')
@@ -92,21 +109,15 @@ if exitcode == CONTINUE:
     ready_for_build = not any([not v for v in ready_for_build_vars])
 
 
-
-
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    if TheProjectBuild:
-        result['MILESTONES'].append({'TheProjectBuild': TheProjectBuild })
-    if TheProjectLog:
-        result['MILESTONES'].append({'TheProjectLog': TheProjectLog})
-    if TheProjectLog:
-        result['MILESTONES'].append({'SPHINXBUILD': SPHINXBUILD})
-    if ready_for_build:
-        result['MILESTONES'].append({'ready_for_build': ready_for_build})
+if SPHINXBUILD:
+    result['MILESTONES'].append({'SPHINXBUILD': SPHINXBUILD})
+
+if ready_for_build:
+    result['MILESTONES'].append({'ready_for_build': ready_for_build})
 
 # ==================================================
 # save result

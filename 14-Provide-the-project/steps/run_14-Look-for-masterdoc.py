@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 # ==================================================
 # open
@@ -25,9 +24,10 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-MASTERDOC_line = None
-LOGDIR_line = None
-buildsettings_file_fixed = None
+xeq_name_cnt = 0
+masterdoc = None
+documentation_folder_created = None
+documentation_folder = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -49,9 +49,9 @@ def params_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
-    TheProjectLog = milestones_get('TheProjectLog')
-    if not (TheProjectLog):
+    TheProject = milestones_get('TheProject')
+    masterdoc_candidates = milestones_get('masterdoc_candidates')
+    if not (TheProject and masterdoc_candidates):
         exitcode = 2
 
 if exitcode == CONTINUE:
@@ -60,47 +60,55 @@ else:
     loglist.append('PROBLEMS with params')
 
 if exitcode == CONTINUE:
-    masterdoc = milestones_get('masterdoc')
-    TheProjectMakedir = milestones_get('TheProjectMakedir')
-    if not (masterdoc and TheProjectMakedir):
-        loglist.append('SKIPPING')
-        CONTINUE = -1
+    workdir_home = params_get('workdir_home')
+    masterdocs_initial = milestones.get('masterdocs_initial')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    documentation_folder = milestones_get('documentation_folder')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 import shutil
-import codecs
 
 if exitcode == CONTINUE:
-    buildsettingssh_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
-    original = buildsettingssh_file + '.original'
-    shutil.move(buildsettingssh_file, original)
+    for candidate in masterdoc_candidates:
+        fpath = os.path.join(TheProject, candidate)
+        if os.path.exists(fpath):
+            masterdoc = fpath
+            break
+    else:
+        candidate = None
+        masterdoc = None
 
-if exitcode == CONTINUE:
+if exitcode == CONTINUE and masterdoc and candidate:
 
-    masterdoc_without_fileext = os.path.splitext(masterdoc)[0]
-    with codecs.open(original, 'r', 'utf-8') as f1:
-        with codecs.open(buildsettingssh_file, 'w', 'utf-8') as f2:
-            for line in f1:
-                if line.startswith('MASTERDOC='):
-                    MASTERDOC_line = 'MASTERDOC=' + masterdoc_without_fileext + '\n'
-                    loglist.append(('MASTERDOC_line', MASTERDOC_line))
-                    line = MASTERDOC_line
-                elif line.startswith('LOGDIR='):
-                    LOGDIR_line = 'LOGDIR=' + TheProjectLog + '\n'
-                    loglist.append(('LOGDIR_line', LOGDIR_line))
-                    line = LOGDIR_line
-                f2.write(line)
-    buildsettings_file_fixed = True
+    if candidate.lower().startswith('documentation/index.'):
+        pass
+
+    elif candidate.lower().startswith('readme.'):
+        fpath, fext = os.path.splitext(candidate)
+        source = masterdoc
+        if not documentation_folder:
+            documentation_folder = os.path.join(TheProject, 'Documentation')
+            os.mkdir(documentation_folder)
+            documentation_folder_created = documentation_folder
+        masterdoc = os.path.join(documentation_folder, 'Index' + fext)
+        shutil.copyfile(source, masterdoc)
+
+    elif masterdoc.lower().startswith('docs/'):
+        # not yet implemented
+        masterdoc = None
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings_file_fixed:
-    result['MILESTONES'].append('buildsettings_file_fixed')\
+if masterdoc:
+    result['MILESTONES'].append({'masterdoc': masterdoc})
+
+if documentation_folder_created:
+    result['MILESTONES'].append({'documentation_folder': documentation_folder})
 
 
 # ==================================================

@@ -68,11 +68,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    if not buildsettings_builddir.startswith(webroot_abspath):
-        loglist.append('target path does not start with webroot_abspath')
-        exitcode = 2
-
-if exitcode == CONTINUE:
     publish_dir_planned = webroot_abspath + relative_part_of_builddir
     loglist.append(('publish_dir_planned', publish_dir_planned))
 

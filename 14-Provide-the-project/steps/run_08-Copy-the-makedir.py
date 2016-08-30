@@ -15,22 +15,44 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
 
+xeq_name_cnt = 0
+TheProjectMakedir = None
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    makedir = milestones.get('makedir')
-    loglist.append(['makedir', makedir])
-    TheProject = milestones.get('TheProject')
-    loglist.append(['TheProject', TheProject])
+    loglist.append('CHECK PARAMS')
+    makedir = milestones_get('makedir')
+    TheProject = milestones_get('TheProject')
 
     if not (makedir and TheProject):
+        loglist.append('SKIPPING')
         CONTINUE = -1
 
 # ==================================================
@@ -42,14 +64,10 @@ from shutil import copytree
 if exitcode == CONTINUE:
     TheProjectMakedir = TheProject + 'Makedir'
     if os.path.exists(TheProjectMakedir):
-        errormsg = "Error: Unexpected. Folder 'TheProjectMakdir' should not exist ('%s')." % TheProjectMakedir
-        loglist.append(errormsg)
+        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
         exitcode = 2
 
 if exitcode == CONTINUE:
-
-    from shutil import copytree
-
     source = makedir
     destination = TheProjectMakedir
     copytree(source, destination)
@@ -58,7 +76,7 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if TheProjectMakedir:
     result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
 
 # ==================================================

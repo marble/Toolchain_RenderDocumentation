@@ -15,40 +15,73 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
 
+xeq_name_cnt = 0
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    masterdocs = milestones.get('masterdocs')
-    if not masterdocs:
+    loglist.append('CHECK PARAMS')
+    workdir_home = params_get('workdir_home')
+    masterdocs_initial = milestones_get('masterdocs_initial')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    if not (workdir_home and masterdocs_initial and gitdir):
         exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    buildsettings = milestones['buildsettings']
-    gitdir = buildsettings['gitdir']
 
-from shutil import copytree, ignore_patterns
+from shutil import copytree, ignore_patterns, copyfile
 
 if exitcode == CONTINUE:
-    TheProject = os.path.join(params['workdir_home'], 'TheProject')
+    TheProject = os.path.join(workdir_home, 'TheProject')
     if os.path.exists(TheProject):
-        errormsg = "Error: Unexpected. Folder 'TheProject' should not exist ('%s')." % TheProject
-        loglist.append(errormsg)
+        loglist.append("TheProject already exists: %s" % TheProject)
         exitcode = 2
 
 if exitcode == CONTINUE:
-    source = gitdir
-    destination = TheProject
-    copytree(source, destination, ignore=ignore_patterns('.git','.idea','*.pyc'))
+    os.mkdir(TheProject)
 
+if exitcode == CONTINUE:
+    for top, dirs, files in os.walk(gitdir):
+        for afile in files:
+            copyfile(os.path.join(top, afile), os.path.join(TheProject, afile))
+        for adir in dirs:
+            if adir in ['docs', 'Documentation']:
+                copytree(os.path.join(top, adir), os.path.join(TheProject, adir))
+        break
 
 # ==================================================
 # Set MILESTONE

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 # ==================================================
 # open
@@ -25,9 +24,8 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-MASTERDOC_line = None
-LOGDIR_line = None
-buildsettings_file_fixed = None
+TheProjectLog = None
+TheProjectBuild = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -50,58 +48,38 @@ def params_get(name, default=None):
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    TheProjectLog = milestones_get('TheProjectLog')
-    if not (TheProjectLog):
+    TheProject = milestones_get('TheProject')
+
+    if not (TheProject):
         exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if exitcode == CONTINUE:
-    masterdoc = milestones_get('masterdoc')
-    TheProjectMakedir = milestones_get('TheProjectMakedir')
-    if not (masterdoc and TheProjectMakedir):
-        loglist.append('SKIPPING')
-        CONTINUE = -1
+    loglist.append('PROBLEM with params')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-import shutil
-import codecs
-
-if exitcode == CONTINUE:
-    buildsettingssh_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
-    original = buildsettingssh_file + '.original'
-    shutil.move(buildsettingssh_file, original)
-
 if exitcode == CONTINUE:
 
-    masterdoc_without_fileext = os.path.splitext(masterdoc)[0]
-    with codecs.open(original, 'r', 'utf-8') as f1:
-        with codecs.open(buildsettingssh_file, 'w', 'utf-8') as f2:
-            for line in f1:
-                if line.startswith('MASTERDOC='):
-                    MASTERDOC_line = 'MASTERDOC=' + masterdoc_without_fileext + '\n'
-                    loglist.append(('MASTERDOC_line', MASTERDOC_line))
-                    line = MASTERDOC_line
-                elif line.startswith('LOGDIR='):
-                    LOGDIR_line = 'LOGDIR=' + TheProjectLog + '\n'
-                    loglist.append(('LOGDIR_line', LOGDIR_line))
-                    line = LOGDIR_line
-                f2.write(line)
-    buildsettings_file_fixed = True
+    TheProjectLog = TheProject + 'Log'
+    if not os.path.exists(TheProjectLog):
+        os.makedirs(TheProjectLog)
+
+    TheProjectBuild = TheProject + 'Build'
+    if not os.path.exists(TheProjectBuild):
+        os.makedirs(TheProjectBuild)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings_file_fixed:
-    result['MILESTONES'].append('buildsettings_file_fixed')\
-
+if TheProjectBuild:
+    result['MILESTONES'].append({'TheProjectBuild': TheProjectBuild})
+if TheProjectLog:
+    result['MILESTONES'].append({'TheProjectLog': TheProjectLog})
 
 # ==================================================
 # save result

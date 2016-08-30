@@ -16,6 +16,8 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
@@ -28,11 +30,16 @@ email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3
 
 
 # ==================================================
-# Check required milestone(s)
+# Get and check required milestone(s)
 # --------------------------------------------------
 
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
     loglist.append((name, result))
     return result
 
@@ -65,16 +72,22 @@ if exitcode == CONTINUE:
     notify_about_new_build = milestones_get('notify_about_new_build')
     email_admin = (tct.deepget(facts, 'run_command', 'email_admin') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin'))
+    loglist.append(('email_admin', email_admin))
     email_user_to = (tct.deepget(facts, 'run_command', 'email_user_to') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to'))
+    loglist.append(('email_user_to', email_user_to))
     email_user_cc = (tct.deepget(facts, 'run_command', 'email_user_cc') or
                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc'))
+    loglist.append(('email_user_cc', email_user_cc))
     email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
                       tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
+    loglist.append(('email_user_bcc', email_user_bcc))
     email_user_send_extra_mail_to_admin = (tct.deepget(facts, 'run_command', 'email_user_send_extra_mail_to_admin') or
                       tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_extra_mail_to_admin'))
+    loglist.append(('email_user_send_extra_mail_to_admin', email_user_send_extra_mail_to_admin))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
-    toochains_home = tct.deepget(facts, 'tctconfig', 'general', 'toolchains_home')
+    loglist.append(('temp_home', temp_home))
+    toochains_home = facts_get('toolchains_home')
 
     publish_dir_buildinfo_message = (publish_dir_buildinfo +
                                      TheProjectResultBuildinfoMessage[len(TheProjectResultBuildinfo):])
@@ -150,7 +163,9 @@ if exitcode == CONTINUE:
         if msg_bcc_value:
             msg['Bcc'] = msg_bcc_value
         s = smtplib.SMTP(host)
+        #sendmail_result = 'simulated'
         sendmail_result = s.sendmail(sender, receivers, msg.as_string())
+
         loglist.append(('sendmail_result:', sendmail_result))
 
         quit_result = s.quit()
@@ -162,7 +177,7 @@ if exitcode == CONTINUE:
             result = []
         elif type(v) == list:
             result = v
-        elif isinstance(v, str):
+        elif isinstance(v, basestring):
             result = [s for s in v.replace(',', ' ').split(' ') if s]
         else:
             result = []
@@ -174,6 +189,9 @@ if exitcode == CONTINUE:
     A = as_list(email_user_to)
     B = as_list(notify_about_new_build)
     C = as_list(emails_user)
+    loglist.append(('A=email_user_to', A))
+    loglist.append(('B=notify_about_new_build', B))
+    loglist.append(('C=emails_user', C))
 
     for candidates in [A, B, C]:
         if not receivers and candidates:

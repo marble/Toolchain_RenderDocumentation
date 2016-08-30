@@ -16,6 +16,8 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
