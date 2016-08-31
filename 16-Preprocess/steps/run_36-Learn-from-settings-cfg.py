@@ -25,7 +25,7 @@ exitcode = CONTINUE = 0
 xeq_name_cnt = 0
 settings_cfg_data = {}
 notify_about_new_build = []
-email_user_do_not_send = False
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -49,6 +49,7 @@ def params_get(name, default=None):
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     settingscfg_file = milestones.get('settingscfg_file', '')
+    email_user_do_not_send = milestones.get('email_user_do_not_send', 0)
     if not (settingscfg_file):
         CONTINUE = -1
 

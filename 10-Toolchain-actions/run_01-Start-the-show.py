@@ -70,7 +70,7 @@ if exitcode == CONTINUE:
     talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
 if talk:
-    print('# --------', facts['toolchain_name'], time_started_at)
+    print('\n# --------', facts['toolchain_name'], time_started_at)
 
 # ==================================================
 # Set MILESTONE

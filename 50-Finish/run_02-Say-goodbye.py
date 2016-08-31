@@ -49,13 +49,18 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     rebuild_needed = milestones_get('rebuild_needed')
-    assembled = milestones_get('assembled', [])
+    achieved = milestones_get('assembled', [])[:]
+    if milestones_get('package_file'):
+        achieved.append('package')
+    if milestones_get('publish_dir_buildinfo'):
+        achieved.append('buildinfo')
+
     if talk:
-        if assembled:
-            s = ','.join(sorted(assembled))
+        if achieved:
+            s = ', '.join(sorted(achieved))
         else:
             s = 'nothing'
-        print("assembled: %s" % s)
+        print("Achieved: %s" % s)
 
 
 if exitcode == CONTINUE:

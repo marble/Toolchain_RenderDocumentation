@@ -68,7 +68,8 @@ if exitcode == CONTINUE:
     for top, dirs, files in os.walk(srcdir):
         current_dir = makedir_lastrun_folder + top[len(srcdir):]
         for afile in files:
-            if not afile.endswith('.json'):
+            fext = os.path.splitext(afile)[1]
+            if not fext in ['.json', '.txt']:
                 continue
             if afile.startswith('params_'):
                 continue

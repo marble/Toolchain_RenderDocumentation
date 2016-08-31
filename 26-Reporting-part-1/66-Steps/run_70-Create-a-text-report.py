@@ -122,7 +122,7 @@ if exitcode == CONTINUE:
     if package_file:
         package_url = packages_url + os.path.split(package_file)[1]
 
-    subject = u'Documentation rendered: %s %s' % (bs['project'], bs['version'])
+    subject = u'%s %s: Documentation rendered' % (bs['project'], bs['version'])
 
     # try to keep line length <= 60 chars
 
