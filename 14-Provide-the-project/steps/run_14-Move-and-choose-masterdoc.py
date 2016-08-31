@@ -25,7 +25,9 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 xeq_name_cnt = 0
-TheProjectMakedir = None
+masterdoc = None
+documentation_folder_created = None
+documentation_folder = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -47,37 +49,70 @@ def params_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
-    makedir = milestones_get('makedir')
     TheProject = milestones_get('TheProject')
+    masterdoc_candidates = milestones_get('masterdoc_candidates')
+    if not (TheProject and masterdoc_candidates):
+        exitcode = 2
 
-    if not (makedir and TheProject):
-        loglist.append('SKIPPING')
-        CONTINUE = -1
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
+if exitcode == CONTINUE:
+    workdir_home = params_get('workdir_home')
+    masterdocs_initial = milestones.get('masterdocs_initial')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    documentation_folder = milestones_get('documentation_folder')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-from shutil import copytree
+import shutil
 
 if exitcode == CONTINUE:
-    TheProjectMakedir = TheProject + 'Makedir'
-    if os.path.exists(TheProjectMakedir):
-        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
-        exitcode = 2
+    for candidate in masterdoc_candidates:
+        fpath = os.path.join(TheProject, candidate)
+        if os.path.exists(fpath):
+            masterdoc = fpath
+            break
+    else:
+        candidate = None
+        masterdoc = None
 
-if exitcode == CONTINUE:
-    source = makedir
-    destination = TheProjectMakedir
-    copytree(source, destination)
+if exitcode == CONTINUE and masterdoc and candidate:
+
+    if candidate.lower().startswith('documentation/index.'):
+        pass
+
+    elif candidate.lower().startswith('readme.'):
+        fpath, fext = os.path.splitext(candidate)
+        source = masterdoc
+        if not documentation_folder:
+            documentation_folder = os.path.join(TheProject, 'Documentation')
+            os.mkdir(documentation_folder)
+            documentation_folder_created = documentation_folder
+        masterdoc = os.path.join(documentation_folder, 'Index' + fext)
+        shutil.copyfile(source, masterdoc)
+
+    elif masterdoc.lower().startswith('docs/'):
+        # not yet implemented
+        masterdoc = None
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if TheProjectMakedir:
-    result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
+if masterdoc:
+    result['MILESTONES'].append({'masterdoc': masterdoc})
+
+if documentation_folder_created:
+    result['MILESTONES'].append({'documentation_folder_created': documentation_folder_created})
+
+if documentation_folder:
+    result['MILESTONES'].append({'documentation_folder': documentation_folder})
+
 
 # ==================================================
 # save result

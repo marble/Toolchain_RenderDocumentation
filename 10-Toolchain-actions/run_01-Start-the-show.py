@@ -5,8 +5,8 @@
 # --------------------------------------------------
 
 from __future__ import print_function
-import os
 import tct
+import os
 import sys
 
 params = tct.readjson(sys.argv[1])
@@ -23,9 +23,11 @@ exitcode = CONTINUE = 0
 # ==================================================
 # define
 # --------------------------------------------------
+import time
 
-xeq_name_cnt = 0
-TheProjectMakedir = None
+talk = None
+time_started_at_unixtime = time.time()
+time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 
 # ==================================================
 # Get and check required milestone(s)
@@ -48,36 +50,38 @@ def params_get(name, default=None):
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    makedir = milestones_get('makedir')
-    TheProject = milestones_get('TheProject')
+    toolchain_name = params_get('toolchain_name')
+    if not toolchain_name:
+        exitcode = 99
 
-    if not (makedir and TheProject):
-        loglist.append('SKIPPING')
-        CONTINUE = -1
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-from shutil import copytree
-
 if exitcode == CONTINUE:
-    TheProjectMakedir = TheProject + 'Makedir'
-    if os.path.exists(TheProjectMakedir):
-        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
-        exitcode = 2
+    talk_builtin = 1
+    talk_run_command = tct.deepget(facts, 'run_command', 'talk')
+    talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk')
+    talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
-if exitcode == CONTINUE:
-    source = makedir
-    destination = TheProjectMakedir
-    copytree(source, destination)
+if talk:
+    print('# --------', facts['toolchain_name'], time_started_at)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if TheProjectMakedir:
-    result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
+if talk is not None:
+    result['MILESTONES'].append({'talk': talk})
+if time_started_at:
+    result['MILESTONES'].append({'time_started_at': time_started_at})
+if time_started_at_unixtime:
+    result['MILESTONES'].append({'time_started_at_unixtime': time_started_at_unixtime})
 
 # ==================================================
 # save result
@@ -88,5 +92,4 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 sys.exit(exitcode)

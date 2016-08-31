@@ -16,7 +16,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
-toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -31,6 +31,8 @@ webroot_part_of_builddir = ''
 url_of_webroot = ''
 webroot_abspath = ''
 buildsettings_builddir = ''
+lockfile_ttl_seconds = 1800
+checksum_ttl_seconds = 86400
 
 # ==================================================
 # Get and check required milestone(s)
@@ -107,6 +109,12 @@ if webroot_abspath:
 
 if buildsettings_builddir:
     result['MILESTONES'].append({'buildsettings_builddir': buildsettings_builddir})
+
+if lockfile_ttl_seconds:
+    result['MILESTONES'].append({'lockfile_ttl_seconds': lockfile_ttl_seconds})
+
+if checksum_ttl_seconds:
+    result['MILESTONES'].append({'checksum_ttl_seconds': checksum_ttl_seconds})
 
 
 # ==================================================

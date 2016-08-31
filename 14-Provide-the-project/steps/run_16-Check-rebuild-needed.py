@@ -15,6 +15,8 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
@@ -24,7 +26,11 @@ exitcode = CONTINUE = 0
 
 xeq_name_cnt = 0
 checksum_new = None
-rebuild_needed = False
+talk = milestones.get('talk', 1)
+age = None
+
+rebuild_needed = None
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -59,10 +65,10 @@ else:
     loglist.append('PROBLEM with params')
 
 if exitcode == CONTINUE:
-    toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 02-Name
     checksum_old = milestones_get('checksum_old', '')
     checksum_time = milestones_get('checksum_time')
     checksum_file = milestones_get('checksum_file')
+    checksum_ttl_seconds = milestones_get('checksum_ttl_seconds', 86400)
 
 # ==================================================
 # work
@@ -71,6 +77,14 @@ if exitcode == CONTINUE:
 import codecs
 import subprocess
 import time
+
+rebuild_needed = tct.deepget(facts, 'run_command', 'rebuild_needed')
+if rebuild_needed == {}:
+    rebuild_needed = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'rebuild_needed')
+if rebuild_needed == {}:
+    rebuild_needed = 0
+rebuild_needed = int(rebuild_needed)
+
 
 def cmdline(cmd, cwd=None):
     if cwd is None:
@@ -97,9 +111,9 @@ if exitcode == CONTINUE:
         loglist.append('checksum_new: ' + checksum_new)
 
         xeq_name_cnt += 1
-        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
-        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
-        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
         with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(theCmd)
         with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
@@ -109,45 +123,57 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
 
-    if params.get('rebuild_needed'):
-        rebuild_needed = True
-        loglist.append('Rebuild is needed due to commandline parameters.')
-
-
     if checksum_time and not rebuild_needed:
         now = int(time.time())
-        if (now - checksum_time) > 86400:
-            rebuild_needed = True
-            loglist.append('Rebuild is needed. Last build is older than a day.')
+        age = now - checksum_time
+        if age > checksum_ttl_seconds:
+            rebuild_needed = 1
+            loglist.append('Rebuild is needed. Age %s is greater than checksum_ttl_seconds %s' % (age, checksum_ttl_seconds))
 
     if checksum_old and checksum_new and not rebuild_needed:
         if checksum_new != checksum_old:
-            rebuild_needed = True
-            loglist.append('Rebuild is needed. Checksums do not match.')
+            rebuild_needed = 1
+            loglist.append('Rebuild is needed. Checksums are different.')
 
-    if not checksum_old and not rebuild_needed:
-        rebuild_needed = True
-        loglist.append('Rebuild is needed. There is now previous checksum.')
+    if not checksum_old:
+        rebuild_needed = 1
+        loglist.append('Rebuild is needed. There is no previous checksum.')
 
     if not checksum_new and not rebuild_needed:
-        rebuild_needed = True
+        rebuild_needed = 1
         loglist.append('Rebuild is needed. There is no new checksum (Strange!?.')
 
     if checksum_file and checksum_new:
         if checksum_old and checksum_old == checksum_new:
-            loglist.append('The new checksum is equal to the old checksum.')
-        else:
+            loglist.append('checksums are equal')
+        if rebuild_needed:
             with file(checksum_file, 'wb') as f2:
                 f2.write(checksum_new)
-            loglist.append('New checksum written to file.')
+            loglist.append('rebuild is needed, so new checksum is written')
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({'rebuild_needed': rebuild_needed, 'checksum_new': checksum_new})
+if rebuild_needed:
+    result['MILESTONES'].append({'rebuild_needed': rebuild_needed})
+if checksum_new:
+    result['MILESTONES'].append({'checksum_new': checksum_new})
+
+# ==================================================
+# talk
+# --------------------------------------------------
+
+if talk:
+    if rebuild_needed:
+        print('rebuild_needed: yes')
+    else:
+        agestr = ''
+        if age:
+            agestr = ', age: %s seconds' % age
+        print('rebuild_needed: no%s' % agestr)
+
 # ==================================================
 # save result
 # --------------------------------------------------

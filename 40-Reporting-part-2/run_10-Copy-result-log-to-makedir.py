@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 # ==================================================
 # open
@@ -15,7 +16,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
-toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -24,10 +25,8 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-masterdoc = None
-documentation_folder_created = None
-documentation_folder = None
+final_exitcode = None
+makedir_lastrun_folder = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -49,21 +48,11 @@ def params_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    TheProject = milestones_get('TheProject')
-    masterdoc_candidates = milestones_get('masterdoc_candidates')
-    if not (TheProject and masterdoc_candidates):
-        exitcode = 2
-
-if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
-else:
-    loglist.append('PROBLEMS with params')
-
-if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
     workdir_home = params_get('workdir_home')
-    masterdocs_initial = milestones.get('masterdocs_initial')
-    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
-    documentation_folder = milestones_get('documentation_folder')
+    makedir = milestones_get('makedir')
+    if not (workdir_home and makedir):
+        exitcode = 2
 
 # ==================================================
 # work
@@ -72,44 +61,29 @@ if exitcode == CONTINUE:
 import shutil
 
 if exitcode == CONTINUE:
-    for candidate in masterdoc_candidates:
-        fpath = os.path.join(TheProject, candidate)
-        if os.path.exists(fpath):
-            masterdoc = fpath
-            break
-    else:
-        candidate = None
-        masterdoc = None
-
-if exitcode == CONTINUE and masterdoc and candidate:
-
-    if candidate.lower().startswith('documentation/index.'):
-        pass
-
-    elif candidate.lower().startswith('readme.'):
-        fpath, fext = os.path.splitext(candidate)
-        source = masterdoc
-        if not documentation_folder:
-            documentation_folder = os.path.join(TheProject, 'Documentation')
-            os.mkdir(documentation_folder)
-            documentation_folder_created = documentation_folder
-        masterdoc = os.path.join(documentation_folder, 'Index' + fext)
-        shutil.copyfile(source, masterdoc)
-
-    elif masterdoc.lower().startswith('docs/'):
-        # not yet implemented
-        masterdoc = None
+    srcdir = workdir_home.rstrip('/')
+    makedir_lastrun_folder = os.path.join(makedir, 'temp_lastrun_' + facts['toolchain_name'])
+    if os.path.isdir(makedir_lastrun_folder):
+        shutil.rmtree(makedir_lastrun_folder)
+    for top, dirs, files in os.walk(srcdir):
+        current_dir = makedir_lastrun_folder + top[len(srcdir):]
+        for afile in files:
+            if not afile.endswith('.json'):
+                continue
+            if afile.startswith('params_'):
+                continue
+            srcfile = os.path.join(top, afile)
+            destfile = makedir_lastrun_folder + srcfile[len(srcdir):]
+            if not os.path.exists(current_dir):
+                os.makedirs(current_dir)
+            shutil.copy(srcfile, destfile)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if masterdoc:
-    result['MILESTONES'].append({'masterdoc': masterdoc})
-
-if documentation_folder_created:
-    result['MILESTONES'].append({'documentation_folder': documentation_folder})
-
+if makedir_lastrun_folder:
+    result['MILESTONES'].append({'makedir_lastrun_folder': makedir_lastrun_folder})
 
 # ==================================================
 # save result

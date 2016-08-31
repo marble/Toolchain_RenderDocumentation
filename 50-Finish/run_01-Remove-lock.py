@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 # ==================================================
 # open
@@ -24,8 +25,8 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-TheProjectMakedir = None
+lockfile_removed = ''
+lockfile_remove_logstamp = ''
 
 # ==================================================
 # Get and check required milestone(s)
@@ -36,48 +37,33 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
-    makedir = milestones_get('makedir')
-    TheProject = milestones_get('TheProject')
-
-    if not (makedir and TheProject):
-        loglist.append('SKIPPING')
+    lockfile = milestones_get('lockfile')
+    if not (lockfile):
         CONTINUE = -1
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-from shutil import copytree
-
 if exitcode == CONTINUE:
-    TheProjectMakedir = TheProject + 'Makedir'
-    if os.path.exists(TheProjectMakedir):
-        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
-        exitcode = 2
-
-if exitcode == CONTINUE:
-    source = makedir
-    destination = TheProjectMakedir
-    copytree(source, destination)
+    if os.path.isfile(lockfile):
+        os.remove(lockfile)
+        lockfile_removed = lockfile
+        lockfile = ''
+        lockfile_remove_logstamp = tct.logstamp_finegrained()
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if TheProjectMakedir:
-    result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
+if exitcode == CONTINUE:
+    if lockfile_removed:
+        result['MILESTONES'].append({
+            'lockfile': lockfile,
+            'lockfile_removed': lockfile_removed,
+            'lockfile_remove_logstamp': lockfile_remove_logstamp,
+        })
 
 # ==================================================
 # save result

@@ -15,59 +15,88 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
-errormsg = ''
-helpmsg = ''
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+makedir_missing = ''
+makedir = ''
+talk = milestones.get('talk', 1)
 
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
-if exitcode == CONTINUE:
-    toolchain_name = facts.get('toolchain_name')
-    toolchain_usage = milestones_get('toolchain_usage')
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
 
-if not toolchain_name:
-    exitcode = 99
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+    toolchain_name = facts_get('toolchain_name')
+    cwd = facts_get('cwd')
+    if not (toolchain_name and cwd):
+        exitcode = 99
+
+if exitcode == CONTINUE:
+    makedir = params_get('makedir', '')
+    if not makedir:
+        msg = 'Usage: tct run %s --config makedir MAKEDIR [--toolchain-help]' % toolchain_name
+        loglist.append(msg)
+        print(msg)
+        exitcode = 99
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    for line in toolchain_usage.split('\n'):
-        loglist.append(line)
-
-if exitcode == CONTINUE:
-    makedir = params.get('makedir', '')
-    if not makedir:
-        errormsg = 'Usage: tct run %s --config makedir MAKEDIR [--toolchain-help]\nmakedir is not specified' % toolchain_name
-        exitcode = 2
-
-if exitcode == CONTINUE:
     if not os.path.isabs(makedir):
         makedir = os.path.join(facts['cwd'], makedir)
     makedir = os.path.abspath(os.path.normpath(makedir))
     if not os.path.isdir(makedir):
-        errormsg = "makedir not found: '%s'" % makedir
+        makedir_missing = makedir
+        makedir = None
+        msg = "makedir not found: %s" % makedir_missing
+        loglist.append(msg)
+        print(msg)
         exitcode = 2
 
-if errormsg:
-    loglist.append(errormsg)
-    print(errormsg)
-
+if exitcode == CONTINUE:
+    if talk:
+        print(os.path.split(makedir)[1])
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if makedir:
     result['MILESTONES'].append({'makedir': makedir})
+
+if makedir_missing:
+    result['MILESTONES'].append({'makedir_missing': makedir_missing})
 
 # ==================================================
 # save result

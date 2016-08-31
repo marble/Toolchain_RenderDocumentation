@@ -16,7 +16,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
-toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -25,8 +25,11 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
-lockfile_removed = ''
-lockfile_remove_logstamp = ''
+import time
+
+talk = milestones.get('talk', 1)
+time_finished_at_unixtime = time.time()
+time_finished_at = tct.logstamp_finegrained(unixtime=time_finished_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 
 # ==================================================
 # Get and check required milestone(s)
@@ -38,32 +41,39 @@ def milestones_get(name, default=None):
     return result
 
 if exitcode == CONTINUE:
-    lockfile = milestones_get('lockfile')
-    if not (lockfile):
-        CONTINUE = -1
+    time_started_at_unixtime = milestones_get('time_started_at_unixtime', 0)
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    if os.path.isfile(lockfile):
-        os.remove(lockfile)
-        lockfile_removed = lockfile
-        lockfile = ''
-        lockfile_remove_logstamp = tct.logstamp_finegrained()
+    rebuild_needed = milestones_get('rebuild_needed')
+    assembled = milestones_get('assembled', [])
+    if talk:
+        if assembled:
+            s = ','.join(sorted(assembled))
+        else:
+            s = 'nothing'
+        print("assembled: %s" % s)
+
+
+if exitcode == CONTINUE:
+    if talk:
+        duration = ''
+        if time_started_at_unixtime and time_finished_at_unixtime:
+            duration = 'duration: %4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime)
+        print(time_finished_at, duration)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    if lockfile_removed:
-        result['MILESTONES'].append({
-            'lockfile': lockfile,
-            'lockfile_removed': lockfile_removed,
-            'lockfile_remove_logstamp': lockfile_remove_logstamp,
-        })
+if time_finished_at:
+    result['MILESTONES'].append({'time_finished_at': time_finished_at})
+
+if time_finished_at_unixtime:
+    result['MILESTONES'].append({'time_finished_at_unixtime': time_finished_at_unixtime})
 
 # ==================================================
 # save result

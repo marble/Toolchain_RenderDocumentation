@@ -15,21 +15,52 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
+
+toolchain_usage = False
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+toolchain_usage = False
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 if exitcode == CONTINUE:
-    toolchain_name = params.get('toolchain_name')
+    loglist.append('CHECK PARAMS')
+    toolchain_name = params_get('toolchain_name')
     if not toolchain_name:
         exitcode = 99
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
 
 # ==================================================
 # work
@@ -51,29 +82,34 @@ Options:
   --help                         Show this message and exit.
 
 Toolchain options:
-  -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
-  -c rebuild_needed 1            Force rebuild regardless of checksum
   -T clean                       Let the toolchain delete prior builds, then exit.
   -T help                        Let the toolchain show this help, then exit.
   -T unlock                      Let the toolchain remove existing locks, then exit
+
+  -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
+  -c rebuild_needed 1            Force rebuild regardless of checksum
+
+  -c talk 0                      run quietly
+  -c talk 1                      talk just the minimum (default)
+  -c talk 2                      talk more
+
   -c email_user_to  "email1,email2,..."  instead of real user
   -c email_user_cc  "email1,email2,..."  additionally, publicly
   -c email_user_bcc "email1,email2,..."  additionally, secretly
+  -c email_user_send_to_admin_too  1     like it says
+
 """ % {'toolchain_name': toolchain_name}
 
 if exitcode == CONTINUE:
     if params.get('toolchain_help') or ('help' in params.get('toolchain_actions', [])):
+        print(toolchain_usage)
         exitcode = 99
-
-if exitcode == 99:
-    print(toolchain_usage)
-    loglist.append('Done: Show usage')
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if 1:
+if toolchain_usage:
     result['MILESTONES'].append({'toolchain_usage': toolchain_usage})
 
 # ==================================================

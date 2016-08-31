@@ -16,6 +16,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
@@ -59,9 +60,6 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
-if exitcode == CONTINUE:
-    toolname_short = os.path.splitext(toolname)[0][4:]
-
 # ==================================================
 # work
 # --------------------------------------------------
@@ -88,9 +86,9 @@ if exitcode == CONTINUE:
     loglist.append([exitcode, cmd, out, err])
 
     xeq_name_cnt += 1
-    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
-    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
-    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
     with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
         f2.write(cmd.decode('utf-8', 'replace'))
     with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:

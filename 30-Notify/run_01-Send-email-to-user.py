@@ -16,7 +16,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
-toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -25,9 +25,9 @@ exitcode = CONTINUE = 0
 # define
 # --------------------------------------------------
 
+talk = milestones.get('talk', 1)
 email_user_send_extra_mail_to_admin = False
 email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
-
 
 # ==================================================
 # Get and check required milestone(s)
@@ -88,6 +88,7 @@ if exitcode == CONTINUE:
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     loglist.append(('temp_home', temp_home))
     toochains_home = facts_get('toolchains_home')
+    assembled = milestones_get('assembled', [])
 
     publish_dir_buildinfo_message = (publish_dir_buildinfo +
                                      TheProjectResultBuildinfoMessage[len(TheProjectResultBuildinfo):])
@@ -119,6 +120,9 @@ if exitcode == CONTINUE:
     # subject
     if not subject:
         subject = os.path.split(publish_dir_buildinfo_message)[1]
+
+    if assembled:
+        subject = '[' + ','.join(sorted(assembled)) + '] '+ subject
 
     # cc
     cclist = []
@@ -162,8 +166,20 @@ if exitcode == CONTINUE:
             msg['Cc'] = msg_cc_value
         if msg_bcc_value:
             msg['Bcc'] = msg_bcc_value
+        if talk:
+            if subject:
+                print(subject)
+            slist = []
+            if msg_to_value:
+                slist.append('To: %s' % msg_to_value)
+            if msg_cc_value:
+                slist.append('Cc: %s' % msg_cc_value)
+            if msg_bcc_value:
+                slist.append('Bcc: %s' % msg_bcc_value)
+            if slist:
+                print(';  '.join(slist))
         s = smtplib.SMTP(host)
-        #sendmail_result = 'simulated'
+        # sendmail_result = 'simulated'
         sendmail_result = s.sendmail(sender, receivers, msg.as_string())
 
         loglist.append(('sendmail_result:', sendmail_result))

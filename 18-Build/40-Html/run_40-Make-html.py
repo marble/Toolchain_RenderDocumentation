@@ -60,7 +60,7 @@ else:
     loglist.append('PROBLEM with params')
 
 if exitcode == CONTINUE:
-    toolname_short = os.path.splitext(toolname)[0][4:]  # run_01-Name.py -> 01-Name
+    toolname_pure = params['toolname_pure']
     masterdoc = milestones.get('masterdoc')
     has_settingscfg = milestones.get('has_settingscfg')
     TheProject = milestones.get('TheProject')
@@ -123,9 +123,9 @@ if exitcode == CONTINUE:
     loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
     xeq_name_cnt += 1
-    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'cmd')
-    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'err')
-    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_short, xeq_name_cnt, 'out')
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
     with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
         f2.write(cmd_multiline.decode('utf-8', 'replace'))
     with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
