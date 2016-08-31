@@ -179,8 +179,8 @@ if exitcode == CONTINUE:
             if slist:
                 print(';  '.join(slist))
         s = smtplib.SMTP(host)
-        sendmail_result = 'simulated'
-        # sendmail_result = s.sendmail(sender, receivers, msg.as_string())
+        # sendmail_result = 'simulated'
+        sendmail_result = s.sendmail(sender, receivers, msg.as_string())
 
         loglist.append(('sendmail_result:', sendmail_result))
 
