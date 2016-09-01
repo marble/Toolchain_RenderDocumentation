@@ -26,7 +26,7 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 talk = milestones.get('talk', 1)
-email_user_send_extra_mail_to_admin = False
+email_user_send_extra_mail_to_admin = 0
 email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
 
 # ==================================================
@@ -82,8 +82,9 @@ if exitcode == CONTINUE:
     email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
                       tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
     loglist.append(('email_user_bcc', email_user_bcc))
-    email_user_send_extra_mail_to_admin = (tct.deepget(facts, 'run_command', 'email_user_send_extra_mail_to_admin') or
-                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_extra_mail_to_admin'))
+    email_user_send_extra_mail_to_admin = int(tct.deepget(facts, 'run_command', 'email_user_send_extra_mail_to_admin') or
+                                              tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_extra_mail_to_admin') or
+                                              email_user_send_extra_mail_to_admin)
     loglist.append(('email_user_send_extra_mail_to_admin', email_user_send_extra_mail_to_admin))
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
     loglist.append(('temp_home', temp_home))
