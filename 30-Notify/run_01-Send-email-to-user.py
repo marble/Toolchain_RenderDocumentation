@@ -27,7 +27,6 @@ exitcode = CONTINUE = 0
 
 talk = milestones.get('talk', 1)
 email_user_send_extra_mail_to_admin = 0
-email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
 
 # ==================================================
 # Get and check required milestone(s)
@@ -59,6 +58,11 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     if not (create_buildinfo and TheProjectResultBuildinfo and TheProjectResultBuildinfoMessage
             and publish_dir_buildinfo and toolchain_name):
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list', None)
+    if email_user_receivers_exlude_list is None:
         exitcode = 2
 
 if exitcode == CONTINUE:
@@ -116,7 +120,7 @@ if exitcode == CONTINUE:
         msgbody = f1.read()
 
     # from
-    sender = 'Toolchain_RenderDocumentation@typo3.org'
+    sender = 'RenderDocumentation@typo3.org'
 
     # subject
     if not subject:
