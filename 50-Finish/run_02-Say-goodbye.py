@@ -60,7 +60,7 @@ if exitcode == CONTINUE:
             s = ', '.join(sorted(achieved))
         else:
             s = 'nothing'
-        print("Created: %s" % s)
+        print("Produced: %s" % s)
 
 
 if exitcode == CONTINUE:
