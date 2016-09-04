@@ -92,7 +92,7 @@ if exitcode == CONTINUE:
         exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
 
     if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch, cwd=gitdir)
+        exitcode, cmd, out, err = cmdline('git checkout --force ' + gitbranch, cwd=gitdir)
 
     if exitcode == CONTINUE:
         exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
