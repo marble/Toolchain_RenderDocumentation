@@ -27,6 +27,7 @@ exitcode = CONTINUE = 0
 
 final_exitcode = None
 makedir_lastrun_folder = None
+IOError_info = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -68,6 +69,8 @@ if exitcode == CONTINUE:
     for top, dirs, files in os.walk(srcdir):
         current_dir = makedir_lastrun_folder + top[len(srcdir):]
         for afile in files:
+            if not exitcode == CONTINUE:
+                break
             fext = os.path.splitext(afile)[1]
             if not fext in ['.json', '.txt']:
                 continue
@@ -77,7 +80,24 @@ if exitcode == CONTINUE:
             destfile = makedir_lastrun_folder + srcfile[len(srcdir):]
             if not os.path.exists(current_dir):
                 os.makedirs(current_dir)
-            shutil.copy(srcfile, destfile)
+            try:
+                shutil.copy(srcfile, destfile)
+            except IOError, e:
+                print('IOError    :', e)
+                print('srcdir     :', srcdir)
+                print('makedir    :', makedir)
+                print('current_dir:', current_dir)
+                print('srcfile    :', srcfile)
+                print('destfile   :', destfile)
+                IOError_info = {
+                    'IOError': e,
+                    'srcdir': srcdir,
+                    'makedir:': makedir,
+                    'current_dir:': current_dir,
+                    'srcfile': srcfile,
+                    'destfile': destfile,
+                }
+                exitcode = 1
 
 # ==================================================
 # Set MILESTONE
@@ -85,6 +105,8 @@ if exitcode == CONTINUE:
 
 if makedir_lastrun_folder:
     result['MILESTONES'].append({'makedir_lastrun_folder': makedir_lastrun_folder})
+if IOError_info:
+    result['MILESTONES'].append({'IOError_info': IOError_info})
 
 # ==================================================
 # save result
