@@ -74,6 +74,8 @@ if exitcode == CONTINUE:
     for top, dirs, files in os.walk(srcdir):
         dirs[:] = []
         files.sort()
+        if not os.path.exists(destdir):
+            os.mkdir(destdir)
         for afile in files:
             srcfile = os.path.join(top, afile)
             destfile = destdir + srcfile[len(srcdir):]
