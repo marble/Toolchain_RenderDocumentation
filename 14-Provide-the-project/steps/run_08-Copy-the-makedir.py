@@ -59,7 +59,7 @@ if exitcode == CONTINUE:
 # work
 # --------------------------------------------------
 
-from shutil import copytree
+import shutil
 
 if exitcode == CONTINUE:
     TheProjectMakedir = TheProject + 'Makedir'
@@ -68,9 +68,16 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
-    source = makedir
-    destination = TheProjectMakedir
-    copytree(source, destination)
+    srcdir = makedir.rstrip('/')
+    destdir = TheProjectMakedir.rstrip('/')
+    # we better only copy the top level files, no subdirs
+    for top, dirs, files in os.walk(srcdir):
+        dirs[:] = []
+        files.sort()
+        for afile in files:
+            srcfile = srcdir + '/' + afile
+            destfile = destdir + '/' + srcfile[len(srcdir):]
+            shutil.copy(srcfile, destfile)
 
 # ==================================================
 # Set MILESTONE
