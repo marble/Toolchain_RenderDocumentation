@@ -75,7 +75,7 @@ if exitcode == CONTINUE:
         dirs[:] = []
         files.sort()
         for afile in files:
-            srcfile = srcdir + '/' + afile
+            srcfile = os.path.join(top, afile)
             destfile = destdir + '/' + srcfile[len(srcdir):]
             shutil.copy(srcfile, destfile)
 
