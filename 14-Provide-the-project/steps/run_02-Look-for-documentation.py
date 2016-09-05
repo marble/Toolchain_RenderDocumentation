@@ -71,7 +71,7 @@ if exitcode == CONTINUE:
     for candidate in masterdoc_candidates:
         fpath = os.path.join(gitdir, candidate)
         if os.path.exists(fpath):
-            masterdocs_initial[candidate] = 'found'
+            masterdocs_initial[candidate] = True
         else:
             masterdocs_initial[candidate] = False
 

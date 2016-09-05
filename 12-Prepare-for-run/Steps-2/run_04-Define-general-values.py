@@ -32,7 +32,7 @@ url_of_webroot = ''
 webroot_abspath = ''
 buildsettings_builddir = ''
 lockfile_ttl_seconds = 1800
-checksum_ttl_seconds = 86400
+checksum_ttl_seconds = 86400 * 7 # render if last checksum calcultation is older
 email_user_do_not_send = 0
 email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
 
