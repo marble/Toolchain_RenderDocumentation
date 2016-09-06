@@ -22,19 +22,34 @@ loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
-# define
+# define unconditionally
 # --------------------------------------------------
 
 xeq_name_cnt = 0
 relative_part_of_builddir = ''
 webroot_part_of_builddir = ''
-url_of_webroot = ''
 webroot_abspath = ''
+url_of_webroot = ''
 buildsettings_builddir = ''
 lockfile_ttl_seconds = 1800
-checksum_ttl_seconds = 86400 * 7 # render if last checksum calcultation is older
+checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
+
 email_user_do_not_send = 0
-email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com']
+email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com', 'kasperYYYY@typo3.org', 'info@typo3.org', ]
+
+general_string_options = (
+    ('email_admin', 'martin.bless@gmail.com'),
+    ('email_user_to', ''),
+    ('email_user_cc', ''),
+    ('email_user_bcc', ''),
+)
+general_int_options = (
+    ('email_user_do_not_send', 0),
+    ('email_user_send_extra_mail_to_admin', 0),
+)
+general_csvlist_options = (
+    ('email_user_receivers_exlude_list', ''),
+)
 
 # ==================================================
 # Get and check required milestone(s)
@@ -60,16 +75,19 @@ if exitcode == CONTINUE:
     toolchain_name = facts.get('toolchain_name')
 
     # is always on srv123
-    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir')
+    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
     loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
 
-    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot')
+    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot', default=url_of_webroot)
     loglist.append(('url_of_webroot', url_of_webroot))
 
-    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
+    relative_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'relative_part_of_builddir', default=relative_part_of_builddir)
+    loglist.append(('relative_part_of_builddir', relative_part_of_builddir))
+
+    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath', default=webroot_abspath)
     loglist.append(('webroot_abspath', webroot_abspath))
 
-    buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir')
+    buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
     loglist.append(('buildsettings_builddir', buildsettings_builddir))
 
 if not (toolchain_name and webroot_part_of_builddir and url_of_webroot
@@ -87,18 +105,28 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    email_user_do_not_send = int(
-        tct.deepget(facts, 'run_command', 'email_user_do_not_send') or
-        tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_do_not_send') or
-        email_user_do_not_send)
+    for option, default in general_int_options:
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        if not v:
+            v = default
+        else:
+            v = int(v)
+        result['MILESTONES'].append({option: v})
 
-if exitcode == CONTINUE:
-    email_user_receivers_exlude_list = (
-        tct.deepget(facts, 'run_command', 'email_user_receivers_exlude_list') or
-        tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_receivers_exlude_list') or
-        ','.join(email_user_receivers_exlude_list))
-    s = email_user_receivers_exlude_list.replace(' ', ',').split(',')
-    email_user_receivers_exlude_list = [email for email in s if email]
+    for option, default in general_string_options:
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        if not v:
+            v = default
+        result['MILESTONES'].append({option: v})
+
+    for option, default in general_csvlist_options:
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        if not v:
+            v = default
+        v = v.replace(' ', ',').split(',')
+        v = [item for item in v if item]
+        result['MILESTONES'].append({option: v})
+
 
 if exitcode == CONTINUE:
     if not relative_part_of_builddir:
@@ -150,3 +178,4 @@ tct.writejson(result, resultfile)
 # --------------------------------------------------
 
 sys.exit(exitcode)
+
