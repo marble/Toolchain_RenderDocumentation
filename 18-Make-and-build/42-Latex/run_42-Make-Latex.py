@@ -51,8 +51,9 @@ if exitcode == CONTINUE:
     rebuild_needed = milestones_get('rebuild_needed')
     included_files_check = milestones_get('included_files_check')
     toolname = params_get('toolname')
+    build_html = milestones_get('build_html')
     if not (ready_for_build and rebuild_needed and
-            toolname and included_files_check):
+            toolname and included_files_check and build_html):
         exitcode = 2
 
 if exitcode == CONTINUE:

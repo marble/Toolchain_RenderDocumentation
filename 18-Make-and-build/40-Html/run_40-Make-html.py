@@ -158,4 +158,5 @@ tct.writejson(result, resultfile)
 # Return with proper exitcode
 # --------------------------------------------------
 
+
 sys.exit(exitcode)

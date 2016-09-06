@@ -32,7 +32,7 @@ if exitcode == CONTINUE:
     build_html_folder = milestones_get('build_html_folder')
     build_singlehtml_folder = milestones_get('build_singlehtml_folder')
 
-if not (build_html_folder or build_singlehtml_folder):
+if not (build_html_folder):
     CONTINUE = -1
 
 # ==================================================
