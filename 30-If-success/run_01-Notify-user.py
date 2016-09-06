@@ -26,7 +26,6 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 talk = milestones.get('talk', 1)
-email_user_send_extra_mail_to_admin = 0
 
 # ==================================================
 # Get and check required milestone(s)
@@ -50,20 +49,25 @@ def params_get(name, default=None):
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     create_buildinfo = milestones_get('create_buildinfo')
+    publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
-    publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
     toolchain_name = params_get('toolchain_name')
 
 if exitcode == CONTINUE:
-    if not (create_buildinfo and TheProjectResultBuildinfo and TheProjectResultBuildinfoMessage
-            and publish_dir_buildinfo and toolchain_name):
-        exitcode = 2
+    if not (
+        create_buildinfo and
+        publish_dir_buildinfo and
+        TheProjectResultBuildinfo and
+        TheProjectResultBuildinfoMessage and
+        toolchain_name):
+
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
-    email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list', None)
-    if email_user_receivers_exlude_list is None:
-        exitcode = 2
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
 
 if exitcode == CONTINUE:
     email_user_do_not_send = milestones_get('email_user_do_not_send')
@@ -71,32 +75,22 @@ if exitcode == CONTINUE:
         CONTINUE = -1
 
 if exitcode == CONTINUE:
-    subject = milestones_get('email_user_subject')
+    assembled = milestones_get('assembled', [])
+    email_admin = milestones_get('email_admin')
+    email_user_bcc = milestones_get('email_user_bcc')
+    email_user_cc = milestones_get('email_user_cc')
+    email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list')
+    email_user_send_extra_mail_to_admin = milestones_get('email_user_send_extra_mail_to_admin')
+    email_user_to = milestones_get('email_user_to')
     emails_user = milestones_get('emails_user')
     notify_about_new_build = milestones_get('notify_about_new_build')
-    email_admin = (tct.deepget(facts, 'run_command', 'email_admin') or
-                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_admin'))
-    loglist.append(('email_admin', email_admin))
-    email_user_to = (tct.deepget(facts, 'run_command', 'email_user_to') or
-                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_to'))
-    loglist.append(('email_user_to', email_user_to))
-    email_user_cc = (tct.deepget(facts, 'run_command', 'email_user_cc') or
-                     tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_cc'))
-    loglist.append(('email_user_cc', email_user_cc))
-    email_user_bcc = (tct.deepget(facts, 'run_command', 'email_user_bcc') or
-                      tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_bcc'))
-    loglist.append(('email_user_bcc', email_user_bcc))
-    email_user_send_extra_mail_to_admin = int(tct.deepget(facts, 'run_command', 'email_user_send_extra_mail_to_admin') or
-                                              tct.deepget(facts, 'tctconfig', toolchain_name, 'email_user_send_extra_mail_to_admin') or
-                                              email_user_send_extra_mail_to_admin)
-    loglist.append(('email_user_send_extra_mail_to_admin', email_user_send_extra_mail_to_admin))
+    subject = milestones_get('email_user_subject')
     temp_home = tct.deepget(facts, 'tctconfig', 'general', 'temp_home')
-    loglist.append(('temp_home', temp_home))
     toochains_home = facts_get('toolchains_home')
-    assembled = milestones_get('assembled', [])
-
     publish_dir_buildinfo_message = (publish_dir_buildinfo +
                                      TheProjectResultBuildinfoMessage[len(TheProjectResultBuildinfo):])
+
+    loglist.append(('temp_home', temp_home))
 
 # ==================================================
 # work
@@ -109,8 +103,8 @@ if exitcode == CONTINUE:
     import smtplib
     from email.mime.text import MIMEText
 
-
     if not os.path.exists(publish_dir_buildinfo_message):
+        loglist.append('file not found: publish_dir_buildinfo_message')
         exitcode = 2
 
 if exitcode == CONTINUE:
