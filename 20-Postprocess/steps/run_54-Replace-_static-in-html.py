@@ -58,16 +58,20 @@ if exitcode == CONTINUE:
 
     # should become something like '3.6.0'
     version = None
+    version_major_minor = None
     pattern = os.path.join(build_html_folder, '_static') + '/t3SphinxThemeRtd*.txt'
     files = sorted( glob.glob(pattern), reverse=1)
     loglist.append(['files', files])
+    re_searcher = re.compile('t3SphinxThemeRtd-(?P<version>(?P<version_major_minor>\d+\.\d+)(\.\d+)*)\.txt')
     for fname in files:
         if version:
             break
-        match = re.search('t3SphinxThemeRtd-([\d][\d\.]*)\.txt', fname)
+        match = re_searcher.search(fname)
         if match:
-            version = match.group(1)
+            version = match.groupdict()['version']
             loglist.append(['version', version])
+            version_major_minor = match.groupdict()['version_major_minor']
+            loglist.append(['version_major_minor', version_major_minor])
 
     if not version:
         loglist.append('No version found. Cannot replace anything.')
@@ -92,7 +96,8 @@ if exitcode == CONTINUE:
         """,
         re.VERBOSE)
 
-    replacement = unicode(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version + '/' + '\g<payload>\g<quote>')
+    replacement = unicode(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor +
+                          '/' + '\g<payload>\g<quote>')
 
     for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
