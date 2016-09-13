@@ -60,7 +60,7 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 
 if exitcode == CONTINUE:
-    ter_extension = tct.deepget(milestones, 'buildsettings', 'ter_extension')
+    ter_extension = int(tct.deepget(milestones, 'buildsettings', 'ter_extension'))
     loglist.append(('ter_extension', ter_extension))
 
 # ==================================================
