@@ -38,6 +38,7 @@ email_user_do_not_send = 0
 email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com', 'kasperYYYY@typo3.org', 'info@typo3.org', ]
 
 general_string_options = (
+    ('conf_py_masterfile', ''),
     ('email_admin', 'martin.bless@gmail.com'),
     ('email_user_to', ''),
     ('email_user_cc', ''),
