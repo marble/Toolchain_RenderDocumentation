@@ -26,6 +26,7 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 talk = milestones.get('talk', 1)
+cmdline_reportlines = milestones.get('cmdline_reportlines', [])
 
 # ==================================================
 # Get and check required milestone(s)
@@ -167,16 +168,21 @@ if exitcode == CONTINUE:
             msg['Bcc'] = msg_bcc_value
         if talk:
             if subject:
-                print(subject)
+                cmdline_reportlines.append('subject: %s' % subject)
+                if talk > 2:
+                    print(subject)
             slist = []
             if msg_to_value:
-                slist.append('To: %s' % msg_to_value)
+                slist.append('to     : %s' % msg_to_value)
             if msg_cc_value:
-                slist.append('Cc: %s' % msg_cc_value)
+                slist.append('cc: %s' % msg_cc_value)
             if msg_bcc_value:
-                slist.append('Bcc: %s' % msg_bcc_value)
+                slist.append('bcc: %s' % msg_bcc_value)
             if slist:
-                print(';  '.join(slist))
+                aline = ';  '.join(slist)
+                cmdline_reportlines.append(aline)
+                if talk > 2:
+                    print(aline)
         s = smtplib.SMTP(host)
         # sendmail_result = 'simulated'
         sendmail_result = s.sendmail(sender, receivers, msg.as_string())
@@ -237,6 +243,9 @@ if exitcode == CONTINUE:
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
+
+if 1:
+    result['MILESTONES'].append({'cmdline_reportlines': cmdline_reportlines})
 
 if exitcode == CONTINUE:
     result['MILESTONES'].append({'email_to_user_send': True})

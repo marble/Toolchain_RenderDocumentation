@@ -69,7 +69,7 @@ if exitcode == CONTINUE:
     talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk')
     talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
-if talk:
+if talk > 1:
     print('# --------', facts['toolchain_name'], time_started_at)
 
 # ==================================================

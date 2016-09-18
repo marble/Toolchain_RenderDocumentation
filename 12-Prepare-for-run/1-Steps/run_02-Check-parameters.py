@@ -85,8 +85,8 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
-    if talk:
-        print(os.path.split(makedir)[1])
+    if talk > 1:
+        print('makedir:', os.path.split(makedir)[1])
 
 # ==================================================
 # Set MILESTONE

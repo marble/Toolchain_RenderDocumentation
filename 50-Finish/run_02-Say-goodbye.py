@@ -40,35 +40,79 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
-if exitcode == CONTINUE:
-    time_started_at_unixtime = milestones_get('time_started_at_unixtime', 0)
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+time_started_at = milestones_get('time_started_at', '')
+time_started_at_unixtime = milestones_get('time_started_at_unixtime', 0)
+rebuild_needed = milestones_get('rebuild_needed')
+achieved = milestones_get('assembled', [])[:]
+if milestones_get('package_file'):
+    achieved.append('package')
+if milestones_get('publish_dir_buildinfo'):
+    achieved.append('buildinfo')
+achieved.sort()
+cmdline_reportlines = milestones_get('cmdline_reportlines', [])
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    rebuild_needed = milestones_get('rebuild_needed')
-    achieved = milestones_get('assembled', [])[:]
-    if milestones_get('package_file'):
-        achieved.append('package')
-    if milestones_get('publish_dir_buildinfo'):
-        achieved.append('buildinfo')
+if talk:
+    indent = '   '
+    print()
+    print(tct.deepget(milestones, 'buildsettings', 'project', default='PROJECT'),
+          tct.deepget(milestones, 'buildsettings', 'version', default='VERSION'),
+          os.path.split(milestones_get('makedir', default='MAKEDIR'))[1],
+          sep = ' // ', end = '\n')
+    print(indent,
+          time_started_at,
+          ',  took: ', '%4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime),
+          ',  toolchain: ', facts_get('toolchain_name', 'TOOLCHAIN_NAME'),
+          sep='')
+    if rebuild_needed:
+        print(indent, 'REBUILD_NEEDED', sep='')
+        print(indent, 'OK: ', ', '.join(achieved), sep='')
+    else:
+        print(indent, 'build is not needed', sep='')
 
-    if talk:
-        if achieved:
-            s = ', '.join(sorted(achieved))
-        else:
-            s = 'nothing'
-        print("Produced: %s" % s)
+    print()
+
+    if cmdline_reportlines:
+        for line in cmdline_reportlines:
+            print(indent, line, sep='')
+        print()
+
+if talk > 1:
+
+    if exitcode == CONTINUE:
+
+        if talk > 1:
+            if achieved:
+                s = ', '.join(sorted(achieved))
+            else:
+                s = 'nothing'
+            print("Produced: %s" % s)
 
 
-if exitcode == CONTINUE:
-    if talk:
-        duration = ''
-        if time_started_at_unixtime and time_finished_at_unixtime:
-            duration = 'duration: %4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime)
-        print(time_finished_at, duration)
+    if exitcode == CONTINUE:
+        if talk > 1:
+            duration = ''
+            if time_started_at_unixtime and time_finished_at_unixtime:
+                duration = 'duration: %4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime)
+            print(time_finished_at, duration)
 
 # ==================================================
 # Set MILESTONE

@@ -165,7 +165,7 @@ if checksum_new:
 # talk
 # --------------------------------------------------
 
-if talk:
+if talk > 1:
     if rebuild_needed:
         print('rebuild_needed: yes')
     else:
