@@ -31,6 +31,8 @@ talk = milestones.get('talk', 1)
 time_finished_at_unixtime = time.time()
 time_finished_at = tct.logstamp_finegrained(unixtime=time_finished_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 
+age_message = ''
+
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
@@ -93,6 +95,11 @@ if talk:
           ',  took: ', '%4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime),
           ',  toolchain: ', facts_get('toolchain_name', 'TOOLCHAIN_NAME'),
           sep='')
+
+    age_seconds = time_finished_at_unixtime - checksum_time
+    age_message = "age %3.1f of %3.1f hours" % (age_seconds / 3600., checksum_ttl_seconds / 3600.)
+    age_message += ",  %3.1f of %3.1f days" % (age_seconds / 3600. / 24., checksum_ttl_seconds / 3600. / 24.)
+
     if rebuild_needed:
         cause = 'because of '
         if milestones.get('rebuild_needed_because_of_change'):
@@ -105,13 +112,10 @@ if talk:
             cause += 'config'
         else:
             cause += '???'
-        print(indent, 'REBUILD_NEEDED ', cause, sep='')
+        print(indent, 'REBUILD_NEEDED ', cause, ',  ', age_message, sep='')
         print(indent, 'OK: ', ', '.join(achieved), sep='')
     else:
-        age_seconds = time_finished_at_unixtime - checksum_time
-        age_hours_str = '%3.1f' % (float(age_seconds) / 3600.0 )
-        ttl_hours_str = '%3.1f' % (float(checksum_ttl_seconds) / 3600.0)
-        print(indent, 'still ok, age %s of %s hours' % (age_hours_str, ttl_hours_str), sep='')
+        print(indent, 'still ok, ', age_message, sep='')
 
     print()
 

@@ -139,7 +139,7 @@ if exitcode == CONTINUE:
         rebuild_needed = 0
 
     if checksum_new:
-        if checksum_new != checksum_old:
+        if checksum_new != checksum_old or rebuild_needed:
             with file(checksum_file, 'wb') as f2:
                 f2.write(checksum_new)
 
