@@ -15,14 +15,34 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
+
+TheProjectTodos = None
+TheProjectTodosMakefolders = []
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
     loglist.append((name, result))
     return result
 
@@ -30,39 +50,58 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     TheProject = milestones_get('TheProject')
     localization_locales = milestones_get('localization_locales')
-    buildsettings = milestones.get('buildsettings')
-    if not (TheProject and localization_locales and buildsettings):
+    buildsettings = milestones.get('buildsettings', {}).copy()
+    project = buildsettings.get('project')
+    version = buildsettings.get('version')
+    localization = buildsettings.get('localization')
+    if not (localization_locales):
+        loglist.append('Nothing to do - no localizations found')
         CONTINUE = -1
-        loglist.append('DON\'T DO ANYTHING: not all params given')
-    else:
-        loglist.append('PARAMS ARE OK')
+    if localization:
+        loglist.append("Nothing to do - we are building '%s' already" % localization)
+        CONTINUE = -1
+
+
+if exitcode == CONTINUE:
+    if not (TheProject and buildsettings and project and version):
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
 
 if exitcode == CONTINUE:
     TheProjectTodos = milestones.get('TheProjectTodos', TheProject + 'Todos')
-    TheProjectTodosMakefolders = []
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-import glob
-import shutil
-
 if exitcode == CONTINUE:
-    TheProject = milestones['TheProject']
     TheProjectLocalization = TheProject + 'Localization'
 
 if exitcode == CONTINUE:
     if not os.path.exists(TheProjectTodos):
         os.makedirs(TheProjectTodos)
 
-    project = buildsettings.get('project')
-    version = buildsettings.get('version')
-    if not (project and version and buildsettings):
-        exitcode = 2
-
 if exitcode == CONTINUE:
+
+    a, c = os.path.split(buildsettings['builddir'])
     for locale in localization_locales:
+
+        # builddir
+        b = locale.lower().replace('_', '-')
+        buildsettings['builddir'] = os.path.join(a, b, c)
+
+        # localization
+        buildsettings['localization'] = locale
+
+        # masterdoc
+        masterdoc_selected = tct.deepget(milestones, 'masterdoc_selected', locale, default='MASTERDOC')
+        masterdoc_selected_file = os.path.join(buildsettings['gitdir'], masterdoc_selected)
+        buildsettings['masterdoc'] = masterdoc_selected_file
+
         folder_name = 'make_%s_%s_%s' % (project, version, locale)
         TheProjectTodosMakefolder = os.path.join(TheProjectTodos, folder_name)
         TheProjectTodosMakefolders.append(TheProjectTodosMakefolder)
@@ -70,10 +109,7 @@ if exitcode == CONTINUE:
         f2path = TheProjectTodosMakefolderBuildsettingsSh = os.path.join(TheProjectTodosMakefolder, 'buildsettings.sh')
         with file(f2path, 'w') as f2:
             for k in sorted(buildsettings):
-                if k == 'localization':
-                    v = locale
-                else:
-                    v = buildsettings[k]
+                v = buildsettings[k]
                 f2.write('%s=%s\n' % (k.upper(), v))
 
 # ==================================================

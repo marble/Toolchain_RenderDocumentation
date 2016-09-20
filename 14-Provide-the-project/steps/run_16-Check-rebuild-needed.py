@@ -18,19 +18,22 @@ toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
+toolchain_name = facts['toolchain_name']
 exitcode = CONTINUE = 0
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-checksum_new = None
-talk = milestones.get('talk', 1)
 age = None
-
+checksum_new = None
 rebuild_needed = None
-
+rebuild_needed_because_of_age = None
+rebuild_needed_because_of_change = None
+rebuild_needed_run_command = None
+rebuild_needed_tctconfig = None
+talk = milestones.get('talk', 1)
+xeq_name_cnt = 0
 
 # ==================================================
 # Get and check required milestone(s)
@@ -78,13 +81,8 @@ import codecs
 import subprocess
 import time
 
-rebuild_needed = tct.deepget(facts, 'run_command', 'rebuild_needed')
-if rebuild_needed == {}:
-    rebuild_needed = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'rebuild_needed')
-if rebuild_needed == {}:
-    rebuild_needed = 0
-rebuild_needed = int(rebuild_needed)
-
+rebuild_needed_run_command = tct.deepget(facts, 'run_command', 'rebuild_needed', default=None)
+rebuild_needed_tctconfig = tct.deepget(facts, 'tctconfig', toolchain_name, 'rebuild_needed', default=None)
 
 def cmdline(cmd, cwd=None):
     if cwd is None:
@@ -123,43 +121,51 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
 
-    if checksum_time and not rebuild_needed:
+    if checksum_time:
         now = int(time.time())
         age = now - checksum_time
         if age > checksum_ttl_seconds:
-            rebuild_needed = 1
-            loglist.append('Rebuild is needed. Age %s is greater than checksum_ttl_seconds %s' % (age, checksum_ttl_seconds))
+            rebuild_needed_because_of_age = 1
 
-    if checksum_old and checksum_new and not rebuild_needed:
+    if checksum_new == checksum_old:
+        rebuild_needed_because_of_change = 0
+    else:
+        rebuild_needed_because_of_change = 1
+
+    if any([rebuild_needed_because_of_change, rebuild_needed_because_of_age,
+           rebuild_needed_run_command, rebuild_needed_tctconfig]):
+        rebuild_needed = 1
+    else:
+        rebuild_needed = 0
+
+    if checksum_new:
         if checksum_new != checksum_old:
-            rebuild_needed = 1
-            loglist.append('Rebuild is needed. Checksums are different.')
-
-    if not checksum_old:
-        rebuild_needed = 1
-        loglist.append('Rebuild is needed. There is no previous checksum.')
-
-    if not checksum_new and not rebuild_needed:
-        rebuild_needed = 1
-        loglist.append('Rebuild is needed. There is no new checksum (Strange!?.')
-
-    if checksum_file and checksum_new:
-        if checksum_old and checksum_old == checksum_new:
-            loglist.append('checksums are equal')
-        if rebuild_needed:
             with file(checksum_file, 'wb') as f2:
                 f2.write(checksum_new)
-            loglist.append('rebuild is needed, so new checksum is written')
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if rebuild_needed:
-    result['MILESTONES'].append({'rebuild_needed': rebuild_needed})
-if checksum_new:
+if checksum_new is not None:
     result['MILESTONES'].append({'checksum_new': checksum_new})
+
+if rebuild_needed is not None:
+    result['MILESTONES'].append({'rebuild_needed': rebuild_needed})
+
+if rebuild_needed_because_of_age is not None:
+    result['MILESTONES'].append({'rebuild_needed_because_of_age': rebuild_needed_because_of_age})
+
+if rebuild_needed_because_of_change is not None:
+    result['MILESTONES'].append({'rebuild_needed_because_of_change': rebuild_needed_because_of_change})
+
+if rebuild_needed_run_command is not None:
+    result['MILESTONES'].append({'rebuild_needed_run_command': rebuild_needed_run_command})
+
+if rebuild_needed_tctconfig is not None:
+    result['MILESTONES'].append({'rebuild_needed_tctconfig': rebuild_needed_tctconfig})
+
 
 # ==================================================
 # talk

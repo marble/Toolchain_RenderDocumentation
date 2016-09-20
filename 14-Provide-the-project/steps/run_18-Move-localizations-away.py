@@ -21,22 +21,58 @@ loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
-# Check required milestone(s)
+# define
 # --------------------------------------------------
+
+localization_folders = []
+localization_locales = []       # ['de_DE', 'en_US']
+localization_folder_names = []  # ['Localization.de_DE']
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+    toolchain_name = params_get('toolchain_name')
+    if not toolchain_name:
+        exitcode = 99
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
+
+# ==================================================
+# work
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     localization_has_localization = milestones_get('localization_has_localization')
     if not localization_has_localization:
+        loglist.append('nothing to do - no localization found')
         CONTINUE = -1
 
 if exitcode == CONTINUE:
-    localization_folders = []
-    localization_locales = [] # ['de_DE', 'en_US']
-    localization_folder_names = []  # ['Localization.de_DE']
+    localization = tct.deepget(milestones, 'buildsettings', 'localization', default=None)
+    if localization:
+        loglist.append("nothing to do - we do want to render localization '%s'" % localization)
+        CONTINUE = -1
 
 # ==================================================
 # work

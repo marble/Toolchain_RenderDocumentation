@@ -62,7 +62,8 @@ else:
 if exitcode == CONTINUE:
     workdir_home = params_get('workdir_home')
     masterdocs_initial = milestones.get('masterdocs_initial')
-    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir', default='GITDIR')
+    localization = tct.deepget(milestones, 'buildsettings', 'localization', default='LOCALIZATION')
     documentation_folder = milestones_get('documentation_folder')
 
 # ==================================================

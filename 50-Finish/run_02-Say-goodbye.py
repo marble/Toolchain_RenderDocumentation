@@ -50,11 +50,22 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+    checksum_ttl_seconds = milestones_get('checksum_ttl_seconds', 1)
+    if not (checksum_ttl_seconds):
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with params')
 
 # ==================================================
 # define
 # --------------------------------------------------
 
+checksum_time = milestones_get('checksum_time', 0)
 time_started_at = milestones_get('time_started_at', '')
 time_started_at_unixtime = milestones_get('time_started_at_unixtime', 0)
 rebuild_needed = milestones_get('rebuild_needed')
@@ -76,17 +87,31 @@ if talk:
     print(tct.deepget(milestones, 'buildsettings', 'project', default='PROJECT'),
           tct.deepget(milestones, 'buildsettings', 'version', default='VERSION'),
           os.path.split(milestones_get('makedir', default='MAKEDIR'))[1],
-          sep = ' // ', end = '\n')
+          sep = ' : ', end = '\n')
     print(indent,
           time_started_at,
           ',  took: ', '%4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime),
           ',  toolchain: ', facts_get('toolchain_name', 'TOOLCHAIN_NAME'),
           sep='')
     if rebuild_needed:
-        print(indent, 'REBUILD_NEEDED', sep='')
+        cause = 'because of '
+        if milestones.get('rebuild_needed_because_of_change'):
+            cause += 'change'
+        elif milestones.get('rebuild_needed_because_of_age'):
+            cause += 'age'
+        elif milestones.get('rebuild_needed_run_command'):
+            cause += 'parameter'
+        elif milestones.get('rebuild_needed_tctconfig'):
+            cause += 'config'
+        else:
+            cause += '???'
+        print(indent, 'REBUILD_NEEDED ', cause, sep='')
         print(indent, 'OK: ', ', '.join(achieved), sep='')
     else:
-        print(indent, 'build is not needed', sep='')
+        age_seconds = time_finished_at_unixtime - checksum_time
+        age_hours_str = '%3.1f' % (float(age_seconds) / 3600.0 )
+        ttl_hours_str = '%3.1f' % (float(checksum_ttl_seconds) / 3600.0)
+        print(indent, 'still ok, age %s of %s hours' % (age_hours_str, ttl_hours_str), sep='')
 
     print()
 

@@ -21,6 +21,20 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
+
+
+# masterdoc
+# t3docdir
+
+
+
+
+
+
+
+
+
 # ==================================================
 # define
 # --------------------------------------------------
