@@ -91,6 +91,10 @@ if talk:
           os.path.split(milestones_get('makedir', default='MAKEDIR'))[1],
           sep = ' : ', end = '\n')
     print(indent,
+          'makedir ',
+          milestones_get('makedir', default='MAKEDIR'),
+          sep = '', end = '\n')
+    print(indent,
           time_started_at,
           ',  took: ', '%4.2f seconds' % (time_finished_at_unixtime - time_started_at_unixtime),
           ',  toolchain: ', facts_get('toolchain_name', 'TOOLCHAIN_NAME'),
