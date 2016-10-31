@@ -33,6 +33,7 @@ url_of_webroot = ''
 buildsettings_builddir = ''
 lockfile_ttl_seconds = 1800
 checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
+gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/'
 
 email_user_do_not_send = 0
 email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com', 'kasperYYYY@typo3.org', 'info@typo3.org', ]
@@ -166,6 +167,9 @@ if webroot_abspath:
 
 if webroot_part_of_builddir:
     result['MILESTONES'].append({'webroot_part_of_builddir': webroot_part_of_builddir})
+
+if gitdir_must_start_with:
+    result['MILESTONES'].append({'gitdir_must_start_with': gitdir_must_start_with})
 
 
 # ==================================================

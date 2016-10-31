@@ -25,6 +25,7 @@ exitcode = CONTINUE = 0
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+do_clone_or_pull = None
 
 # ==================================================
 # Get and check required milestone(s)
@@ -49,12 +50,32 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     giturl = tct.deepget(milestones, 'buildsettings', 'giturl')
     gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    gitdir_must_start_with = milestones_get('gitdir_must_start_with')
     gitbranch = tct.deepget(milestones, 'buildsettings', 'gitbranch')
     loglist.append(('giturl', giturl))
     loglist.append(('gitdir', gitdir))
     loglist.append(('gitbranch', gitbranch))
     if not giturl:
         CONTINUE = -1
+
+if exitcode == CONTINUE:
+    if not gitdir:
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    if os.path.exists(gitdir):
+        do_clone_or_pull = 'pull'
+    else:
+        do_clone_or_pull = 'clone'
+
+if exitcode == CONTINUE:
+    if do_clone_or_pull == 'clone':
+        for item in gitdir_must_start_with.split(':'):
+            if gitdir.startswith(item):
+                break
+        else:
+            CONTINUE = -1
+            loglist.append(('gitdir', 'need to clone, but gitdir does not start with one of gitdir_must_start_with'))
 
 # ==================================================
 # work
@@ -87,15 +108,28 @@ if exitcode == CONTINUE:
             f2.write(err.decode('utf-8', 'replace'))
         return exitcode, cmd, out, err
 
+    if exitcode == CONTINUE:
+        if do_clone_or_pull == 'clone':
+            parent_dir = os.path.split(gitdir)[0]
+            if not os.path.exists(parent_dir):
+                os.makedirs(parent_dir, mode=0775)
+
+            exitcode, cmd, out, err = cmdline('git clone %s %s' % (giturl, gitdir))
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch, cwd=gitdir)
 
     if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
+        if do_clone_or_pull == 'pull':
 
-    if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git checkout --force ' + gitbranch, cwd=gitdir)
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
 
-    if exitcode == CONTINUE:
-        exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git checkout --force ' + gitbranch, cwd=gitdir)
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
 
 
 # ==================================================
@@ -103,7 +137,10 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    result['MILESTONES'].append({'git_pull_done': 1})
+    if do_clone_or_pull == 'clone':
+        result['MILESTONES'].append({'git_clone_done': 1})
+    if do_clone_or_pull == 'pull':
+        result['MILESTONES'].append({'git_pull_done': 1})
 
 # ==================================================
 # save result
