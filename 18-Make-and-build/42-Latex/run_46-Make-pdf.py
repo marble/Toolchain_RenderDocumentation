@@ -83,7 +83,7 @@ if exitcode == CONTINUE:
 
     exitcode, cmd, out, err = cmdline(cmd, cwd=latex_file_folder)
 
-    loglist.append([exitcode, cmd.decode('utf-8', errors='replace'), out.decode('utf-8', errors='replace'), err.decode('utf-8', errors='replace')])
+    loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])
 
     xeq_name_cnt += 1
     filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
