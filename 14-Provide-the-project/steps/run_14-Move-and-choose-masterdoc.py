@@ -20,14 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-masterdoc = None
-documentation_folder_created = None
-documentation_folder = None
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -48,7 +48,24 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+masterdoc = None
+documentation_folder_created = None
+documentation_folder = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
     TheProject = milestones_get('TheProject')
     masterdoc_candidates = milestones_get('masterdoc_candidates')
     if not (TheProject and masterdoc_candidates):
@@ -59,16 +76,21 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEMS with params')
 
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
+# ==================================================
+# work
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     workdir_home = params_get('workdir_home')
     masterdocs_initial = milestones.get('masterdocs_initial')
     gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir', default='GITDIR')
     localization = tct.deepget(milestones, 'buildsettings', 'localization', default='LOCALIZATION')
     documentation_folder = milestones_get('documentation_folder')
-
-# ==================================================
-# work
-# --------------------------------------------------
 
 import shutil
 
@@ -100,6 +122,7 @@ if exitcode == CONTINUE and masterdoc and candidate:
     elif masterdoc.lower().startswith('docs/'):
         # not yet implemented
         masterdoc = None
+
 
 # ==================================================
 # Set MILESTONE

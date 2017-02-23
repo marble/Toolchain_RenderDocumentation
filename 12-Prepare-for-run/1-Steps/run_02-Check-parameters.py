@@ -20,13 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-makedir_missing = ''
-makedir = ''
-talk = milestones.get('talk', 1)
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -46,6 +47,21 @@ def params_get(name, default=None):
     result = params.get(name, default)
     loglist.append((name, result))
     return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+makedir_missing = ''
+makedir = ''
+makedir_abspath = ''
+talk = milestones.get('talk', 1)
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -85,8 +101,10 @@ if exitcode == CONTINUE:
         exitcode = 2
 
 if exitcode == CONTINUE:
+    makedir_abspath = makedir
     if talk > 1:
         print('makedir:', os.path.split(makedir)[1])
+        print('makedir_abspath:', makedir_abspath)
 
 # ==================================================
 # Set MILESTONE
@@ -94,6 +112,9 @@ if exitcode == CONTINUE:
 
 if makedir:
     result['MILESTONES'].append({'makedir': makedir})
+
+if makedir_abspath:
+    result['MILESTONES'].append({'makedir_abspath': makedir_abspath})
 
 if makedir_missing:
     result['MILESTONES'].append({'makedir_missing': makedir_missing})

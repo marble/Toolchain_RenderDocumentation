@@ -1,0 +1,5 @@
+
+001-t3docs.html
+   This is file :file:`~/Repositories/github.com/TYPO3-Documentation/t3SphinxThemeRtdEmail/dist/t3docs.html`
+   after `npm run mail` has run in :file:`~/Repositories/github.com/TYPO3-Documentation/t3SphinxThemeRtdEmail`
+

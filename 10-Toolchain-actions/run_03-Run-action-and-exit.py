@@ -19,8 +19,17 @@ toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
+# --------------------------------------------------
+
+if 0:
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
 # --------------------------------------------------
 
 def milestones_get(name, default=None):
@@ -38,12 +47,18 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
 lockfiles_removed = []
 toolchain_actions = params_get('toolchain_actions', [])
 removed_dirs = []
 
+
 # ==================================================
-# Get and check required milestone(s)
+# Check params
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
@@ -69,6 +84,7 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
+
 # ==================================================
 # work
 # --------------------------------------------------
@@ -89,7 +105,7 @@ if exitcode == CONTINUE:
                         lockfile = os.path.join(top, fname)
                         os.remove(lockfile)
                         lockfiles_removed.append(lockfile)
-            exitcode = 99
+            exitcode = 90
             break
 
         elif action == 'clean':
@@ -101,19 +117,20 @@ if exitcode == CONTINUE:
                         if os.path.isdir(fpath):
                             shutil.rmtree(fpath)
                 dirs[:] = [] # stop recursion
-            exitcode = 99
+            exitcode = 90
             break
 
 
-# ==================================================run_01.py
+# ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == 99:
+if exitcode == 90:
     result['MILESTONES'].append({'FINAL_EXITCODE': 0})
 
 if lockfiles_removed:
     result['MILESTONES'].append({'lockfiles_removed': lockfiles_removed})
+
 
 # ==================================================
 # save result

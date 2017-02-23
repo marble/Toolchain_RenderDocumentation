@@ -11,20 +11,25 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
-toolname_pure = params["toolname_pure"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-xeq_name_cnt = 0
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -45,20 +50,38 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
     latex_file_folder = milestones_get('latex_file_folder')
     latex_file_tweaked = milestones_get('latex_file_tweaked')
     latex_make_file_tweaked  = milestones_get('latex_make_file_tweaked')
     toolname = params_get('toolname')
+
     if not (latex_file_folder and latex_file_tweaked and
             latex_make_file_tweaked and toolname):
-        exitcode = 2
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 # ==================================================
 # work
@@ -89,10 +112,13 @@ if exitcode == CONTINUE:
     filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
     filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
     filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
     with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
         f2.write(cmd.decode('utf-8', 'replace'))
+
     with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
+
     with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
 
@@ -105,7 +131,6 @@ if exitcode == CONTINUE:
     PROJECT_log_file = os.path.join(latex_file_folder, 'PROJECT.log')
     if os.path.exists(PROJECT_log_file):
         pdf_log_file = PROJECT_log_file
-
 
 
 # ==================================================
@@ -122,16 +147,20 @@ if exitcode == CONTINUE:
         'builds_successful': builds_successful,
     })
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
 
-import pprint
+if exitcode == CONTINUE:
 
-with codecs.open(resultfile + '.pprinted.txt', 'w', 'utf-8', 'replace') as f2:
-    pprint.pprint(result, f2)
+    import pprint
 
-tct.writejson(result, resultfile)
+    with codecs.open(resultfile + '.pprinted.txt', 'w', 'utf-8', 'replace') as f2:
+        pprint.pprint(result, f2)
+
+    tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

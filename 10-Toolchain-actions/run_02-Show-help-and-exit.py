@@ -20,17 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
-# ==================================================
-# define
-# --------------------------------------------------
-
-toolchain_usage = False
 
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-toolchain_usage = False
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -51,6 +48,18 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+toolchain_usage = False
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     toolchain_name = params_get('toolchain_name')
@@ -61,6 +70,7 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
+
 
 # ==================================================
 # work
@@ -89,6 +99,15 @@ Toolchain options:
   -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
   -c rebuild_needed 1            Force rebuild regardless of checksum
 
+  -c make_singlehtml 1           yes (default)
+  -c make_singlehtml 0           no
+
+  -c make_latex 1                yes! Make LaTeX and PDF(default)
+  -c make_latex 0                no
+
+  -c make_package 1              yes (default)
+  -c make_package 0              no
+
   -c talk 0                      run quietly
   -c talk 1                      talk just the minimum (default)
   -c talk 2                      talk more
@@ -103,7 +122,8 @@ Toolchain options:
 if exitcode == CONTINUE:
     if params.get('toolchain_help') or ('help' in params.get('toolchain_actions', [])):
         print(toolchain_usage)
-        exitcode = 99
+        exitcode = 90
+
 
 # ==================================================
 # Set MILESTONE

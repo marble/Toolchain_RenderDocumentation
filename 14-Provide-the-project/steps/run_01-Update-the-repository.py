@@ -20,12 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-do_clone_or_pull = None
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -45,6 +47,18 @@ def params_get(name, default=None):
     result = params.get(name, default)
     loglist.append((name, result))
     return result
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+do_clone_or_pull = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -77,6 +91,7 @@ if exitcode == CONTINUE:
             CONTINUE = -1
             loglist.append(('gitdir', 'need to clone, but gitdir does not start with one of gitdir_must_start_with'))
 
+
 # ==================================================
 # work
 # --------------------------------------------------
@@ -84,7 +99,6 @@ if exitcode == CONTINUE:
 import codecs
 import os
 import subprocess
-
 
 if exitcode == CONTINUE:
 
@@ -137,8 +151,10 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+
     if do_clone_or_pull == 'clone':
         result['MILESTONES'].append({'git_clone_done': 1})
+
     if do_clone_or_pull == 'pull':
         result['MILESTONES'].append({'git_pull_done': 1})
 

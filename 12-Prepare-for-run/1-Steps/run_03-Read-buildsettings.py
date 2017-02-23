@@ -18,13 +18,38 @@ toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# Check required milestone(s)
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     makedir = milestones_get('makedir')
@@ -32,6 +57,7 @@ if exitcode == CONTINUE:
     if not makedir:
         loglist.append('no makedir')
         exitcode == 2
+
 
 # ==================================================
 # work
@@ -100,6 +126,7 @@ if exitcode == CONTINUE:
     # LOCALIZATION=en_US
     # LOCALIZATION=fr_FR
     buildsettings['localization'] = buildsettings.get('localization', '')
+
 
 # ==================================================
 # Set MILESTONE

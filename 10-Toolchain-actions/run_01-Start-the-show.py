@@ -20,14 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
-# ==================================================
-# define
-# --------------------------------------------------
-import time
 
-talk = None
-time_started_at_unixtime = time.time()
-time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+# ==================================================
+# Make a copy of milestones for later inspection?
+# --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -48,6 +48,25 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+# use 0 or 1
+debug_always_make_milestones_snapshot = 1
+
+import time
+
+talk = None
+time_started_at_unixtime = time.time()
+time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     toolchain_name = params_get('toolchain_name')
@@ -58,6 +77,11 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
@@ -72,16 +96,25 @@ if exitcode == CONTINUE:
 if talk > 1:
     print('# --------', facts['toolchain_name'], time_started_at)
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if talk is not None:
     result['MILESTONES'].append({'talk': talk})
+
 if time_started_at:
     result['MILESTONES'].append({'time_started_at': time_started_at})
+
 if time_started_at_unixtime:
     result['MILESTONES'].append({'time_started_at_unixtime': time_started_at_unixtime})
+
+if 'always':
+    result['MILESTONES'].append({'debug_always_make_milestones_snapshot': debug_always_make_milestones_snapshot})
+
+
+
 
 # ==================================================
 # save result
@@ -89,7 +122,9 @@ if time_started_at_unixtime:
 
 tct.writejson(result, resultfile)
 
+
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
+
 sys.exit(exitcode)

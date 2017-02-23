@@ -11,36 +11,92 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# Check required milestone(s)
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+package_file_new_value = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = milestones_get(requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
     buildsettings = milestones_get('buildsettings', {})
     if not buildsettings:
         exitcode = 2
 
-if exitcode == CONTINUE:
     build_html = milestones_get('build_html')
     build_html_folder = milestones_get('build_html_folder')
     TheProject = milestones_get('TheProject')
     version = buildsettings.get('version')
 
-if exitcode == CONTINUE:
     if not (build_html and build_html_folder and TheProject and version):
         exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with required params')
+
+
+# ==================================================
+# work
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     build_singlehtml = milestones_get('build_singlehtml')
@@ -48,10 +104,6 @@ if exitcode == CONTINUE:
     build_latex = milestones_get('build_latex')
     build_pdf = milestones_get('build_pdf')
     package_file = milestones_get('package_file')
-
-# ==================================================
-# work
-# --------------------------------------------------
 
 if exitcode == CONTINUE:
 
@@ -102,6 +154,7 @@ if exitcode == CONTINUE:
         shutil.move(package_file, TheProjectResultPackages)
         package_file_new_value = os.path.join(TheProjectResultPackages, os.path.split(package_file)[1])
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -121,11 +174,13 @@ if exitcode == CONTINUE:
     if pdf_dest_folder:
         result['MILESTONES'].append({'pdf_dest_folder': pdf_dest_folder})
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

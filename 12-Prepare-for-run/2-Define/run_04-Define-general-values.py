@@ -21,10 +21,37 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define unconditionally
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+# ==================================================
+# define
+# --------------------------------------------------
 xeq_name_cnt = 0
 relative_part_of_builddir = ''
 webroot_part_of_builddir = ''
@@ -47,30 +74,19 @@ general_string_options = (
 )
 general_int_options = (
     ('email_user_do_not_send', 0),
-    ('email_user_send_extra_mail_to_admin', 0),
+    ('email_admin_send_extra_mail', 0),
+    ('make_singlehtml', 1),
+    ('make_latex', 1),
+    ('make_package', 1),
 )
 general_csvlist_options = (
     ('email_user_receivers_exlude_list', ''),
 )
 
+
 # ==================================================
-# Get and check required milestone(s)
+# Check params
 # --------------------------------------------------
-
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -136,6 +152,7 @@ if exitcode == CONTINUE:
             relative_part_of_builddir = buildsettings_builddir[len(webroot_part_of_builddir):]
         elif buildsettings_builddir.startswith(webroot_abspath):
             relative_part_of_builddir = buildsettings_builddir[len(webroot_abspath):]
+
 
 # ==================================================
 # Set MILESTONE

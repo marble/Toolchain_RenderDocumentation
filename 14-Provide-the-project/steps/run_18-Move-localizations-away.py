@@ -20,13 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-localization_folders = []
-localization_locales = []       # ['de_DE', 'en_US']
-localization_folder_names = []  # ['Localization.de_DE']
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -47,6 +48,19 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+# ==================================================
+# define
+# --------------------------------------------------
+
+localization_folders = []
+localization_locales = []       # ['de_DE', 'en_US']
+localization_folder_names = []  # ['Localization.de_DE']
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     toolchain_name = params_get('toolchain_name')
@@ -57,6 +71,12 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
 
 # ==================================================
 # work
@@ -73,6 +93,7 @@ if exitcode == CONTINUE:
     if localization:
         loglist.append("nothing to do - we do want to render localization '%s'" % localization)
         CONTINUE = -1
+
 
 # ==================================================
 # work
@@ -96,6 +117,7 @@ if exitcode == CONTINUE:
         localization_folder_name = os.path.split(folder)[1]
         localization_folder_names.append(localization_folder_name)
         localization_locales.append(localization_folder_name[len('Localization.'):])
+
 
 # ==================================================
 # Set MILESTONE

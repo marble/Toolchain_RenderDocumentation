@@ -11,13 +11,25 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
+
+
+# ==================================================
+# Make a copy of milestones for later inspection?
+# --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -28,12 +40,56 @@ def milestones_get(name, default=None):
     loglist.append((name, result))
     return result
 
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = milestones_get(requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
     build_html_folder = milestones_get('build_html_folder')
     build_singlehtml_folder = milestones_get('build_singlehtml_folder')
 
-if not (build_html_folder):
-    CONTINUE = -1
+    if not (build_html_folder):
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
@@ -121,6 +177,7 @@ if exitcode == CONTINUE:
                         f2.write(data)
                 loglist.append('%s, %s, %s' % (cnt, builder_logname, file_logname))
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -128,11 +185,13 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     result['MILESTONES'].append({'replace_static_in_html': True})
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

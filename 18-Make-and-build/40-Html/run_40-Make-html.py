@@ -11,19 +11,25 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-xeq_name_cnt = 0
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -44,6 +50,18 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     ready_for_build = milestones_get('ready_for_build')
@@ -59,6 +77,11 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
+
+# ==================================================
+# work
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     toolname_pure = params['toolname_pure']
     masterdoc = milestones.get('masterdoc')
@@ -68,12 +91,6 @@ if exitcode == CONTINUE:
     TheProjectBuild = milestones.get('TheProjectBuild')
     TheProjectMakedir = milestones.get('TheProjectMakedir')
     SPHINXBUILD = milestones.get('SPHINXBUILD')
-
-# ==================================================
-# work
-# --------------------------------------------------
-
-# CONTINUE = -1
 
 if exitcode == CONTINUE:
 
@@ -126,13 +143,15 @@ if exitcode == CONTINUE:
     filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
     filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
     filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
     with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
         f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
     with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
+
     with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
-
 
 
 # ==================================================
@@ -148,6 +167,7 @@ if exitcode == CONTINUE:
         'build_' + builder + '_folder': build_builder_folder,
     })
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
@@ -157,6 +177,5 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 
 sys.exit(exitcode)

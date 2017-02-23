@@ -20,12 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-TheProjectLog = None
-TheProjectBuild = None
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -46,8 +48,22 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+TheProjectLog = None
+TheProjectBuild = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
     TheProject = milestones_get('TheProject')
 
     if not (TheProject):
@@ -56,7 +72,12 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
@@ -72,14 +93,17 @@ if exitcode == CONTINUE:
     if not os.path.exists(TheProjectBuild):
         os.makedirs(TheProjectBuild)
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if TheProjectBuild:
     result['MILESTONES'].append({'TheProjectBuild': TheProjectBuild})
+
 if TheProjectLog:
     result['MILESTONES'].append({'TheProjectLog': TheProjectLog})
+
 
 # ==================================================
 # save result

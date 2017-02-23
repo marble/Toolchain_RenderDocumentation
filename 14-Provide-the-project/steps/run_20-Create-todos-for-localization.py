@@ -20,12 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-TheProjectTodos = None
-TheProjectTodosMakefolders = []
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -45,6 +47,19 @@ def params_get(name, default=None):
     result = params.get(name, default)
     loglist.append((name, result))
     return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+TheProjectTodos = None
+TheProjectTodosMakefolders = []
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -71,12 +86,17 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
-if exitcode == CONTINUE:
-    TheProjectTodos = milestones.get('TheProjectTodos', TheProject + 'Todos')
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
 # --------------------------------------------------
+
+if exitcode == CONTINUE:
+    TheProjectTodos = milestones.get('TheProjectTodos', TheProject + 'Todos')
 
 if exitcode == CONTINUE:
     TheProjectLocalization = TheProject + 'Localization'
@@ -112,6 +132,7 @@ if exitcode == CONTINUE:
                 v = buildsettings[k]
                 f2.write('%s=%s\n' % (k.upper(), v))
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -121,6 +142,7 @@ if exitcode == CONTINUE:
 
     if TheProjectTodosMakefolders:
         result['MILESTONES'].append({'TheProjectTodosMakefolders': TheProjectTodosMakefolders})
+
 
 # ==================================================
 # save result

@@ -20,6 +20,34 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
+# ==================================================
+# Make a copy of milestones for later inspection?
+# --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
 # ==================================================
 # define
 # --------------------------------------------------
@@ -42,24 +70,10 @@ masterdoc_selected = {}
 masterdocs_initial = {}
 xeq_name_cnt = 0
 
+
 # ==================================================
-# Get and check required milestone(s)
+# Check params
 # --------------------------------------------------
-
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -71,6 +85,11 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
@@ -116,6 +135,7 @@ if exitcode == CONTINUE:
                             masterdoc_selected[locale] = os.path.join(a[0], folder, a[1])
                             locale_masterdocs.append(masterdoc_selected[locale])
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -141,6 +161,7 @@ if masterdoc_selected:
     result['MILESTONES'].append({
         'masterdoc_selected': masterdoc_selected,
     })
+
 
 # ==================================================
 # save result

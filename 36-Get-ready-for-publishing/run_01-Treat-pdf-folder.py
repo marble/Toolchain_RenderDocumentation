@@ -1,0 +1,150 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# ==================================================
+# open
+# --------------------------------------------------
+
+from __future__ import print_function
+import os
+import tct
+import sys
+
+params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
+facts = tct.readjson(params['factsfile'])
+milestones = tct.readjson(params['milestonesfile'])
+resultfile = params['resultfile']
+result = tct.readjson(resultfile)
+loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
+exitcode = CONTINUE = 0
+
+
+# ==================================================
+# Make a copy of milestones for later inspection?
+# --------------------------------------------------
+
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
+
+# ==================================================
+# Get and check required milestone(s)
+# --------------------------------------------------
+
+def milestones_get(name, default=None):
+    result = milestones.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def facts_get(name, default=None):
+    result = facts.get(name, default)
+    loglist.append((name, result))
+    return result
+
+def params_get(name, default=None):
+    result = params.get(name, default)
+    loglist.append((name, result))
+    return result
+
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+pdf_dest_folder_htaccess = ''
+pdf_url_relpath = ''
+xeq_name_cnt = 0
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = milestones_get(requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
+    toolchain_name = params_get('toolchain_name')
+    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
+    loglist.append(('webroot_abspath', webroot_abspath))
+
+    # test
+    if not webroot_abspath:
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
+# ==================================================
+# work
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+    pdf_dest_file = milestones_get('pdf_dest_file')
+    pdf_dest_folder = milestones_get('pdf_dest_folder')
+    publish_dir_pdf_planned = milestones_get('publish_dir_pdf_planned')
+
+    if not (pdf_dest_file and pdf_dest_folder and publish_dir_pdf_planned):
+        loglist.append('nothing to do')
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    temp = os.path.join(publish_dir_pdf_planned, os.path.split(pdf_dest_file)[1])
+    pdf_url_relpath = temp[len(webroot_abspath):]
+    loglist.append(('pdf_url_relpath', pdf_url_relpath))
+
+    htaccess_contents = (
+        "RewriteEngine On\n"
+        "RewriteCond %{REQUEST_FILENAME} !-f\n"
+        "RewriteRule ^(.*)$ " + pdf_url_relpath + " [L,R=301]\n")
+
+    pdf_dest_folder_htaccess = os.path.join(pdf_dest_folder, '.htaccess')
+
+    with file(pdf_dest_folder_htaccess, 'w') as f2:
+        f2.write(htaccess_contents)
+
+
+# ==================================================
+# Set MILESTONE
+# --------------------------------------------------
+
+if pdf_url_relpath:
+    result['MILESTONES'].append({'pdf_dest_folder_htaccess': pdf_dest_folder_htaccess})
+
+if pdf_url_relpath:
+    result['MILESTONES'].append({'pdf_url_relpath': pdf_url_relpath})
+
+
+# ==================================================
+# save result
+# --------------------------------------------------
+
+tct.writejson(result, resultfile)
+
+
+# ==================================================
+# Return with proper exitcode
+# --------------------------------------------------
+
+sys.exit(exitcode)

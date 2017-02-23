@@ -21,19 +21,14 @@ loglist = result['loglist'] = result.get('loglist', [])
 toolchain_name = facts['toolchain_name']
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-age = None
-checksum_new = None
-rebuild_needed = None
-rebuild_needed_because_of_age = None
-rebuild_needed_because_of_change = None
-rebuild_needed_run_command = None
-rebuild_needed_tctconfig = None
-talk = milestones.get('talk', 1)
-xeq_name_cnt = 0
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -54,6 +49,25 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+# ==================================================
+# define
+# --------------------------------------------------
+
+age = None
+checksum_new = None
+rebuild_needed = None
+rebuild_needed_because_of_age = None
+rebuild_needed_because_of_change = None
+rebuild_needed_run_command = None
+rebuild_needed_tctconfig = None
+talk = milestones.get('talk', 1)
+xeq_name_cnt = 0
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     toolname = params_get('toolname')
@@ -67,15 +81,20 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
+# ==================================================
+# work
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     checksum_old = milestones_get('checksum_old', '')
     checksum_time = milestones_get('checksum_time')
     checksum_file = milestones_get('checksum_file')
     checksum_ttl_seconds = milestones_get('checksum_ttl_seconds', 86400)
-
-# ==================================================
-# work
-# --------------------------------------------------
 
 import codecs
 import subprocess
@@ -180,6 +199,7 @@ if talk > 1:
             agestr = ', age: %s seconds' % age
         print('rebuild_needed: no%s' % agestr)
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
@@ -191,4 +211,3 @@ tct.writejson(result, resultfile)
 # --------------------------------------------------
 
 sys.exit(exitcode)
-

@@ -11,20 +11,25 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-latex_contrib_typo3_folder = None
-copied_latex_resources = []
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -45,16 +50,40 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+copied_latex_resources = []
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
     toolchain_name = params_get('toolchain_name')
+
     if not toolchain_name:
         exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
+# ==================================================
+# work
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     build_latex = milestones_get('build_latex')
@@ -72,10 +101,6 @@ if exitcode == CONTINUE:
         loglist.append(('is not a directory', latex_contrib_typo3_folder))
         exitcode = 2
 
-# ==================================================
-# work
-# --------------------------------------------------
-
 if exitcode == CONTINUE:
 
     import shutil
@@ -91,6 +116,7 @@ if exitcode == CONTINUE:
             shutil.copy(srcpath, destpath)
         copied_latex_resources.append(thing)
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -100,11 +126,13 @@ if copied_latex_resources:
         'copied_latex_resources': copied_latex_resources,
     })
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

@@ -20,19 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-talk = milestones.get('talk', 1)
-lockfile = None
-lockfile_time = None
-lockfile_planned = None
-lockfile_planned_time = None
-lockfile_planned_age = None
-lockfile_removed = None
-lockfile_create_logstamp = None
-unixtime = None
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -52,6 +47,25 @@ def params_get(name, default=None):
     result = params.get(name, default)
     loglist.append((name, result))
     return result
+
+# ==================================================
+# define
+# --------------------------------------------------
+
+talk = milestones.get('talk', 1)
+lockfile = None
+lockfile_time = None
+lockfile_planned = None
+lockfile_planned_time = None
+lockfile_planned_age = None
+lockfile_removed = None
+lockfile_create_logstamp = None
+unixtime = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -75,6 +89,7 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with params')
+
 
 # ==================================================
 # work
@@ -118,22 +133,29 @@ if exitcode == CONTINUE:
     lockfile_time = int(os.path.getmtime(lockfile))
     loglist.append(('lockfile_time', lockfile_time))
 
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if lockfile:
     result['MILESTONES'].append({'lockfile': lockfile})
+
 if lockfile_time:
     result['MILESTONES'].append({'lockfile_time': lockfile_time})
+
 if lockfile_planned:
     result['MILESTONES'].append({'lockfile_planned': lockfile_planned})
+
 if lockfile_planned_age:
     result['MILESTONES'].append({'lockfile_planned_age': lockfile_planned_age})
+
 if lockfile_planned_time:
     result['MILESTONES'].append({'lockfile_planned_time': lockfile_planned_time})
+
 if lockfile_removed:
     result['MILESTONES'].append({'lockfile_removed':lockfile_removed})
+
 if lockfile_create_logstamp:
     result['MILESTONES'].append({'lockfile_create_logstamp': lockfile_create_logstamp})
 

@@ -20,13 +20,14 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+
 # ==================================================
-# define
+# Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-conf_py_file = None
-conf_py_masterfile = None
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
+    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+
 
 # ==================================================
 # Get and check required milestone(s)
@@ -47,10 +48,23 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+conf_py_file = None
+conf_py_masterfile = None
+
+
+# ==================================================
+# Check params
+# --------------------------------------------------
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    makedir = params_get('makedir')
-    if not makedir:
+    makedir_abspath = milestones_get('makedir_abspath')
+    if not makedir_abspath:
         CONTINUE = -1
 
 if exitcode == CONTINUE:
@@ -61,12 +75,13 @@ else:
 if exitcode == CONTINUE:
     conf_py_masterfile = milestones_get('conf_py_masterfile')
 
+
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    conf_py_file = os.path.join(makedir, 'conf.py')
+    conf_py_file = os.path.join(makedir_abspath, 'conf.py')
     loglist.append(('conf_py_file', conf_py_file))
     if os.path.exists(conf_py_file):
         loglist.append('Ok, conf.py exists')
@@ -87,6 +102,7 @@ if exitcode == CONTINUE:
         printerror = print
         printerror('conf.py is missing')
         exitcode = 2
+
 
 # ==================================================
 # Set MILESTONE
