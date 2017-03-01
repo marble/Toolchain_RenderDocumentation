@@ -66,7 +66,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     ready_for_build = milestones_get('ready_for_build')
     rebuild_needed = milestones_get('rebuild_needed')
-    included_files_check = milestones_get('included_files_check')
+    included_files_check_is_ok = milestones_get('included_files_check_is_ok')
     toolname = params_get('toolname')
     build_html = milestones_get('build_html')
     make_singlehtml = milestones_get('build_html')
@@ -79,7 +79,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not (make_singlehtml and ready_for_build and rebuild_needed and
-            toolname and included_files_check and build_html):
+            toolname and included_files_check_is_ok and build_html):
         loglist.append('requirements are not met')
         exitcode = 2
 

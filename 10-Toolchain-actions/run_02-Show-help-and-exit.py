@@ -112,7 +112,7 @@ Toolchain options:
   -c talk 1                      talk just the minimum (default)
   -c talk 2                      talk more
 
-  -c email_user_to  "email1,email2,..."  instead of real user
+  -c email_user_to_instead  "email1,email2,..."  instead of real user
   -c email_user_cc  "email1,email2,..."  additionally, publicly
   -c email_user_bcc "email1,email2,..."  additionally, secretly
   -c email_user_send_to_admin_too  1     like it says

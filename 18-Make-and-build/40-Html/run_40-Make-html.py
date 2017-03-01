@@ -66,10 +66,10 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     ready_for_build = milestones_get('ready_for_build')
     rebuild_needed = milestones_get('rebuild_needed')
-    included_files_check = milestones_get('included_files_check')
+    included_files_check_is_ok = milestones_get('included_files_check_is_ok')
     toolname = params_get('toolname')
     if not (ready_for_build and rebuild_needed and
-            toolname and included_files_check):
+            toolname and included_files_check_is_ok):
         exitcode = 2
 
 if exitcode == CONTINUE:

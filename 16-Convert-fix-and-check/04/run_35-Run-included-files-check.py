@@ -7,16 +7,19 @@
 
 from __future__ import print_function
 import os
-import tct
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
 
@@ -52,7 +55,8 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-pass
+included_files_check_is_ok = 0
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -65,16 +69,21 @@ if exitcode == CONTINUE:
     documentation_folder = milestones_get('documentation_folder')
     masterdoc = milestones_get('masterdoc')
     TheProjectLog = milestones_get('TheProjectLog')
-    workdir = params.get('workdir')
-    loglist.append(('workdir', workdir))
+    toolfolderabspath = params_get('toolfolderabspath')
+    workdir = params_get('workdir')
 
-    if not (documentation_folder and masterdoc and TheProjectLog and workdir):
-        CONTINUE = -1
+    if not (documentation_folder and masterdoc and TheProjectLog and
+            toolfolderabspath and workdir):
+        exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with required params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 
 # ==================================================
@@ -95,24 +104,41 @@ if exitcode == CONTINUE:
         return exitcode, cmd, out, err
 
 if exitcode == CONTINUE:
-    cmd = 'check_include_files.py --verbose ' + documentation_folder
-    this_exitcode, cmd, out, err = cmdline(cmd)
-    loglist.append('exitcode of check_include_files: %s' % this_exitcode)
+    cmdlist = [
+        facts['python_exe_abspath'],
+        os.path.join(toolfolderabspath, 'check_include_files.py'),
+        '--verbose',
+        documentation_folder,
+    ]
+    cmd = ' '.join(cmdlist)
+    cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
 
-    with codecs.open(os.path.join(workdir, 'cmd-01-stdout.txt'), 'w', 'utf-8') as f2:
-        f2.write(out)
+    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+    if exitcode == 0:
+        included_files_check_is_ok = 1
 
-    with codecs.open(os.path.join(workdir, 'cmd-01-stderr.txt'), 'w', 'utf-8') as f2:
-        f2.write(err)
+    loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
+    xeq_name_cnt += 1
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+        f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+        f2.write(out.decode('utf-8', 'replace'))
+
+    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+        f2.write(err.decode('utf-8', 'replace'))
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    if this_exitcode == 0:
-        result['MILESTONES'].append('included_files_check')
+if included_files_check_is_ok:
+    result['MILESTONES'].append({'included_files_check_is_ok': included_files_check_is_ok})
 
 
 # ==================================================

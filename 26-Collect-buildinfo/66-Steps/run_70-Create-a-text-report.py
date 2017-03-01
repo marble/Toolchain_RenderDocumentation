@@ -216,14 +216,14 @@ if exitcode == CONTINUE:
 
             """)
 
-    emails_user = milestones.get('emails_user')
-    if not email_notify_about_new_build and emails_user:
+    emails_user_from_project = milestones.get('emails_user_from_project')
+    if not email_notify_about_new_build and emails_user_from_project:
         tell_owner("""\
             Therefore I looked around for email addresses in the project.
             So I'm sending this report to:
 
             """)
-        for email_address in emails_user:
+        for email_address in emails_user_from_project:
             tell_owner("%s\n" % email_address)
         tell_owner('\n')
 

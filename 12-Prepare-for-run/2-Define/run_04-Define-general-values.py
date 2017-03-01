@@ -68,7 +68,7 @@ email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3
 general_string_options = (
     ('conf_py_masterfile', ''),
     ('email_admin', 'martin.bless@gmail.com'),
-    ('email_user_to', ''),
+    ('email_user_to_instead', ''),
     ('email_user_cc', ''),
     ('email_user_bcc', ''),
 )

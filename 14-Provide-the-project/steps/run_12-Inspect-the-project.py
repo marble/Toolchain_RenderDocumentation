@@ -60,6 +60,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     TheProject = milestones_get('TheProject')
+    email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list', [])
     if not (TheProject):
         exitcode = 2
 
@@ -141,13 +142,15 @@ if exitcode == CONTINUE:
             # project_version
 
 if exitcode == CONTINUE:
-    emails_user = []
+    excluded_emails_lowercase = [e.lower() for e in email_user_receivers_exlude_list]
+    emails_user_from_project = []
     if emails_found_in_projects:
         for filename, emails in emails_found_in_projects:
             for email in emails:
-                if email not in ['documentation@typo3.org']:
-                    if email not in emails_user:
-                        emails_user.append(email)
+                email_lower = email.lower()
+                if email_lower not in excluded_emails_lowercase:
+                    if email_lower not in emails_user_from_project:
+                        emails_user_from_project.append(email_lower)
 
 
 if exitcode == CONTINUE:
@@ -203,8 +206,8 @@ if exitcode == CONTINUE:
     if composerjson:
         result['MILESTONES'].append({'NAMING': NAMING})
 
-    if emails_user:
-        result['MILESTONES'].append({'emails_user': emails_user})
+    if emails_user_from_project:
+        result['MILESTONES'].append({'emails_user_from_project': emails_user_from_project})
 
 
 # ==================================================

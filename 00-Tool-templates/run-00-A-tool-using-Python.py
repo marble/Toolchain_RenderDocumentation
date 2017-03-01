@@ -99,6 +99,59 @@ if exitcode == CONTINUE:
     pass
 
 
+# =========================================================
+# work Example of how to start a subprocess with perfect logging
+# ---------------------------------------------------------
+
+if exitcode == CONTINUE:
+
+    import codecs
+    import subprocess
+
+    def cmdline(cmd, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        out, err = process.communicate()
+        exitcode = process.returncode
+        return exitcode, cmd, out, err
+
+if exitcode == CONTINUE:
+    builder = 'dummy'
+    warnings_file = 'dummy.txt'
+    sourcedir = 'dummy'
+    outdir = 'dummy'
+    cmdlist = [
+        'sphinx-build-dummy',
+        '-a',                  # write all files; default is to only write new and changed files
+        '-b ' + builder,       # builder to use; default is html
+        '-E',                  # don't use a saved environment, always read all files
+        '-w ' + warnings_file, # write warnings (and errors) to given file
+        sourcedir,
+        outdir
+    ]
+    cmd = ' '.join(cmdlist)
+    cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+
+    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+
+    loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
+    xeq_name_cnt += 1
+    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+        f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+        f2.write(out.decode('utf-8', 'replace'))
+
+    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+        f2.write(err.decode('utf-8', 'replace'))
+
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------

@@ -186,13 +186,14 @@ def processRstFile(filepath, parents=None, recurse=1):
     return ok, parents
 
 def main(startdir):
+    parents = None
     ok = True
     for path, dirs, files in os.walk(startdir):
         dirs.sort()
         files.sort()
         for fname in files:
             stem, ext = os.path.splitext(fname)
-            if ext == '.rst':
+            if ext.lower() == '.rst':
                 f1path = ospj(path, fname)
                 ok, parents = processRstFile(f1path)
             if not ok:

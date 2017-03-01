@@ -67,7 +67,7 @@ if exitcode == CONTINUE:
     requirements = [
         'ready_for_build',
         'rebuild_needed',
-        'included_files_check',
+        'included_files_check_is_ok',
     ]
 
     for requirement in requirements:

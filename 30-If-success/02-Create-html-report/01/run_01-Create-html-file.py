@@ -57,14 +57,22 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
+# Set to true to generate an email with all textblocks for the purpose of reviewing
+debugkeepAllBlocks = 0
+
+HKV = html_key_values = {}
+htmlesc = lambda x: cgi.escape(x, True)
 htmlmail_template_file = None
 milestone_abc = None
 talk = milestones.get('talk', 1)
-xeq_name_cnt = 0
-HKV = html_key_values = {}
+TheProjectLogHtmlmail = ''
+TheProjectLogHtmlmailMessageHtml = ''
 TheProjectResultBuildinfoMessage = ''
-
-htmlesc = lambda x: cgi.escape(x, True)
+TheProjectResultHtmlmailMessageHtml = ''
+TheProjectLogHtmlmailMessageMdTxt = ''
+TheProjectLogHtmlmailMessageRstTxt = ''
+TheProjectLogHtmlmailMessageTxt = ''
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -86,12 +94,14 @@ if exitcode == CONTINUE:
 
     # fetch
     create_buildinfo = milestones_get('create_buildinfo')
+    TheProjectLog = milestones_get('TheProjectLog')
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     toolchain_name = params_get('toolchain_name')
 
     # test
     if not (
         create_buildinfo and
+        TheProjectLog and
         TheProjectResultBuildinfo and
         toolchain_name):
 
@@ -101,7 +111,8 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
     if not TheProjectResultBuildinfoMessage:
-        TheProjectResultBuildinfoMessage = os.path.join(TheProjectResultBuildinfo, 'DearProjectOwner.html')
+        TheProjectResultBuildinfoMessage = os.path.join(TheProjectResultBuildinfo, 'DearProjectOwner')
+    TheProjectResultHtmlmailMessageHtml = TheProjectResultBuildinfoMessage + '.html'
 
     toolfolderabspath = params_get('toolfolderabspath')
     if not toolfolderabspath:
@@ -121,6 +132,13 @@ if CONTINUE != 0:
 # ==================================================
 # work
 # --------------------------------------------------
+
+if exitcode == CONTINUE:
+    TheProjectLogHtmlmail = milestones_get('TheProjectLogHtmlmail')
+    if not TheProjectLogHtmlmail:
+        TheProjectLogHtmlmail = os.path.join(TheProjectLog, 'htmlmail')
+    if not os.path.exists(TheProjectLogHtmlmail):
+        os.mkdir(TheProjectLogHtmlmail)
 
 if exitcode == CONTINUE:
     htmlmail_template_file = os.path.join(toolfolderabspath, 'templates', 't3docs.html')
@@ -144,7 +162,7 @@ if exitcode == CONTINUE:
 
     email_notify_about_new_build = milestones_get('email_notify_about_new_build', [])
     email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off', 0)
-    emails_user = milestones_get('emails_user')
+    emails_user_from_project = milestones_get('emails_user_from_project')
 
 # ==================================================
 # work
@@ -153,7 +171,7 @@ if exitcode == CONTINUE:
 def do_the_work():
 
     global email_notify_about_new_build
-    global emails_user
+    global emails_user_from_project
 
     from bs4 import BeautifulSoup
     import codecs
@@ -181,8 +199,6 @@ def do_the_work():
         return result
 
 
-    # Set to true to generate an email with all textblocks for the purpose of reviewing
-    keepAllBlocks = True
 
 
     # gather information
@@ -322,9 +338,9 @@ def do_the_work():
     HKV['receivers_from_settings_cfg'] = v
 
     v = 'None'
-    if emails_user:
+    if emails_user_from_project:
         temp = []
-        for email in emails_user:
+        for email in emails_user_from_project:
             attrs = a.attrs.copy()
             attrs['href'] = 'mailto:' + email
             atag = soup.new_tag('a', **attrs)
@@ -342,17 +358,17 @@ def do_the_work():
         # We have created a Settings.cfg from a Yaml file
         pass
     else:
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idCalloutSettingsFile = decompose_these(idCalloutSettingsFile)
 
     warnings_file_size = milestones_get('warnings_file_size')
     if warnings_file_size == 0:
         # Congratulations!
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idCalloutThereAreWarnings = decompose_these(idCalloutThereAreWarnings)
     else:
         # Sphinx shows errors
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idCalloutCongratulations = decompose_these(idCalloutCongratulations)
 
     # explicitly turn off by config or commandline
@@ -365,28 +381,28 @@ def do_the_work():
 
     if not email_user_notify_is_turned_off: # and email_notify_about_new_build: # ?
         # We really send to receivers we found in settings
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idSpanISawANo = decompose_these(idSpanISawANo)
     else:
         # We really found a 'no' in the settings
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idSpanISendToReceivers = decompose_these(idSpanISendToReceivers)
 
     email_user_notify_setting_exists = milestones_get('email_user_notify_setting_exists')
     if email_user_notify_setting_exists:
         # We found an entry about emailing in the settings
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idFoundNoSettingAboutEmailing, idSendToProjectEmails = decompose_these(idFoundNoSettingAboutEmailing, idSendToProjectEmails)
     else:
         # We did not find an entry about emailing in the settings
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             decompose_these(idFoundSettingAboutEmailing)
 
-    emails_user = milestones_get('emails_user')
-    if idSendToProjectEmails and not email_user_do_not_send and not email_notify_about_new_build and emails_user:
+    emails_user_from_project = milestones_get('emails_user_from_project')
+    if idSendToProjectEmails and not email_user_do_not_send and not email_notify_about_new_build and emails_user_from_project:
         pass
     else:
-        if not keepAllBlocks:
+        if not debugkeepAllBlocks:
             idSendToProjectEmails = decompose_these(idSendToProjectEmails)
 
 
@@ -462,7 +478,7 @@ if exitcode == CONTINUE:
     do_the_work()
 
 
-if exitcode == CONTINUE:
+if 0:
     # atm there may be a DearProjectOwner.txt as well. Rename that file
     # so it is flagged as disabled
     TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
@@ -474,18 +490,33 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     src = 'DearProjectOwner-prettified.html'
-    TheProjectResultBuildinfoMessage = os.path.join(TheProjectResultBuildinfo, 'DearProjectOwner.html')
-    shutil.copy(src, TheProjectResultBuildinfoMessage)
+    TheProjectLogHtmlmailMessageHtml = TheProjectLogHtmlmail + '/DearProjectOwner.html'
+    shutil.copy(src, TheProjectLogHtmlmailMessageHtml)
+
+if exitcode == CONTINUE:
+    src = 'DearProjectOwner-prettified.html'
+    TheProjectResultBuildinfoMessage = os.path.join(TheProjectResultBuildinfo, 'DearProjectOwner')
+    TheProjectResultBuildinfoMessageHtml = TheProjectResultBuildinfoMessage + '.html'
+    shutil.copy(TheProjectLogHtmlmailMessageHtml, TheProjectResultBuildinfoMessageHtml)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if 'always!':
-    result['MILESTONES'].append({'TheProjectResultBuildinfoMessage': TheProjectResultBuildinfoMessage})
+    result['MILESTONES'].append({
+        'TheProjectResultBuildinfoMessage': TheProjectResultBuildinfoMessage,
+        'TheProjectResultHtmlmailMessageHtml': TheProjectResultHtmlmailMessageHtml,
+    })
 
 if html_key_values:
     result['MILESTONES'].append({'html_key_values': html_key_values})
+
+if TheProjectLogHtmlmail: result['MILESTONES'].append(
+    {'TheProjectLogHtmlmail': TheProjectLogHtmlmail})
+
+if TheProjectLogHtmlmailMessageHtml: result['MILESTONES'].append(
+    {'TheProjectLogHtmlmailMessageHtml': TheProjectLogHtmlmailMessageHtml})
 
 
 
