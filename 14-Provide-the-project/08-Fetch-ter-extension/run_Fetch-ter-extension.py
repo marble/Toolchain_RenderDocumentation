@@ -43,8 +43,17 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+buildsettings = {}
+extension_file = ''
+extension_file_abspath = ''
+extensions_rootfolder = None
+gitbranch = ''
+gitdir = ''
+gitdir_unpacked = ''
+giturl = ''
+ter_extkey = ''
+ter_extversion = ''
 xeq_name_cnt = 0
-milestone_abc = None
 
 
 # ==================================================
@@ -65,11 +74,31 @@ if exitcode == CONTINUE:
             exitcode = 2
 
     # fetch
-    toolchain_name = lookup(params, 'toolchain_name')
+    buildsettings = lookup(milestones, 'buildsettings')
+    if not buildsettings:
+        exitcode = 2
+
+if exitcode == CONTINUE:
+
+    # fetch #1
+    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
+    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    giturl = lookup(milestones, 'buildsettings', 'giturl')
+    ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
+    ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
+    toolchain_name = lookup(facts, 'toolchain_name')
+
+    # fetch #2
+    extensions_rootfolder = lookup(facts, 'tctconfig', toolchain_name, 'extensions_rootfolder')
 
     # test
-    if not toolchain_name:
-        exitcode = 99
+    if not (ter_extkey and ter_extversion):
+        loglist.append('For a TER extension we need the key and the version.')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    if not gitdir and not extensions_rootfolder:
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -85,19 +114,12 @@ if CONTINUE != 0:
 # work
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    pass
-
-
-# =========================================================
-# work Example of how to start a subprocess with perfect logging
-# ---------------------------------------------------------
+import codecs
+import os
+import shutil
+import subprocess
 
 if exitcode == CONTINUE:
-
-    import codecs
-    import os
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
@@ -131,28 +153,61 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    builder = 'dummy'
-    warnings_file = 'dummy.txt'
-    sourcedir = 'dummy'
-    outdir = 'dummy'
-    cmdlist = [
-        'sphinx-build-dummy',
-        '-a',                  # write all files; default is to only write new and changed files
-        '-b ' + builder,       # builder to use; default is html
-        '-E',                  # don't use a saved environment, always read all files
-        '-w ' + warnings_file, # write warnings (and errors) to given file
-        sourcedir,
-        outdir
-    ]
+    foldername = ter_extkey + '_' + ter_extversion
+    foldername = foldername.replace('*', '').replace('?', '')
+    if not foldername:
+        loglist.append('illegal extension specification')
+        exitcode = 2
 
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist)
+if exitcode == CONTINUE:
+    gitdir = os.path.join(extensions_rootfolder, foldername)
+    if os.path.exists(gitdir):
+        shutil.rmtree(gitdir)
+    gitdir_unpacked = os.path.join(gitdir, 'unpacked')
+    os.makedirs(gitdir_unpacked)
+
+if exitcode == CONTINUE:
+    exitcode, cmd, out, err = execute_cmdlist([
+        't3xutils.phar', 'fetch', '--use-curl', ter_extkey, ter_extversion, gitdir])
+
+if exitcode == CONTINUE:
+    extension_file = ''
+    for name in os.listdir(gitdir):
+        if name.startswith(ter_extkey):
+            extension_file = name
+            break
+
+    if extension_file:
+        extension_file_abspath = os.path.join(gitdir, extension_file)
+
+    if not extension_file_abspath:
+        exit = 2
+
+if exitcode == CONTINUE:
+    exitcode, cmd, out, err = execute_cmdlist([
+        't3xutils.phar', 'extract', extension_file_abspath, gitdir_unpacked])
+
+if exitcode == CONTINUE:
+    buildsettings['gitdir'] = gitdir_unpacked
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if milestone_abc:
-    result['MILESTONES'].append({'milestone_abc': milestone_abc})
+
+D = {}
+
+if extension_file:
+    D['extension_file'] = extension_file
+
+if extension_file_abspath:
+    D['extension_file_abspath'] = extension_file_abspath
+
+if buildsettings:
+    D['buildsettings'] = buildsettings
+
+if D:
+    result['MILESTONES'].append(D)
 
 
 # ==================================================
@@ -164,5 +219,6 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
+
 
 sys.exit(exitcode)

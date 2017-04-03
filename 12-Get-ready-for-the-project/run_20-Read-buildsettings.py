@@ -28,23 +28,47 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
 
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
+# ==================================================
+# define
+# --------------------------------------------------
+
+# TER_EXTENSION = 0 | 1
+# TER_EXTKEY = tt_news
+# TER_EXTVERSION = 1.2.3
+# LOCALIZATION=
+# LOCALIZATION=en_US
+# LOCALIZATION=fr_FR
+
+buildsettings = {}
+buildsettings_default = {
+    "builddir": "",
+    "gitbranch": "",
+    "gitdir": "",
+    "giturl": "",
+    "localization": "",
+    "logdir": "",
+    "masterdoc": "",
+    "package_key": "",
+    "package_language": "default",
+    "package_zip": 0,
+    "project": "",
+    "t3docdir": "",
+    "ter_extension": 0,
+    "ter_extkey": "",
+    "ter_extversion": "",
+    "version": ""
+  }
+buildsettings_initial = {}
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -52,11 +76,33 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    makedir = milestones_get('makedir')
+    loglist.append('CHECK PARAMS')
 
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = lookup(milestones, requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
+    makedir = lookup(milestones, 'makedir')
+
+    # test
     if not makedir:
-        loglist.append('no makedir')
-        exitcode == 2
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEM with required params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 
 # ==================================================
@@ -87,19 +133,29 @@ if exitcode == CONTINUE:
     config = ConfigParser.RawConfigParser()
     f1path = os.path.join(makedir, 'buildsettings.sh')
     if not os.path.exists(f1path):
-        errormsg = "Error: file not found ('%s')" % f1path
-        loglist.append(errormsg)
-        exitcode = 2
+        loglist.append(('buildsettings.sh not found', f1path))
+        f1path = None
 
 if exitcode == CONTINUE:
-    with codecs.open(f1path, 'r', 'utf-8') as f1:
-        config.readfp(WithSection(f1, section))
+    if f1path:
+        with codecs.open(f1path, 'r', 'utf-8') as f1:
+            config.readfp(WithSection(f1, section))
 
-    buildsettings = {}
-    for option in config.options(section):
-        buildsettings[option] = config.get(section, option)
+        for option in config.options(section):
+            buildsettings_initial[option] = config.get(section, option)
 
-if exitcode == CONTINUE:
+    for k in buildsettings_initial.keys():
+        # copy what we have found in the file buildsettings.sh
+        buildsettings[k] = buildsettings_initial[k]
+
+    # all keys
+    for k in buildsettings_default.keys():
+        # set on the commandline?
+        if not params.get(k) is None:
+            buildsettings[k] = params[k]
+        elif buildsettings.get(k) is None:
+            buildsettings[k] = buildsettings_default[k]
+
     # A fix: do some interpolation
 
     needle = '$GITDIR/'
@@ -107,33 +163,29 @@ if exitcode == CONTINUE:
     t3docdir = buildsettings.get('t3docdir', '')
     if needle in t3docdir:
         buildsettings['t3docdir'] = t3docdir.replace(needle, gitdir)
-        loglist.append('we replaced $GITDIR in t3docdir')
 
     needle = '$VERSION'
     version = buildsettings.get('version', '')
     builddir = buildsettings.get('builddir', '')
     if needle in builddir:
         buildsettings['builddir'] = builddir.replace(needle, version)
-        loglist.append('we replaced $VERSION in builddir')
-
-if exitcode == CONTINUE:
-
-    # garantee these settings
-    # TER_EXTENSION = 0 | 1
-    buildsettings['ter_extension'] = buildsettings.get('ter_extension', 0)
-
-    # LOCALIZATION=
-    # LOCALIZATION=en_US
-    # LOCALIZATION=fr_FR
-    buildsettings['localization'] = buildsettings.get('localization', '')
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if buildsettings:
+    # we modifiy the values of 'buildsettings' in the course of the process
     result['MILESTONES'].append({'buildsettings': buildsettings})
+
+if buildsettings_initial:
+    # what we have read
+    result['MILESTONES'].append({'buildsettings_initial': buildsettings_initial})
+
+if buildsettings_default:
+    # defaults we may have supplemented
+    result['MILESTONES'].append({'buildsettings_default': buildsettings_default})
 
 # ==================================================
 # save result

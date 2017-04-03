@@ -10,12 +10,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
 
@@ -51,6 +54,26 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
+# first
+checksum_file  = None
+checksum_old  = None
+checksum_time = None
+checksum_time_decoded = None
+composerjson = None
+documentation_folder_exists = None
+email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list', [])
+emails_found_in_projects = None
+emails_user_from_project = None
+has_settingscfg = None
+has_settingsyml = None
+localization_has_localization = None
+NAMING = milestones.get('NAMING', {})
+settingscfg_file = None
+settingsyml_file = None
+
+# second
+NAMING['meta'] = NAMING.get('meta', 'Here we keep names and values that are looking good')
+
 
 # ==================================================
 # Check params
@@ -59,30 +82,38 @@ def params_get(name, default=None):
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = milestones_get(requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
     TheProject = milestones_get('TheProject')
-    email_user_receivers_exlude_list = milestones_get('email_user_receivers_exlude_list', [])
+
+    # test
     if not (TheProject):
         exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('PROBLEM with required params')
 
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
     loglist.append('NOTHING to do')
+
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    NAMING = milestones.get('NAMING', {})
-    NAMING['meta'] = NAMING.get('meta', 'Here we keep names and values that are looking good')
-
-if exitcode == CONTINUE:
-
     import datetime
     import glob
     import re
@@ -156,15 +187,16 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     NAMING['project_name'] = milestones.get('buildsettings', {}).get('project', 'PROJECT')
     NAMING['project_version'] = milestones.get('buildsettings', {}).get('version', 'VERSION')
-
     NAMING['project_language'] = milestones.get('buildsettings', {}).get('package_language', 'default').lower()
     NAMING['pdf_name'] = ('manual.' +
         NAMING['project_name'] + '-' +
-        NAMING['project_version'] + '.pdf')
+        NAMING['project_version'] + '.pdf'
+    )
     NAMING['package_name'] = (
         NAMING['project_name'] + '-' +
         NAMING['project_version'] + '-' +
-        NAMING['project_language'] + '.zip')
+        NAMING['project_language'] + '.zip'
+    )
 
 
 # ==================================================
@@ -174,40 +206,45 @@ if exitcode == CONTINUE:
 def decode_timestamp(unixtime):
     return datetime.datetime.fromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M')
 
-if exitcode == CONTINUE:
-    if documentation_folder_exists:
-        result['MILESTONES'].append({'documentation_folder': documentation_folder})
+D = {}
 
-    if has_settingscfg:
-        result['MILESTONES'].append({'settingscfg_file': settingscfg_file})
+if documentation_folder_exists:
+    D['documentation_folder'] = documentation_folder
 
-    if has_settingsyml:
-        result['MILESTONES'].append({'settingsyml_file': settingsyml_file})
+if has_settingscfg:
+    D['has_settingscfg'] = has_settingscfg
+    D['settingscfg_file'] = settingscfg_file
 
-    if localization_has_localization:
-        result['MILESTONES'].append({'localization_has_localization': localization_has_localization})
+if has_settingsyml:
+    D['has_settingsyml'] = has_settingsyml
+    D['settingsyml_file'] = settingsyml_file
 
-    if checksum_file:
-        result['MILESTONES'].append({'checksum_file': checksum_file})
+if localization_has_localization:
+    D['localization_has_localization'] = localization_has_localization
 
-    if checksum_old:
-        result['MILESTONES'].append({'checksum_old': checksum_old})
+if checksum_file:
+    D['checksum_file'] = checksum_file
 
-    if checksum_time:
-        result['MILESTONES'].append({'checksum_time': checksum_time,
-                                     'checksum_time_decoded': decode_timestamp(checksum_time)})
+if checksum_old:
+    D['checksum_old'] = checksum_old
 
-    if emails_found_in_projects:
-        result['MILESTONES'].append({'emails_found_in_projects': emails_found_in_projects})
+if checksum_time:
+    D['checksum_time'] = checksum_time
+    D['checksum_time_decoded'] = decode_timestamp(checksum_time)
 
-    if composerjson:
-        result['MILESTONES'].append({'composerjson': composerjson})
+if emails_found_in_projects:
+    D['emails_found_in_projects'] = emails_found_in_projects
 
-    if composerjson:
-        result['MILESTONES'].append({'NAMING': NAMING})
+if composerjson:
+    D['composerjson'] = composerjson
 
-    if emails_user_from_project:
-        result['MILESTONES'].append({'emails_user_from_project': emails_user_from_project})
+if 'always':
+    D['NAMING'] = NAMING
+
+if emails_user_from_project:
+    D['emails_user_from_project'] = emails_user_from_project
+
+result['MILESTONES'].append(D)
 
 
 # ==================================================
@@ -215,6 +252,7 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

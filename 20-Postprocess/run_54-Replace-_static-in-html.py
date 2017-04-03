@@ -32,22 +32,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -55,8 +45,8 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
+done_replace_static_in_html = 0
 xeq_name_cnt = 0
-
 
 # ==================================================
 # Check params
@@ -70,13 +60,12 @@ if exitcode == CONTINUE:
 
     # just test
     for requirement in requirements:
-        v = milestones_get(requirement)
+        v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 2
 
-    build_html_folder = milestones_get('build_html_folder')
-    build_singlehtml_folder = milestones_get('build_singlehtml_folder')
+    build_html_folder = lookup(milestones, 'build_html_folder')
 
     if not (build_html_folder):
         CONTINUE = -1
@@ -94,6 +83,14 @@ if CONTINUE != 0:
 # ==================================================
 # work
 # --------------------------------------------------
+
+if exitcode == CONTINUE:
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
+    url_of_webroot = lookup(milestones, 'url_of_webroot')
+    if not url_of_webroot in ['https://docs.typo3.org']:
+        loglist.append(('Nothing to do for server', url_of_webroot))
+        CONTINUE = -2
+
 
 # """
 # old: href="../../_static/css/t3more.css"
@@ -177,13 +174,15 @@ if exitcode == CONTINUE:
                         f2.write(data)
                 loglist.append('%s, %s, %s' % (cnt, builder_logname, file_logname))
 
+    done_replace_static_in_html = 1
+
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({'replace_static_in_html': True})
+if done_replace_static_in_html:
+    result['MILESTONES'].append({'done_replace_static_in_html': done_replace_static_in_html})
 
 
 # ==================================================

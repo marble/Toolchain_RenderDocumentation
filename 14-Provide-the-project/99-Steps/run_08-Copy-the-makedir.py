@@ -5,8 +5,8 @@
 # --------------------------------------------------
 
 from __future__ import print_function
-import tct
 import os
+import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
@@ -52,30 +52,66 @@ def params_get(name, default=None):
 # ==================================================
 # define
 # --------------------------------------------------
+xeq_name_cnt = 0
+TheProjectMakedir = None
 
-# Should we verify these do exist?
-
-pandoc = ''
-html2text = ''
-sphinx_build = ''
 
 # ==================================================
 # Check params
 # --------------------------------------------------
 
-pass
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
+    makedir = milestones_get('makedir')
+    TheProject = milestones_get('TheProject')
+
+    if not (makedir and TheProject):
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('PROBLEMS with params')
+
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-pass
+import shutil
+
+if exitcode == CONTINUE:
+    TheProjectMakedir = TheProject + 'Makedir'
+    if os.path.exists(TheProjectMakedir):
+        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    srcdir = makedir.rstrip('/')
+    destdir = TheProjectMakedir.rstrip('/')
+    # we better only copy the top level files, no subdirs
+    for top, dirs, files in os.walk(srcdir):
+        dirs[:] = []
+        files.sort()
+        if not os.path.exists(destdir):
+            os.mkdir(destdir)
+        for afile in files:
+            srcfile = os.path.join(top, afile)
+            destfile = destdir + srcfile[len(srcdir):]
+            shutil.copy(srcfile, destfile)
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
+
+if TheProjectMakedir:
+    result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
 
 
 # ==================================================
@@ -84,8 +120,8 @@ pass
 
 tct.writejson(result, resultfile)
 
+
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 sys.exit(exitcode)

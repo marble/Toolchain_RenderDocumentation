@@ -5,7 +5,6 @@
 # --------------------------------------------------
 
 from __future__ import print_function
-import os
 import tct
 import sys
 
@@ -21,7 +20,6 @@ toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
-
 # ==================================================
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
@@ -31,22 +29,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -54,21 +42,34 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-pass
+buildsettings = {}
+buildsettings_file = ''
+xeq_name_cnt = 0
 
 # ==================================================
 # Check params
 # --------------------------------------------------
 
-
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    buildsettings = milestones_get('buildsettings')
+    # required milestones
+    requirements = []
 
-    if not buildsettings:
-        loglist.append('No buildsettings')
-        exitcode = 2
+    # just test
+    for requirement in requirements:
+        v = lookup(milestones, requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
+    buildsettings_file = lookup(milestones, 'buildsettings_file')
+    buildsettings = lookup(milestones, 'buildsettings')
+
+    # test
+    if not buildsettings_file and buildsettings:
+        exitcode = 99
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -80,19 +81,21 @@ if CONTINUE != 0:
     loglist.append('NOTHING to do')
 
 
-
 # ==================================================
 # work
 # --------------------------------------------------
+
+if exitcode == CONTINUE:
+    with open(buildsettings_file, 'wb') as f2:
+        for k in sorted(buildsettings.keys()):
+            f2.write('%s=%s\n' % (k.upper(), buildsettings[k]))
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if 0:
-    result['MILESTONES'].append({'dummy': 'dummy'})
-
+pass
 
 # ==================================================
 # save result

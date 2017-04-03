@@ -164,6 +164,7 @@ if exitcode == CONTINUE:
     email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off', 0)
     emails_user_from_project = milestones_get('emails_user_from_project')
 
+
 # ==================================================
 # work
 # --------------------------------------------------
@@ -203,12 +204,19 @@ def do_the_work():
 
     # gather information
 
+    a = soup.a
     h1 = soup.h1
     h2 = soup.h2
     h3 = soup.h3
     h4 = soup.h4
     p = soup.p
-    a = soup.a
+
+    a_attrs = a.attrs.copy() if a else {}
+    h1_attrs = h1.attrs.copy() if h1 else {}
+    h2_attrs = h2.attrs.copy() if h2 else {}
+    h3_attrs = h3.attrs.copy() if h3 else {}
+    h4_attrs = h4.attrs.copy() if h4 else {}
+    p_attrs = p.attrs.copy() if p else {}
 
     idDivYourProject = first_or_none(soup.find_all(id="idDivYourProject"))
     idCalloutSettingsFile = first_or_none(soup.find_all(id="idCalloutSettingsFile"))
@@ -216,6 +224,7 @@ def do_the_work():
     idCalloutThereAreWarnings = first_or_none(soup.find_all(id="idCalloutThereAreWarnings"))
     idDivAboutThisMail = first_or_none(soup.find_all(id="idDivAboutThisMail"))
     idDivGeneralInformation = first_or_none(soup.find_all(id="idDivGeneralInformation"))
+    idDivMoreOnYourProject = first_or_none(soup.find_all(id="idDivMoreOnYourProject"))
 
     idSpanISendToReceivers = first_or_none(soup.find_all(id="idSpanISendToReceivers"))
     idSpanISawANo = first_or_none(soup.find_all(id="idSpanISawANo"))
@@ -229,6 +238,23 @@ def do_the_work():
     idAPDF = first_or_none(soup.find_all(id="idAPDF"))
     idAPACKAGE= first_or_none(soup.find_all(id="idAPACKAGE"))
 
+
+    # Add info about localization
+
+    localization_has_localization = milestones_get('localization_has_localization')
+    localization = tct.deepget(milestones, 'buildsettings', 'localization')
+    if localization_has_localization:
+        h3tag = soup.new_tag('h3', **h3_attrs)
+        h3tag.string = 'Localization'
+        idDivMoreOnYourProject.append(h3tag)
+        ptag = soup.new_tag('p', **p_attrs)
+        ptag.append(u'Yes, I have seen that your project contains one or more localizations.\n')
+        if localization in ['', 'default']:
+            ptag.append(u'In this run I have rendered the default language.\n')
+        else:
+            ptag.append(u"In this run I have rendered the '%s' version.\n" % localization)
+        ptag.append(u'Each localization is done in an extra run.\n')
+        idDivMoreOnYourProject.append(ptag)
 
     # What succeeded? What failed?
 

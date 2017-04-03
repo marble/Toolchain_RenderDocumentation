@@ -5,8 +5,8 @@
 # --------------------------------------------------
 
 from __future__ import print_function
-import os
 import tct
+import os
 import sys
 
 params = tct.readjson(sys.argv[1])
@@ -48,13 +48,15 @@ def params_get(name, default=None):
     loglist.append((name, result))
     return result
 
+
 # ==================================================
 # define
 # --------------------------------------------------
 
-localization_folders = []
-localization_locales = []       # ['de_DE', 'en_US']
-localization_folder_names = []  # ['Localization.de_DE']
+makedir = ''
+makedir_abspath = ''
+makedir_missing = ''
+talk = milestones.get('talk', 1)
 
 
 # ==================================================
@@ -63,19 +65,23 @@ localization_folder_names = []  # ['Localization.de_DE']
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
-    if not toolchain_name:
-        exitcode = 99
+    toolchain_name = facts_get('toolchain_name')
+    cwd = facts_get('cwd')
+    if not (toolchain_name and cwd):
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    makedir = params_get('makedir', '')
+    if not makedir:
+        msg = 'Usage: tct run %s --config makedir MAKEDIR [--toolchain-help]' % toolchain_name
+        loglist.append(msg)
+        print(msg)
+        exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
-
+    loglist.append('PROBLEMS with params')
 
 
 # ==================================================
@@ -83,60 +89,35 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    localization_has_localization = milestones_get('localization_has_localization')
-    if not localization_has_localization:
-        loglist.append('nothing to do - no localization found')
-        CONTINUE = -1
+    if not os.path.isabs(makedir):
+        makedir = os.path.join(facts['cwd'], makedir)
+    makedir = os.path.abspath(os.path.normpath(makedir))
+    if not os.path.isdir(makedir):
+        makedir_missing = makedir
+        makedir = None
+        msg = "makedir not found: %s" % makedir_missing
+        loglist.append(msg)
+        print(msg)
+        exitcode = 2
 
 if exitcode == CONTINUE:
-    localization = tct.deepget(milestones, 'buildsettings', 'localization', default=None)
-    if localization:
-        loglist.append("nothing to do - we do want to render localization '%s'" % localization)
-        CONTINUE = -1
-
-
-# ==================================================
-# work
-# --------------------------------------------------
-
-import glob
-import shutil
-
-if exitcode == CONTINUE:
-    TheProject = milestones['TheProject']
-    TheProjectLocalization = TheProject + 'Localization'
-
-if exitcode == CONTINUE:
-    if not os.path.exists(TheProjectLocalization):
-        os.makedirs(TheProjectLocalization)
-
-    localization_pattern = TheProject + '/Documentation/Localization.*'
-    localization_folders = glob.glob(localization_pattern)
-    for folder in localization_folders:
-        shutil.move(folder, TheProjectLocalization)
-        localization_folder_name = os.path.split(folder)[1]
-        localization_folder_names.append(localization_folder_name)
-        localization_locales.append(localization_folder_name[len('Localization.'):])
-
+    makedir_abspath = makedir
+    if talk > 1:
+        print('makedir:', os.path.split(makedir)[1])
+        print('makedir_abspath:', makedir_abspath)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({'TheProjectLocalization': TheProjectLocalization})
+if makedir:
+    result['MILESTONES'].append({'makedir': makedir})
 
-    if localization_folders:
-        result['MILESTONES'].append({'localization_folders': localization_folders})
+if makedir_abspath:
+    result['MILESTONES'].append({'makedir_abspath': makedir_abspath})
 
-    if localization_pattern:
-        result['MILESTONES'].append({'localization_pattern': localization_pattern})
-
-    if localization_folder_names:
-        result['MILESTONES'].append({'localization_folder_names': localization_folder_names})
-
-    if localization_locales:
-        result['MILESTONES'].append({'localization_locales': localization_locales})
+if makedir_missing:
+    result['MILESTONES'].append({'makedir_missing': makedir_missing})
 
 # ==================================================
 # save result

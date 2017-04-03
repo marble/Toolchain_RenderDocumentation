@@ -52,32 +52,38 @@ def params_get(name, default=None):
 # ==================================================
 # define
 # --------------------------------------------------
-xeq_name_cnt = 0
-relative_part_of_builddir = ''
-webroot_part_of_builddir = ''
-webroot_abspath = ''
-url_of_webroot = ''
+
 buildsettings_builddir = ''
-lockfile_ttl_seconds = 1800
 checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
-gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/'
+gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/:/tmp/'
+lockfile_ttl_seconds = 1800
+relative_part_of_builddir = ''
+url_of_webroot = ''
+webroot_abspath = ''
+webroot_part_of_builddir = ''
+xeq_name_cnt = 0
 
 email_user_do_not_send = 0
-email_user_receivers_exlude_list = ['documentation@typo3.org', 'kasperYYYY@typo3.com', 'kasperYYYY@typo3.org', 'info@typo3.org', ]
+email_user_receivers_exlude_list = [
+    'documentation@typo3.org',
+    'info@typo3.org',
+    'kasperYYYY@typo3.com',
+    'kasperYYYY@typo3.org',
+]
 
 general_string_options = (
     ('conf_py_masterfile', ''),
     ('email_admin', 'martin.bless@gmail.com'),
-    ('email_user_to_instead', ''),
-    ('email_user_cc', ''),
     ('email_user_bcc', ''),
+    ('email_user_cc', ''),
+    ('email_user_to_instead', ''),
 )
 general_int_options = (
-    ('email_user_do_not_send', 0),
     ('email_admin_send_extra_mail', 0),
-    ('make_singlehtml', 1),
+    ('email_user_do_not_send', 0),
     ('make_latex', 1),
     ('make_package', 1),
+    ('make_singlehtml', 1),
 )
 general_csvlist_options = (
     ('email_user_receivers_exlude_list', ''),
@@ -110,7 +116,7 @@ if exitcode == CONTINUE:
 
 if not (toolchain_name and webroot_part_of_builddir and url_of_webroot
         and webroot_abspath and buildsettings_builddir):
-    exitcode = -2
+    exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

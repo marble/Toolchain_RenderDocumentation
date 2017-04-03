@@ -64,6 +64,7 @@ publish_package_dir_planned = ''
 publish_parent_dir = None
 publish_parent_dir_planned = ''
 publish_parent_parent_dir = None
+publish_parent_parent_dir_planned = ''
 publish_settings_cfg_planned = ''
 publish_warnings_txt_planned = ''
 xeq_name_cnt = 0
@@ -130,10 +131,14 @@ if exitcode == CONTINUE:
     loglist.append(('publish_package_dir_planned', publish_package_dir_planned))
 
 if exitcode == CONTINUE:
-    publish_parent_parent_dir = os.path.split(publish_parent_dir_planned)[0]
-    if not os.path.exists(publish_parent_parent_dir):
-        loglist.append(('publish_parent_parent_dir does not exist', publish_parent_parent_dir))
-        exitcode = 2
+    publish_parent_parent_dir_planned = os.path.split(publish_parent_dir_planned)[0]
+    if os.path.exists(publish_parent_parent_dir_planned):
+        publish_parent_parent_dir = publish_parent_parent_dir_planned
+
+    if 0:
+        if not os.path.exists(publish_parent_parent_dir):
+            loglist.append(('publish_parent_parent_dir does not exist', publish_parent_parent_dir))
+            exitcode = 2
 
 
 # ==================================================
@@ -163,30 +168,32 @@ if exitcode == CONTINUE:
 
 
     result['MILESTONES'].append({
-        'publish_dir_buildinfo_planned':    publish_dir_buildinfo_planned,
-        'publish_dir_pdf_planned':          publish_dir_pdf_planned,
-        'publish_dir_planned':              publish_dir_planned,
-        'publish_file_pdf_planned':         publish_file_pdf_planned,
-        'publish_package_dir_planned':      publish_package_dir_planned,
-        'publish_package_file_planned':     publish_package_file_planned,
-        'publish_parent_dir_planned':       publish_parent_dir_planned,
-        'publish_parent_parent_dir':        publish_parent_parent_dir,
-        'publish_settings_cfg_planned':     publish_settings_cfg_planned,
-        'publish_warnings_txt_planned':     publish_warnings_txt_planned,
+        'publish_dir_buildinfo_planned':        publish_dir_buildinfo_planned,
+        'publish_dir_pdf_planned':              publish_dir_pdf_planned,
+        'publish_dir_planned':                  publish_dir_planned,
+        'publish_file_pdf_planned':             publish_file_pdf_planned,
+        'publish_package_dir_planned':          publish_package_dir_planned,
+        'publish_package_file_planned':         publish_package_file_planned,
+        'publish_parent_dir_planned':           publish_parent_dir_planned,
+        'publish_parent_parent_dir':            publish_parent_parent_dir,
+        'publish_parent_parent_dir_planned':    publish_parent_parent_dir_planned,
+        'publish_settings_cfg_planned':         publish_settings_cfg_planned,
+        'publish_warnings_txt_planned':         publish_warnings_txt_planned,
     })
 
     tuples = [
-        ('absurl_buildinfo_dir',        publish_dir_buildinfo_planned,  '/'),
-        ('absurl_html_dir',             publish_dir_planned,            '/'),
-        ('absurl_package_dir',          publish_package_dir_planned,    '/'),
-        ('absurl_package_file',         publish_package_file_planned,   ''),
-        ('absurl_parent_dir',           publish_parent_dir_planned,     '/'),
-        ('absurl_parent_parent_dir',    publish_parent_parent_dir,      '/'),
-        ('absurl_pdf_dir',              publish_dir_pdf_planned,        '/'),
-        ('absurl_pdf_file',             publish_file_pdf_planned,       ''),
-        ('absurl_settings_cfg_file',    publish_settings_cfg_planned,   ''),
-        ('absurl_singlehtml_dir',       publish_dir_singlehtml_planned, '/'),
-        ('absurl_warnings_txt_file',    publish_warnings_txt_planned,   ''),
+        ('absurl_buildinfo_dir',                publish_dir_buildinfo_planned,      '/'),
+        ('absurl_html_dir',                     publish_dir_planned,                '/'),
+        ('absurl_package_dir',                  publish_package_dir_planned,        '/'),
+        ('absurl_package_file',                 publish_package_file_planned,       '' ),
+        ('absurl_parent_dir',                   publish_parent_dir_planned,         '/'),
+        ('absurl_parent_parent_dir',            publish_parent_parent_dir,          '/'),
+        ('absurl_parent_parent_dir_planned',    publish_parent_parent_dir_planned,  '/'),
+        ('absurl_pdf_dir',                      publish_dir_pdf_planned,            '/'),
+        ('absurl_pdf_file',                     publish_file_pdf_planned,           '' ),
+        ('absurl_settings_cfg_file',            publish_settings_cfg_planned,       '' ),
+        ('absurl_singlehtml_dir',               publish_dir_singlehtml_planned,     '/'),
+        ('absurl_warnings_txt_file',            publish_warnings_txt_planned,       '' ),
     ]
 
     some_milestones = {}

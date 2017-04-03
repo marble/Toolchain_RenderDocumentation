@@ -55,6 +55,7 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
+documentation_folder_for_sphinx = ''
 xeq_name_cnt = 0
 
 
@@ -89,15 +90,21 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    masterdoc = milestones.get('masterdoc')
-    has_settingscfg = milestones.get('has_settingscfg')
-    rebuild_needed = milestones.get('rebuild_needed')
-    TheProject = milestones.get('TheProject')
-    TheProjectLog = milestones.get('TheProjectLog')
-    TheProjectBuild = milestones.get('TheProjectBuild')
-    TheProjectMakedir = milestones.get('TheProjectMakedir')
-    SPHINXBUILD = milestones.get('SPHINXBUILD')
+
+    # first
     build_latex_folder = ''
+    has_settingscfg = milestones.get('has_settingscfg')
+    masterdoc = milestones.get('masterdoc')
+    rebuild_needed = milestones.get('rebuild_needed')
+    SPHINXBUILD = milestones.get('SPHINXBUILD')
+    TheProject = milestones.get('TheProject')
+    TheProjectBuild = milestones.get('TheProjectBuild')
+    TheProjectLog = milestones.get('TheProjectLog')
+    TheProjectMakedir = milestones.get('TheProjectMakedir')
+
+    # second
+    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
+
 
 if exitcode == CONTINUE:
 
@@ -114,7 +121,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     builder = 'latex'
-    sourcedir = milestones['documentation_folder']
+    sourcedir = documentation_folder_for_sphinx
     build_latex_folder = build_builder_folder = os.path.join(TheProjectBuild, builder)
     warnings_file_folder = os.path.join(TheProjectLog, builder)
     warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
@@ -172,6 +179,9 @@ if exitcode == CONTINUE:
         'build_latex_folder': build_latex_folder,
         'latex_file': latex_file,
     })
+
+if documentation_folder_for_sphinx:
+    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
 
 # ==================================================
 # save result

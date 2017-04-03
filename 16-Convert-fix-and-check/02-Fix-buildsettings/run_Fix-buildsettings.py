@@ -36,32 +36,26 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
 
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-MASTERDOC_line = None
-LOGDIR_line = None
+buildsettings_file = None
 buildsettings_file_fixed = None
+LOGDIR_line = None
+MASTERDOC_line = None
+T3DOCDIR_line = None
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -70,7 +64,7 @@ buildsettings_file_fixed = None
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    TheProjectLog = milestones_get('TheProjectLog')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
     if not (TheProjectLog):
         exitcode = 2
 
@@ -84,26 +78,29 @@ else:
 # work
 # --------------------------------------------------
 
-import shutil
-import codecs
-
 if exitcode == CONTINUE:
-    masterdoc = milestones_get('masterdoc')
-    TheProjectMakedir = milestones_get('TheProjectMakedir')
-    if not (masterdoc and TheProjectMakedir):
+    documentation_folder = lookup(milestones, 'documentation_folder')
+    masterdoc = lookup(milestones, 'masterdoc')
+    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
+    if not (masterdoc and TheProjectMakedir and documentation_folder):
         loglist.append('SKIPPING')
         CONTINUE = -1
 
 if exitcode == CONTINUE:
-    buildsettingssh_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
-    original = buildsettingssh_file + '.original'
-    shutil.move(buildsettingssh_file, original)
+    import shutil
+    import codecs
+
+    buildsettings_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
+    if not os.path.exists(buildsettings_file):
+        with open(buildsettings_file, 'w') as f2:
+            pass
+    original = buildsettings_file + '.original'
+    shutil.move(buildsettings_file, original)
 
 if exitcode == CONTINUE:
-
     masterdoc_without_fileext = os.path.splitext(masterdoc)[0]
     with codecs.open(original, 'r', 'utf-8') as f1:
-        with codecs.open(buildsettingssh_file, 'w', 'utf-8') as f2:
+        with codecs.open(buildsettings_file, 'w', 'utf-8') as f2:
             for line in f1:
                 if line.startswith('MASTERDOC='):
                     MASTERDOC_line = 'MASTERDOC=' + masterdoc_without_fileext + '\n'
@@ -113,6 +110,10 @@ if exitcode == CONTINUE:
                     LOGDIR_line = 'LOGDIR=' + TheProjectLog + '\n'
                     loglist.append(('LOGDIR_line', LOGDIR_line))
                     line = LOGDIR_line
+                elif line.startswith('T3DOCDIR='):
+                    T3DOCDIR_line = 'T3DOCDIR=' + documentation_folder + '\n'
+                    loglist.append(('T3DOCDIR_line', T3DOCDIR_line))
+                    line = T3DOCDIR_line
                 f2.write(line)
     buildsettings_file_fixed = True
 
@@ -121,8 +122,12 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
+if buildsettings_file:
+    result['MILESTONES'].append({'buildsettings_file':buildsettings_file})
+
 if buildsettings_file_fixed:
-    result['MILESTONES'].append('buildsettings_file_fixed')\
+    result['MILESTONES'].append({'buildsettings_file_fixed':buildsettings_file_fixed})
+
 
 
 # ==================================================

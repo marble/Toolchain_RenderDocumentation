@@ -10,6 +10,7 @@ import os
 import tct
 import sys
 
+
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
@@ -56,6 +57,7 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+documentation_folder_for_sphinx = ''
 
 
 # ==================================================
@@ -69,7 +71,7 @@ if exitcode == CONTINUE:
     included_files_check_is_ok = milestones_get('included_files_check_is_ok')
     toolname = params_get('toolname')
     build_html = milestones_get('build_html')
-    make_singlehtml = milestones_get('build_html')
+    make_singlehtml = milestones_get('make_singlehtml')
     loglist.append('End of PARAMS')
 
 if exitcode == CONTINUE:
@@ -90,14 +92,20 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    masterdoc = milestones.get('masterdoc')
+
+    # first
     has_settingscfg = milestones.get('has_settingscfg')
+    masterdoc = milestones.get('masterdoc')
     rebuild_needed = milestones.get('rebuild_needed')
-    TheProject = milestones.get('TheProject')
-    TheProjectLog = milestones.get('TheProjectLog')
-    TheProjectBuild = milestones.get('TheProjectBuild')
-    TheProjectMakedir = milestones.get('TheProjectMakedir')
     SPHINXBUILD = milestones.get('SPHINXBUILD')
+    TheProject = milestones.get('TheProject')
+    TheProjectBuild = milestones.get('TheProjectBuild')
+    TheProjectLog = milestones.get('TheProjectLog')
+    TheProjectMakedir = milestones.get('TheProjectMakedir')
+
+    # second
+    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
+
 
 if exitcode == CONTINUE:
 
@@ -114,7 +122,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     builder = 'singlehtml'
-    sourcedir = milestones['documentation_folder']
+    sourcedir = documentation_folder_for_sphinx
     outdir = build_builder_folder = os.path.join(TheProjectBuild, builder)
     warnings_file_folder = os.path.join(TheProjectLog, builder)
     warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
@@ -174,12 +182,16 @@ if exitcode == CONTINUE:
         'build_' + builder + '_folder': build_builder_folder,
     })
 
+if documentation_folder_for_sphinx:
+    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
+
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

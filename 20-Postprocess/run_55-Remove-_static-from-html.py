@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 # ==================================================
 # open
@@ -10,14 +11,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
+loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -30,30 +32,21 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
 # ==================================================
 # define
 # --------------------------------------------------
+
+done_remove_static_folder_from_html = 0
 xeq_name_cnt = 0
-TheProjectMakedir = None
 
 
 # ==================================================
@@ -63,11 +56,21 @@ TheProjectMakedir = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    makedir = milestones_get('makedir')
-    TheProject = milestones_get('TheProject')
+    # required milestones
+    requirements = []
 
-    if not (makedir and TheProject):
-        loglist.append('SKIPPING')
+    # just test
+    for requirement in requirements:
+        v = lookup(milestones, requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    done_replace_static_in_html = lookup(milestones, 'done_replace_static_in_html')
+    build_html_folder = lookup(milestones, 'build_html_folder')
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
+
+    if not (done_replace_static_in_html and (build_html_folder or build_singlehtml_folder)):
         CONTINUE = -1
 
 if exitcode == CONTINUE:
@@ -84,41 +87,36 @@ if CONTINUE != 0:
 # work
 # --------------------------------------------------
 
-import shutil
-
 if exitcode == CONTINUE:
-    TheProjectMakedir = TheProject + 'Makedir'
-    if os.path.exists(TheProjectMakedir):
-        loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
-        exitcode = 2
 
-if exitcode == CONTINUE:
-    srcdir = makedir.rstrip('/')
-    destdir = TheProjectMakedir.rstrip('/')
-    # we better only copy the top level files, no subdirs
-    for top, dirs, files in os.walk(srcdir):
-        dirs[:] = []
-        files.sort()
-        if not os.path.exists(destdir):
-            os.mkdir(destdir)
-        for afile in files:
-            srcfile = os.path.join(top, afile)
-            destfile = destdir + srcfile[len(srcdir):]
-            shutil.copy(srcfile, destfile)
+    import shutil
+
+    todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
+    for build_folder in todolist:
+        if not build_folder:
+            continue
+        fpath = os.path.join(build_folder, '_static')
+        if os.path.exists(fpath):
+            shutil.rmtree(fpath)
+            loglist.append('%s, %s' % ('remove', fpath))
+
+    done_remove_static_folder_from_html = 1
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if TheProjectMakedir:
-    result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
+if done_remove_static_folder_from_html:
+    result['MILESTONES'].append({'done_remove_static_folder_from_html': done_remove_static_folder_from_html})
+
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

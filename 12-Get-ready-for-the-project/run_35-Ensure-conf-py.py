@@ -10,14 +10,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
+loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -52,9 +53,10 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
+conf_py_file = ''
+conf_py_masterfile = milestones_get('conf_py_masterfile')
+conf_py_symlink_created = 0
 xeq_name_cnt = 0
-conf_py_file = None
-conf_py_masterfile = None
 
 
 # ==================================================
@@ -63,17 +65,32 @@ conf_py_masterfile = None
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = milestones_get(requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
     makedir_abspath = milestones_get('makedir_abspath')
+
+    # test
     if not makedir_abspath:
         CONTINUE = -1
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEM with required params')
 
-if exitcode == CONTINUE:
-    conf_py_masterfile = milestones_get('conf_py_masterfile')
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 
 # ==================================================
@@ -82,25 +99,25 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     conf_py_file = os.path.join(makedir_abspath, 'conf.py')
-    loglist.append(('conf_py_file', conf_py_file))
     if os.path.exists(conf_py_file):
-        loglist.append('Ok, conf.py exists')
         CONTINUE = -1
     else:
-        loglist.append('Oops, conf.py is missing')
+        conf_py_file = ''
 
 if exitcode == CONTINUE:
     if conf_py_masterfile:
+        conf_py_file = os.path.join(makedir_abspath, 'conf.py')
         try:
             os.link(conf_py_masterfile, conf_py_file)
-            loglist.append('create symlink to masterfile')
+            conf_py_symlink_created = 1
         except OSError:
-            loglist.append('OSError on create symlink')
+            conf_py_file = ''
 
 if exitcode == CONTINUE:
     if not os.path.exists(conf_py_file):
+        loglist.append(('conf.py not found in makedir', makedir_abspath))
         printerror = print
-        printerror('conf.py is missing')
+        printerror('conf.py is missing in makedir ' + makedir_abspath)
         exitcode = 2
 
 
@@ -111,8 +128,9 @@ if exitcode == CONTINUE:
 if conf_py_file:
     result['MILESTONES'].append({'conf_py_file': conf_py_file})
 
-if conf_py_masterfile:
-    result['MILESTONES'].append({'conf_py_masterfile': conf_py_masterfile})
+if conf_py_symlink_created:
+    result['MILESTONES'].append({'conf_py_symlink_created': conf_py_symlink_created})
+
 
 # ==================================================
 # save result

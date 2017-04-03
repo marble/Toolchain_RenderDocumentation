@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 # ==================================================
 # open
@@ -55,67 +54,43 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
-
+pass
 
 # ==================================================
 # Check params
 # --------------------------------------------------
 
+
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
+    buildsettings = milestones_get('buildsettings')
 
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 2
-
-    replace_static_in_html = milestones_get('replace_static_in_html')
-    build_html_folder = milestones_get('build_html_folder')
-    build_singlehtml_folder = milestones_get('build_singlehtml_folder')
-
-    if not (replace_static_in_html and (build_html_folder or build_singlehtml_folder)):
-        CONTINUE = -1
+    if not buildsettings:
+        exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('PROBLEM with required params')
 
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
     loglist.append('NOTHING to do')
 
 
+
 # ==================================================
 # work
 # --------------------------------------------------
-
-if exitcode == CONTINUE:
-
-    import shutil
-
-    todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
-    for build_folder in todolist:
-        if not build_folder:
-            continue
-        fpath = os.path.join(build_folder, '_static')
-        if os.path.exists(fpath):
-            shutil.rmtree(fpath)
-            loglist.append('%s, %s' % ('remove', fpath))
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({'remove_static_folder_from_html': True})
+if 0:
+    result['MILESTONES'].append({'dummy': 'dummy'})
 
 
 # ==================================================
@@ -123,7 +98,6 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
-
 
 # ==================================================
 # Return with proper exitcode

@@ -5,19 +5,19 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+import os
 import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -43,8 +43,12 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+gitbranch = ''
+gitdir = ''
+giturl = ''
+do_clone_or_pull = ''
+gitdir_must_start_with = ''
 xeq_name_cnt = 0
-milestone_abc = None
 
 
 # ==================================================
@@ -65,11 +69,17 @@ if exitcode == CONTINUE:
             exitcode = 2
 
     # fetch
-    toolchain_name = lookup(params, 'toolchain_name')
+    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
+    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    giturl = lookup(milestones, 'buildsettings', 'giturl')
 
     # test
-    if not toolchain_name:
-        exitcode = 99
+    if not gitdir:
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    if not (giturl and gitbranch):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -79,14 +89,6 @@ else:
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
     loglist.append('NOTHING to do')
-
-
-# ==================================================
-# work
-# --------------------------------------------------
-
-if exitcode == CONTINUE:
-    pass
 
 
 # =========================================================
@@ -130,7 +132,7 @@ if exitcode == CONTINUE:
         return exitcode, cmd, out, err
 
 
-if exitcode == CONTINUE:
+if 0:
     builder = 'dummy'
     warnings_file = 'dummy.txt'
     sourcedir = 'dummy'
@@ -148,11 +150,78 @@ if exitcode == CONTINUE:
     exitcode, cmd, out, err = execute_cmdlist(cmdlist)
 
 # ==================================================
+# work
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+    if os.path.exists(gitdir):
+        do_clone_or_pull = 'pull'
+    else:
+        do_clone_or_pull = 'clone'
+        gitdir_must_start_with = lookup(milestones, 'gitdir_must_start_with')
+        if not gitdir_must_start_with:
+            exitcode = 2
+
+if exitcode == CONTINUE:
+    if do_clone_or_pull == 'clone':
+        for item in gitdir_must_start_with.split(':'):
+            if gitdir.startswith(item):
+                break
+        else:
+            CONTINUE = -1
+            loglist.append(('need to clone, but gitdir does not start with one of gitdir_must_start_with',
+                            gitdir))
+
+# ==================================================
+# work
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+
+    import codecs
+    import os
+    import subprocess
+
+
+    if do_clone_or_pull == 'clone':
+        parent_dir = os.path.split(gitdir)[0]
+        if not os.path.exists(parent_dir):
+            os.makedirs(parent_dir, mode=0775)
+
+        exitcode, cmd, out, err = cmdline('git clone %s %s' % (giturl, gitdir))
+
+        if exitcode == CONTINUE:
+            exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch, cwd=gitdir)
+
+    if exitcode == CONTINUE:
+        if do_clone_or_pull == 'pull':
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git fetch', cwd=gitdir)
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git checkout ' + gitbranch, cwd=gitdir)
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
+
+
+# ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if milestone_abc:
-    result['MILESTONES'].append({'milestone_abc': milestone_abc})
+D = {}
+
+if do_clone_or_pull == 'clone':
+    D['git_clone_done'] = 1
+
+if do_clone_or_pull == 'pull':
+    D['git_pull_done'] = 1
+
+result['MILESTONES'].append(D)
 
 
 # ==================================================

@@ -43,8 +43,15 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+buildsettings = None
+gitbranch = ''
+gitdir = ''
+giturl = ''
+repositories_rootfolder = ''
+ter_extkey = ''
+ter_extversion = ''
+toolchain_name = ''
 xeq_name_cnt = 0
-milestone_abc = None
 
 
 # ==================================================
@@ -64,12 +71,37 @@ if exitcode == CONTINUE:
             loglist.append("'%s' not found" % requirement)
             exitcode = 2
 
-    # fetch
-    toolchain_name = lookup(params, 'toolchain_name')
+    buildsettings = lookup(milestones, 'buildsettings')
+    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
+    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    giturl = lookup(milestones, 'buildsettings', 'giturl')
+    ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
+    ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
 
-    # test
-    if not toolchain_name:
+    if not ((gitdir or giturl) or (ter_extkey and ter_extversion)):
+        loglist.append('no source project specified')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    if not buildsettings:
+        exitcode = 2
+
+if exitcode == CONTINUE:
+    if giturl and not gitbranch:
+        loglist.append('we need to know the branch of the repository')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    if (gitdir or giturl) and (ter_extkey or ter_extversion):
+        loglist.append('we either expect a manual or a ter extension. ')
         exitcode = 99
+
+if exitcode == CONTINUE:
+    if not gitdir:
+        toolchain_name = lookup(facts, 'toolchain_name')
+        repositories_rootfolder = lookup(facts, 'tctconfig', toolchain_name, 'repositories_rootfolder')
+        if not (toolchain_name and repositories_rootfolder):
+            CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -85,75 +117,31 @@ if CONTINUE != 0:
 # work
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    pass
+import os
 
+legalchars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-01234567890'
 
-# =========================================================
-# work Example of how to start a subprocess with perfect logging
-# ---------------------------------------------------------
-
-if exitcode == CONTINUE:
-
-    import codecs
-    import os
-    import subprocess
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
-
-    def execute_cmdlist(cmdlist):
-        global xeq_name_cnt
-        cmd = ' '.join(cmdlist)
-        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
-        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
-        xeq_name_cnt += 1
-        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
-
-        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-            f2.write(cmd_multiline.decode('utf-8', 'replace'))
-
-        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-            f2.write(out.decode('utf-8', 'replace'))
-
-        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-            f2.write(err.decode('utf-8', 'replace'))
-
-        return exitcode, cmd, out, err
-
+def slugify_url(url):
+    result = []
+    for c in url:
+        if c in legalchars:
+            result.append(c)
+        else:
+            result.append('-')
+    return ''.join(result)
 
 if exitcode == CONTINUE:
-    builder = 'dummy'
-    warnings_file = 'dummy.txt'
-    sourcedir = 'dummy'
-    outdir = 'dummy'
-    cmdlist = [
-        'sphinx-build-dummy',
-        '-a',                  # write all files; default is to only write new and changed files
-        '-b ' + builder,       # builder to use; default is html
-        '-E',                  # don't use a saved environment, always read all files
-        '-w ' + warnings_file, # write warnings (and errors) to given file
-        sourcedir,
-        outdir
-    ]
+    if not gitdir and giturl:
+        gitdir = os.path.join(repositories_rootfolder, slugify_url('-'.join(giturl.split('://'))))
+        buildsettings['gitdir'] = gitdir
 
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if milestone_abc:
-    result['MILESTONES'].append({'milestone_abc': milestone_abc})
-
+if buildsettings:
+    result['MILESTONES'].append({'buildsettings': buildsettings})
 
 # ==================================================
 # save result

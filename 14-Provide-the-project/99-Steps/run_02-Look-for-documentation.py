@@ -33,28 +33,22 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Get and check required milestone(s)
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-locale_folders = []
+buildsettings = {}
+
+locale_folders = {'': '', 'default': ''} # 'fr_FR':'Localization.fr_FR'
 locale_locales = []
 locale_masterdocs = []
+localization = 'default'
 
 masterdoc_candidates = [
     'Documentation/Index.rst',
@@ -77,7 +71,11 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+
+    # fetch
+    buildsettings = lookup(milestones, 'buildsettings')
+    localization = lookup(milestones, 'buildsettings', 'localization', default='default')
+    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not gitdir:
         exitcode = 2
 
@@ -123,7 +121,7 @@ if exitcode == CONTINUE:
             locale = m.groupdict()['locale']
             locale_for_file = locale.lower().replace('_', '-')
 
-            locale_folders.append(folder)
+            locale_folders[locale] = folder
             locale_locales.append(locale)
 
             for candi in masterdoc_candidates:
@@ -135,12 +133,34 @@ if exitcode == CONTINUE:
                             masterdoc_selected[locale] = os.path.join(a[0], folder, a[1])
                             locale_masterdocs.append(masterdoc_selected[locale])
 
+if 0:
+    {
+        "buildsettings": {
+            "builddir": "/home/marble/htdocs/docs-typo3-org/typo3cms/extensions/sphinx/2.5",
+            "gitbranch": "",
+            "gitdir": "",
+            "giturl": "",
+            "localization": "fr_FR",
+            "logdir": ".",
+            "masterdoc": "",
+            "package_key": "typo3cms.extensions.sphinx",
+            "package_language": "fr-fr",
+            "package_zip": "1",
+            "project": "sphinx",
+            "t3docdir": "",
+            "ter_extension": "1",
+            "ter_extkey": "sphinx",
+            "ter_extversion": "2.5.0",
+            "version": "2.5"
+        }}
+
+
 
 # ==================================================
-# Set MILESTONE
+# Set MILESTONE #1
 # --------------------------------------------------
 
-if 1:
+if 'always':
     result['MILESTONES'].append({
         'locale_folders': locale_folders,
         'locale_locales': locale_locales,
@@ -161,6 +181,24 @@ if masterdoc_selected:
     result['MILESTONES'].append({
         'masterdoc_selected': masterdoc_selected,
     })
+    masterdoc = masterdoc_selected.get(localization)
+    if masterdoc:
+        buildsettings['masterdoc'] = os.path.join(gitdir, masterdoc)
+        hit = None
+        left, right = os.path.split(masterdoc)
+        while left:
+            hit = left
+            left = os.path.split(left)[0]
+        if hit:
+            buildsettings['t3docdir'] = os.path.join(gitdir, hit)
+
+
+# ==================================================
+# Set MILESTONE #2
+# --------------------------------------------------
+
+if buildsettings:
+    result['MILESTONES'].append({'buildsettings': buildsettings})
 
 
 # ==================================================

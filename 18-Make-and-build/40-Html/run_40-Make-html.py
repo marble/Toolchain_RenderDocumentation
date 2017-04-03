@@ -32,22 +32,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -56,6 +46,7 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+documentation_folder_for_sphinx = ''
 
 
 # ==================================================
@@ -64,35 +55,59 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    ready_for_build = milestones_get('ready_for_build')
-    rebuild_needed = milestones_get('rebuild_needed')
-    included_files_check_is_ok = milestones_get('included_files_check_is_ok')
-    toolname = params_get('toolname')
-    if not (ready_for_build and rebuild_needed and
-            toolname and included_files_check_is_ok):
+
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = lookup(milestones, requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch
+    included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok')
+    ready_for_build = lookup(milestones, 'ready_for_build')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
+    toolname = lookup(params, 'toolname')
+    toolname_pure = lookup(params, 'toolname_pure')
+
+    # test
+    if not (included_files_check_is_ok and ready_for_build and
+            rebuild_needed and toolname and toolname_pure):
+        exitcode = 2
+    else:
+        loglist.append('ok, check more params')
+
+if exitcode == CONTINUE:
+
+    masterdoc = lookup(milestones, 'masterdoc')
+    SPHINXBUILD = lookup(milestones, 'SPHINXBUILD')
+    TheProject = lookup(milestones, 'TheProject')
+    TheProjectBuild = lookup(milestones, 'TheProjectBuild')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
+
+    if not (masterdoc and SPHINXBUILD and
+            TheProject and TheProjectBuild and TheProjectLog and TheProjectMakedir):
         exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEM with required params')
 
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    toolname_pure = params['toolname_pure']
-    masterdoc = milestones.get('masterdoc')
-    has_settingscfg = milestones.get('has_settingscfg')
-    TheProject = milestones.get('TheProject')
-    TheProjectLog = milestones.get('TheProjectLog')
-    TheProjectBuild = milestones.get('TheProjectBuild')
-    TheProjectMakedir = milestones.get('TheProjectMakedir')
-    SPHINXBUILD = milestones.get('SPHINXBUILD')
-
-if exitcode == CONTINUE:
+    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
 
     import codecs
     import subprocess
@@ -105,16 +120,37 @@ if exitcode == CONTINUE:
         exitcode = process.returncode
         return exitcode, cmd, out, err
 
+    def execute_cmdlist(cmdlist, cwd=None):
+        global xeq_name_cnt
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+
+        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+
+        return exitcode, cmd, out, err
+
+
 if exitcode == CONTINUE:
     builder = 'html'
-    sourcedir = milestones['documentation_folder']
+    sourcedir = documentation_folder_for_sphinx
     outdir = build_builder_folder = os.path.join(TheProjectBuild, builder)
     warnings_file_folder = os.path.join(TheProjectLog, builder)
     warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
     doctree_folder = os.path.join(TheProjectBuild, 'doctree', builder)
     confpy_folder = TheProjectMakedir
-    workdir = params['workdir']
-    loglist.append(['workdir', workdir])
 
     if not os.path.exists(warnings_file_folder):
         os.makedirs(warnings_file_folder)
@@ -132,27 +168,8 @@ if exitcode == CONTINUE:
         sourcedir,
         outdir
     ]
-    cmd = ' '.join(cmdlist)
-    cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-
-    loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
-
-    xeq_name_cnt += 1
-    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
-
-    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-        f2.write(cmd_multiline.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-        f2.write(out.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-        f2.write(err.decode('utf-8', 'replace'))
-
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 # ==================================================
 # Set MILESTONE
@@ -167,12 +184,16 @@ if exitcode == CONTINUE:
         'build_' + builder + '_folder': build_builder_folder,
     })
 
+if documentation_folder_for_sphinx:
+    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
+
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
+
 
 # ==================================================
 # Return with proper exitcode

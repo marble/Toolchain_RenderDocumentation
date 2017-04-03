@@ -58,6 +58,7 @@ publish_dir = ''
 publish_dir_buildinfo = ''
 publish_html_done = False
 publish_parent_dir = ''
+publish_parent_parent_dir = ''
 publish_removed_old = False
 xeq_name_cnt = 0
 
@@ -82,7 +83,7 @@ if exitcode == CONTINUE:
     # fetch
     publish_dir_planned = milestones_get('publish_dir_planned')
     publish_parent_dir_planned = milestones_get('publish_parent_dir_planned')
-    publish_parent_parent_dir = milestones_get('publish_parent_parent_dir')
+    publish_parent_parent_dir_planned = milestones_get('publish_parent_parent_dir_planned')
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
 
@@ -90,7 +91,7 @@ if exitcode == CONTINUE:
     if not (
         publish_dir_planned and
         publish_parent_dir_planned and
-        publish_parent_parent_dir and
+        publish_parent_parent_dir_planned and
         TheProjectResult and
         TheProjectResultVersion):
         exitcode = 2
@@ -112,6 +113,11 @@ if CONTINUE != 0:
 import shutil
 
 if exitcode == CONTINUE:
+
+    if not os.path.exists(publish_parent_parent_dir_planned):
+        os.makedirs(publish_parent_parent_dir_planned)
+    publish_parent_parent_dir = publish_parent_parent_dir_planned
+
     if not os.path.exists(publish_parent_dir_planned):
         os.mkdir(publish_parent_dir_planned)
     publish_parent_dir = publish_parent_dir_planned
@@ -147,24 +153,29 @@ if exitcode == CONTINUE:
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
-NM = new_milestones = {}
+
+D = {}
 
 if publish_html_done:
-    NM['publish_html_done'] = publish_html_done
+    D['publish_html_done'] = publish_html_done
 
 if publish_removed_old:
-    NM['publish_removed_old'] = publish_removed_old
+    D['publish_removed_old'] = publish_removed_old
 
 if publish_parent_dir:
-    NM['publish_parent_dir'] = publish_parent_dir
+    D['publish_parent_dir'] = publish_parent_dir
+
+if publish_parent_parent_dir:
+    D['publish_parent_parent_dir'] = publish_parent_parent_dir
 
 if publish_dir:
-    NM['publish_dir'] = publish_dir
+    D['publish_dir'] = publish_dir
 
 if publish_dir_buildinfo:
-    NM['publish_dir_buildinfo'] = publish_dir_buildinfo
+    D['publish_dir_buildinfo'] = publish_dir_buildinfo
 
-result['MILESTONES'].append(NM)
+if D:
+    result['MILESTONES'].append(D)
 
 # ==================================================
 # save result

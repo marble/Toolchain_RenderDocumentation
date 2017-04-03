@@ -30,22 +30,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -62,9 +52,9 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    workdir_home = params_get('workdir_home')
-    masterdocs_initial = milestones_get('masterdocs_initial')
-    gitdir = tct.deepget(milestones, 'buildsettings', 'gitdir')
+    workdir_home = lookup(params, 'workdir_home')
+    masterdocs_initial = lookup(milestones, 'masterdocs_initial')
+    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not (workdir_home and masterdocs_initial and gitdir):
         exitcode = 2
 

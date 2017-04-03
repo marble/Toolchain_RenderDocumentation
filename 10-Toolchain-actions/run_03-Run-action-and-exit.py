@@ -11,12 +11,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
 loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params['toolname_pure']
+workdir = params['workdir']
 exitcode = CONTINUE = 0
 
 
@@ -24,27 +27,17 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0:
+if 0 or milestones.get('debug_always_make_milestones_snapshot'):
     tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -53,8 +46,9 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 lockfiles_removed = []
-toolchain_actions = params_get('toolchain_actions', [])
+toolchain_actions = lookup(params, 'toolchain_actions', default=[])
 removed_dirs = []
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -63,35 +57,120 @@ removed_dirs = []
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
-    toolchain_temp_home = params_get('toolchain_temp_home')
-    run_id = facts_get('run_id')
 
-if exitcode == CONTINUE:
+    # required milestones
+    requirements = []
+
+    # just test
+    for requirement in requirements:
+        v = lookup(milestones, requirement)
+        if not v:
+            loglist.append("'%s' not found" % requirement)
+            exitcode = 2
+
+    # fetch #1
+    toolchain_name = lookup(params, 'toolchain_name')
+    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    run_id = lookup(facts, 'run_id')
+
+    # test #1
     if not (toolchain_name and toolchain_temp_home and run_id):
         exitcode = 2
 
 if exitcode == CONTINUE:
-    lockfile_name = tct.deepget(facts, 'tctconfig', toolchain_name, 'lockfile_name')
-    loglist.append(('lockfile_name', lockfile_name))
 
-if exitcode == CONTINUE:
+    # fetch #2
+    lockfile_name = lookup(facts, 'tctconfig', toolchain_name, 'lockfile_name')
+
+    # text #2
     if not (lockfile_name):
         exitcode = 2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append('PROBLEM with required params')
 
+if CONTINUE != 0:
+    loglist.append({'CONTINUE': CONTINUE})
+    loglist.append('NOTHING to do')
+
+
+# =========================================================
+# Prepare for a subprocess with perfect logging
+# ---------------------------------------------------------
+
+if exitcode == CONTINUE:
+
+    import codecs
+    import os
+    import subprocess
+
+    def cmdline(cmd, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        out, err = process.communicate()
+        exitcode = process.returncode
+        return exitcode, cmd, out, err
+
+
+    def execute_cmdlist(cmdlist):
+        global xeq_name_cnt
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+
+        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+
+        return exitcode, cmd, out, err
+
+    # exitcode, cmd, out, err = execute_cmdlist(cmdlist)
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-import shutil
+
+
+if 0 and exitcode == CONTINUE and 'This clause is experimental research':
+    import os
+
+    cmdlist = ['find /proc',
+               '-maxdepth 1',
+               '-user marble',
+               '-type d',
+               # '-mmin +$AGE',
+               ]
+    exitcode_temp, cmd, out, err = execute_cmdlist(cmdlist)
+
+
+    for one in out.split('\n'):
+        one = one.strip().strip('/proc/')
+        pid = None
+        try:
+            pid = int(one)
+        except ValueError:
+            pass
+        if one is not None:
+            exitcode_temp, cmd, out, err = execute_cmdlist(['ps', str(one)])
+
 
 if exitcode == CONTINUE:
+    import shutil
+
     for action in toolchain_actions:
 
         if action == 'help':
