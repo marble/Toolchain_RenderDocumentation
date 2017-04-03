@@ -151,7 +151,7 @@ if exitcode == CONTINUE:
         result['MILESTONES'].append({'emails_found': emails_found})
     if composerjson:
         result['MILESTONES'].append({'composerjson': composerjson})
-    if composerjson:
+    if NAMING:
         result['MILESTONES'].append({'NAMING': NAMING})
     if emails_user:
         result['MILESTONES'].append({'emails_user': emails_user})
