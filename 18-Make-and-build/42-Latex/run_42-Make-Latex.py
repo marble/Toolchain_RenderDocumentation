@@ -76,7 +76,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     if not make_latex:
         loglist.append('make_latex is turned off')
-        CONTINUE = -2
+        exitcode = 2
 
 if exitcode == CONTINUE:
     if not (make_latex and ready_for_build and rebuild_needed and
