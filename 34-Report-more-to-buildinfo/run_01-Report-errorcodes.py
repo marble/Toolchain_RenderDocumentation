@@ -71,7 +71,7 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-final_exitcode = None
+final_exitcode = 0
 talk_builtin = 1
 talk_run_command = tct.deepget(facts, 'run_command', 'talk')
 talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk')
@@ -137,8 +137,8 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     for k, v in tools_exitcodes.items():
-        final_exitcode = 0 if v == 0 else 1
-        if final_exitcode > 0:
+        if v != 0 and v != 2:
+            final_exitcode = 1
             break
 
 if exitcode == CONTINUE:
