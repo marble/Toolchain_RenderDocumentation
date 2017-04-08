@@ -32,22 +32,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -55,10 +45,10 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-host = 'localhost'
+smtp_host = None
 sender = 'RenderDocumentation@typo3.org'
 receivers = ''
-subject = milestones_get('email_user_subject', 'Your project: Documentation rendered')
+subject = lookup(milestones, 'email_user_subject', 'Your project: Documentation rendered')
 textfile = None
 htmlfile = None
 cmdline_reportlines = milestones.get('cmdline_reportlines', [])
@@ -78,14 +68,14 @@ if exitcode == CONTINUE:
 
     # just test
     for requirement in requirements:
-        v = milestones_get(requirement)
+        v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 2
-    TheProjectLogHtmlmailMessageHtml = milestones_get('TheProjectLogHtmlmailMessageHtml')
-    TheProjectLogHtmlmailMessageMdTxt = milestones_get('TheProjectLogHtmlmailMessageMdTxt')
-    TheProjectLogHtmlmailMessageRstTxt = milestones_get('TheProjectLogHtmlmailMessageRstTxt')
-    TheProjectLogHtmlmailMessageTxt = milestones_get('TheProjectLogHtmlmailMessageTxt')
+    TheProjectLogHtmlmailMessageHtml = lookup(milestones, 'TheProjectLogHtmlmailMessageHtml')
+    TheProjectLogHtmlmailMessageMdTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageMdTxt')
+    TheProjectLogHtmlmailMessageRstTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageRstTxt')
+    TheProjectLogHtmlmailMessageTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageTxt')
 
     textfile = TheProjectLogHtmlmailMessageTxt or TheProjectLogHtmlmailMessageRstTxt or TheProjectLogHtmlmailMessageMdTxt
     htmlfile = TheProjectLogHtmlmailMessageHtml
@@ -93,18 +83,24 @@ if exitcode == CONTINUE:
         loglist.append('No textfile and no htmlfile specified')
         CONTINUE = -1
 
+    smtp_host = lookup(milestones, 'smtp_host')
+    smtp_host = smtp_host or lookup(facts, 'tctconfig', facts['toolchain_name'])
+    if not smtp_host:
+        loglist.append('No smtp_host specified')
+        CONTINUE = -1
+
 if exitcode == CONTINUE:
 
     # fetch
-    email_admin = milestones_get('email_admin')
-    email_admin_send_extra_mail = milestones_get('email_admin_send_extra_mail')
-    email_notify_about_new_build = milestones_get('email_notify_about_new_build')
-    email_user_bcc = milestones_get('email_user_bcc')
-    email_user_cc = milestones_get('email_user_cc')
-    email_user_do_not_send = milestones_get('email_user_do_not_send') # at the commandline
-    email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off')
-    email_user_to_instead = milestones_get('email_user_to_instead')
-    emails_user_from_project = milestones_get('emails_user_from_project')
+    email_admin = lookup(milestones, 'email_admin')
+    email_admin_send_extra_mail = lookup(milestones, 'email_admin_send_extra_mail')
+    email_notify_about_new_build = lookup(milestones, 'email_notify_about_new_build')
+    email_user_bcc = lookup(milestones, 'email_user_bcc')
+    email_user_cc = lookup(milestones, 'email_user_cc')
+    email_user_do_not_send = lookup(milestones, 'email_user_do_not_send') # at the commandline
+    email_user_notify_is_turned_off = lookup(milestones, 'email_user_notify_is_turned_off')
+    email_user_to_instead = lookup(milestones, 'email_user_to_instead')
+    emails_user_from_project = lookup(milestones, 'emails_user_from_project')
 
     # test
 
@@ -142,7 +138,7 @@ def as_list(v):
     return result
 
 def send_the_mail(sender, receivers, subject='',
-                  ccreceivers=None, bccreceivers=None, host='localhost',
+                  ccreceivers=None, bccreceivers=None, smtp_host='localhost',
                   textfile=None, htmlfile=None):
 
     sendmail_result = None
@@ -194,7 +190,7 @@ def send_the_mail(sender, receivers, subject='',
         cmdline_reportlines.append(u'Cc     : ' + msg_cc_value)
         cmdline_reportlines.append(u'Bcc    : ' + msg_bcc_value)
 
-        s = smtplib.SMTP(host)
+        s = smtplib.SMTP(smtp_host)
         sendmail_result = s.sendmail(sender, msg_to_value, msg.as_string())
         s.quit()
         cmdline_reportlines.append(u'result : ' + repr(sendmail_result))
@@ -221,7 +217,7 @@ if exitcode == CONTINUE:
                       bccreceivers = email_user_bcc,
                       textfile = textfile,
                       htmlfile = htmlfile,
-                      host=host)
+                      smtp_host=smtp_host)
 
     if email_admin and email_admin_send_extra_mail:
         send_the_mail(sender, email_admin, subject=subject,
@@ -229,7 +225,7 @@ if exitcode == CONTINUE:
                       bccreceivers = None,
                       textfile = textfile,
                       htmlfile = htmlfile,
-                      host=host)
+                      smtp_host=smtp_host)
 
 
 # ==================================================
