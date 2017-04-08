@@ -69,6 +69,7 @@ buildsettings_default = {
   }
 buildsettings_initial = {}
 xeq_name_cnt = 0
+buildsettings_from_run_command = {}
 
 
 # ==================================================
@@ -171,6 +172,15 @@ if exitcode == CONTINUE:
         buildsettings['builddir'] = builddir.replace(needle, version)
 
 
+
+    for k in buildsettings.keys():
+        v = lookup(facts, 'run_command', k, default=None)
+        if v is not None:
+            buildsettings[k] = v
+            buildsettings_from_run_command[k] = v
+
+
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -186,6 +196,11 @@ if buildsettings_initial:
 if buildsettings_default:
     # defaults we may have supplemented
     result['MILESTONES'].append({'buildsettings_default': buildsettings_default})
+
+if buildsettings_from_run_command:
+    # defaults we may have supplemented
+    result['MILESTONES'].append({'buildsettings_from_run_command': buildsettings_from_run_command})
+
 
 # ==================================================
 # save result
