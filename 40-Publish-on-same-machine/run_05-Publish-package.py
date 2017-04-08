@@ -101,6 +101,7 @@ if CONTINUE != 0:
 import hashlib
 import re
 import time
+import shutil
 
 def hashfile(f1, hasher, blocksize=4096):
     buf = f1.read(blocksize)
@@ -121,7 +122,7 @@ if exitcode == CONTINUE:
         loglist.append(('publish_package_file', publish_package_file))
         if os.path.isfile(publish_package_file):
             os.remove(publish_package_file)
-        os.rename(package_file, publish_package_file)
+        shutil.move(package_file, publish_package_file)
     else:
         # should not occurr unless developing
         pass
