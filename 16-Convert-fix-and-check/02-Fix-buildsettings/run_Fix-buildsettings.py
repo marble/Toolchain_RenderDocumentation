@@ -66,7 +66,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
     if not (TheProjectLog):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

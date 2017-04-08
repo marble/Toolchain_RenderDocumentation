@@ -90,7 +90,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     create_buildinfo = milestones_get('create_buildinfo')
@@ -116,7 +116,7 @@ if exitcode == CONTINUE:
 
     toolfolderabspath = params_get('toolfolderabspath')
     if not toolfolderabspath:
-        exitcode = 2
+        exitcode = 22
 
 
 if exitcode == CONTINUE:
@@ -144,7 +144,7 @@ if exitcode == CONTINUE:
     htmlmail_template_file = os.path.join(toolfolderabspath, 'templates', 't3docs.html')
     if not os.path.isfile(htmlmail_template_file):
         loglist.append(('fatal: htmlmail_template_file not found', htmlmail_template_file))
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     # use individual variables for nice code completion in PyCharm

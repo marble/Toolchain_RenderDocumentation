@@ -67,7 +67,7 @@ if exitcode == CONTINUE:
     TheProject = milestones_get('TheProject')
 
     if not (TheProject):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

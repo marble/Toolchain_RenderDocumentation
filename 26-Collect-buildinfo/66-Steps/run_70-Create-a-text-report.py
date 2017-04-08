@@ -76,7 +76,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
@@ -95,7 +95,7 @@ if exitcode == CONTINUE:
             webroot_part_of_builddir and url_of_webroot and
             buildsettings_builddir and relative_part_of_builddir and
             webroot_abspath):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

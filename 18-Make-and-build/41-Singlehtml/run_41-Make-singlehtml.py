@@ -83,7 +83,7 @@ if exitcode == CONTINUE:
     if not (make_singlehtml and ready_for_build and rebuild_needed and
             toolname and included_files_check_is_ok and build_html):
         loglist.append('requirements are not met')
-        exitcode = 2
+        exitcode = 22
 
 
 

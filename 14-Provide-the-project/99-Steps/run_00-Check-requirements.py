@@ -67,7 +67,7 @@ if exitcode == CONTINUE:
     buildsettings = milestones_get('buildsettings')
 
     if not buildsettings:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

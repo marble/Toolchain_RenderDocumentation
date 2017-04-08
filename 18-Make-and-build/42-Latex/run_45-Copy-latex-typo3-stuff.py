@@ -69,7 +69,7 @@ if exitcode == CONTINUE:
     toolchain_name = params_get('toolchain_name')
 
     if not toolchain_name:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -99,7 +99,7 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     if not os.path.isdir(latex_contrib_typo3_folder):
         loglist.append(('is not a directory', latex_contrib_typo3_folder))
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
 

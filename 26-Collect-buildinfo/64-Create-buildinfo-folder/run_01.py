@@ -73,14 +73,14 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     if exitcode == CONTINUE:
         TheProjectResultVersion = milestones_get('TheProjectResultVersion')
         toolfolderabspath = params_get('toolfolderabspath')
 
     if not (TheProjectResultVersion and toolfolderabspath):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

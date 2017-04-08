@@ -79,7 +79,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not (TheProject and buildsettings and project and version):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

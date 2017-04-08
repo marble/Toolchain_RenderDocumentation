@@ -78,7 +78,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     publish_dir = milestones_get('publish_dir')
@@ -89,7 +89,7 @@ if exitcode == CONTINUE:
     # test
     if not (publish_dir and publish_parent_dir and publish_html_done
             and toolchain_name):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     htaccess_template_show_latest = tct.deepget(facts, 'tctconfig', toolchain_name, 'htaccess_template_show_latest')
@@ -97,7 +97,7 @@ if exitcode == CONTINUE:
 
     # test
     if not htaccess_template_show_latest:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

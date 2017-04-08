@@ -74,7 +74,7 @@ if exitcode == CONTINUE:
     workdir = params_get('workdir')
     documentation_folder = milestones_get('documentation_folder')
     if not (workdir and toolname and documentation_folder):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

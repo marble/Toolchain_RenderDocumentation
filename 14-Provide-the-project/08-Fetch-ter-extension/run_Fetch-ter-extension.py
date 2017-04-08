@@ -71,12 +71,12 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     buildsettings = lookup(milestones, 'buildsettings')
     if not buildsettings:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
 
@@ -157,7 +157,7 @@ if exitcode == CONTINUE:
     foldername = foldername.replace('*', '').replace('?', '')
     if not foldername:
         loglist.append('illegal extension specification')
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     gitdir = os.path.join(extensions_rootfolder, foldername)

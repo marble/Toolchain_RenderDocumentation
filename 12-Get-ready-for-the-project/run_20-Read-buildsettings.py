@@ -87,14 +87,14 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     makedir = lookup(milestones, 'makedir')
 
     # test
     if not makedir:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

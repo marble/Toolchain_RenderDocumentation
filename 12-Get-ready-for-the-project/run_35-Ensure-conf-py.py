@@ -74,7 +74,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     makedir_abspath = milestones_get('makedir_abspath')
@@ -118,7 +118,7 @@ if exitcode == CONTINUE:
         loglist.append(('conf.py not found in makedir', makedir_abspath))
         printerror = print
         printerror('conf.py is missing in makedir ' + makedir_abspath)
-        exitcode = 2
+        exitcode = 22
 
 
 # ==================================================

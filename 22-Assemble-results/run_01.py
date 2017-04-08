@@ -74,11 +74,11 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     buildsettings = milestones_get('buildsettings', {})
     if not buildsettings:
-        exitcode = 2
+        exitcode = 22
 
     build_html = milestones_get('build_html')
     build_html_folder = milestones_get('build_html_folder')
@@ -86,7 +86,7 @@ if exitcode == CONTINUE:
     version = buildsettings.get('version')
 
     if not (build_html and build_html_folder and TheProject and version):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -114,7 +114,7 @@ if exitcode == CONTINUE:
     loglist.append(TheProjectResult)
     if os.path.exists(TheProjectResult):
         loglist.append("'TheProjectResult' already exists.")
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     src = build_html_folder

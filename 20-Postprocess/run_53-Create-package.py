@@ -73,7 +73,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     package_file = None
     buildsettings = milestones_get('buildsettings', {})

@@ -74,7 +74,7 @@ if exitcode == CONTINUE:
 
     if not (buildsettings_file_fixed and makedir and masterdoc and TheProject
             and TheProjectBuild and TheProjectLog):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

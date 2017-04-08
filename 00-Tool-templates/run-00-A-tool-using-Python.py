@@ -62,7 +62,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     toolchain_name = lookup(params, 'toolchain_name')

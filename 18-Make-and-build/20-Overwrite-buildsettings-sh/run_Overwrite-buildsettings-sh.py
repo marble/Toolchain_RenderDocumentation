@@ -61,7 +61,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     buildsettings_file = lookup(milestones, 'buildsettings_file')

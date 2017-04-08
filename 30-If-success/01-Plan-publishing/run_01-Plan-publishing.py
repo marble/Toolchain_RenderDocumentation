@@ -85,7 +85,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     url_of_webroot = milestones_get('url_of_webroot')
@@ -102,7 +102,7 @@ if exitcode == CONTINUE:
             buildsettings_builddir and
             webroot_part_of_builddir and webroot_abspath and
             relative_part_of_builddir):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -138,7 +138,7 @@ if exitcode == CONTINUE:
     if 0:
         if not os.path.exists(publish_parent_parent_dir):
             loglist.append(('publish_parent_parent_dir does not exist', publish_parent_parent_dir))
-            exitcode = 2
+            exitcode = 22
 
 
 # ==================================================

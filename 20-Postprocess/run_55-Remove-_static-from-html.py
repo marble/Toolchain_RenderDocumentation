@@ -64,7 +64,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     done_replace_static_in_html = lookup(milestones, 'done_replace_static_in_html')
     build_html_folder = lookup(milestones, 'build_html_folder')

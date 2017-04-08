@@ -69,7 +69,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     buildsettings = lookup(milestones, 'buildsettings')
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
@@ -84,7 +84,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not buildsettings:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     if giturl and not gitbranch:

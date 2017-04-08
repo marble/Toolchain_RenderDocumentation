@@ -75,14 +75,14 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     build_html = milestones_get('build_html')
     TheProjectLog = milestones_get('TheProjectLog')
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
 
     if not (build_html and TheProjectLog and TheProjectResultBuildinfo):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

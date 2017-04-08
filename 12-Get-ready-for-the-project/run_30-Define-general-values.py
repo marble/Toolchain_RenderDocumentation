@@ -116,7 +116,7 @@ if exitcode == CONTINUE:
 
 if not (toolchain_name and webroot_part_of_builddir and url_of_webroot
         and webroot_abspath and buildsettings_builddir):
-    exitcode = 2
+    exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

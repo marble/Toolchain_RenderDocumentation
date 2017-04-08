@@ -89,7 +89,7 @@ if exitcode == CONTINUE:
     TheProjectMakedir = TheProject + 'Makedir'
     if os.path.exists(TheProjectMakedir):
         loglist.append(('Error: TheProjectMakdir should not exist', TheProjectMakedir))
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     srcdir = makedir.rstrip('/')

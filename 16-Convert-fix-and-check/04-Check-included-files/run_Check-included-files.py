@@ -74,7 +74,7 @@ if exitcode == CONTINUE:
 
     if not (documentation_folder and masterdoc and TheProjectLog and
             toolfolderabspath and workdir):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

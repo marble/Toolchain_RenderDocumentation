@@ -75,7 +75,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     toolchain_name = params_get('toolchain_name')
@@ -84,7 +84,7 @@ if exitcode == CONTINUE:
 
     # test
     if not webroot_abspath:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

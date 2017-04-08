@@ -111,7 +111,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
             # do not break here to get info about all required milestones
 
@@ -124,7 +124,7 @@ if exitcode == CONTINUE:
 
         # When TCT sees exitcode >= `1`, processing of the following tools
         # IN THIS FOLDER (including subfolders) is skipped.
-        # exitcode = 2
+        # exitcode = 22
 
         # When TCT sees exitcode `99`, processing of THE WHOLE toolchain
         # is aborted

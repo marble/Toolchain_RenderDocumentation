@@ -79,7 +79,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     publish_dir_planned = milestones_get('publish_dir_planned')
@@ -95,7 +95,7 @@ if exitcode == CONTINUE:
         publish_parent_parent_dir_planned and
         TheProjectResult and
         TheProjectResultVersion):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -132,7 +132,7 @@ if exitcode == CONTINUE:
     if os.path.exists(publish_dir_planned):
         loglist.append(('cannot remove `publish_dir_planned`', publish_dir_planned))
         publish_removed_old = False
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     # move our new build in place
@@ -140,7 +140,7 @@ if exitcode == CONTINUE:
     publish_dir = publish_dir_planned
     if not os.path.isdir(publish_dir):
         loglist.append(('cannot move build to `publish_dir`', publish_dir))
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     publish_html_done = True

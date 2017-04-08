@@ -77,7 +77,7 @@ if exitcode == CONTINUE:
     localization = lookup(milestones, 'buildsettings', 'localization', default='default')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not gitdir:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

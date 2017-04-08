@@ -66,7 +66,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch #1
     toolchain_name = lookup(params, 'toolchain_name')
@@ -75,7 +75,7 @@ if exitcode == CONTINUE:
 
     # test #1
     if not (toolchain_name and toolchain_temp_home and run_id):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
 
@@ -84,7 +84,7 @@ if exitcode == CONTINUE:
 
     # text #2
     if not (lockfile_name):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

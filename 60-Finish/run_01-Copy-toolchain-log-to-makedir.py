@@ -76,7 +76,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     workdir_home = params_get('workdir_home')
@@ -84,7 +84,7 @@ if exitcode == CONTINUE:
 
     # test
     if not (workdir_home and makedir):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

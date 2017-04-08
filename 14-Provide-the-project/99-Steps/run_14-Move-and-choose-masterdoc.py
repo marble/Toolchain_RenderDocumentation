@@ -62,7 +62,7 @@ if exitcode == CONTINUE:
     TheProject = lookup(milestones, 'TheProject')
     masterdoc_candidates = lookup(milestones, 'masterdoc_candidates')
     if not (TheProject and masterdoc_candidates):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

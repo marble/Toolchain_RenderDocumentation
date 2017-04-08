@@ -72,14 +72,14 @@ if exitcode == CONTINUE:
     toolchain_name = params_get('toolchain_name')
     toolchain_temp_home = params_get('toolchain_temp_home')
     if not (toolchain_name and toolchain_temp_home):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     lockfile_ttl_seconds = milestones.get('lockfile_ttl_seconds', 3600)
     lockfile_name = tct.deepget(facts, 'tctconfig', toolchain_name, 'lockfile_name')
     loglist.append(('lockfile_name', lockfile_name))
     if not lockfile_name:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     lockfile_planned = os.path.join(toolchain_temp_home, lockfile_name)
@@ -115,7 +115,7 @@ if exitcode == CONTINUE:
         if lockfile_planned_age >= lockfile_ttl_seconds:
             os.remove(lockfile_planned)
             if os.path.exists(lockfile_planned):
-                exitcode = 2
+                exitcode = 22
             else:
                 lockfile_removed = lockfile_planned
                 if talk:
@@ -124,7 +124,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     if os.path.exists(lockfile_planned):
         loglist.append('lockfile_planned still exists')
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     tct.writejson(facts, lockfile_planned)

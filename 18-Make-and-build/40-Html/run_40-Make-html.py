@@ -64,7 +64,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok')
@@ -76,7 +76,7 @@ if exitcode == CONTINUE:
     # test
     if not (included_files_check_is_ok and ready_for_build and
             rebuild_needed and toolname and toolname_pure):
-        exitcode = 2
+        exitcode = 22
     else:
         loglist.append('ok, check more params')
 
@@ -91,7 +91,7 @@ if exitcode == CONTINUE:
 
     if not (masterdoc and SPHINXBUILD and
             TheProject and TheProjectBuild and TheProjectLog and TheProjectMakedir):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

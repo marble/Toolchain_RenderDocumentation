@@ -82,14 +82,14 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     checksum_ttl_seconds = milestones_get('checksum_ttl_seconds', 1)
 
     # test
     if not (checksum_ttl_seconds):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

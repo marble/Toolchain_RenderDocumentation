@@ -95,7 +95,7 @@ if exitcode == CONTINUE:
         v = milestones_get(requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
 
@@ -137,7 +137,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     for k, v in tools_exitcodes.items():
-        if v != 0 and v != 2:
+        if v != 0 and v != 22:
             final_exitcode = 1
             break
 

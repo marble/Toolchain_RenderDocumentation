@@ -109,7 +109,7 @@ if exitcode == CONTINUE:
             settingsyml = None
     if settingsyml is None:
         loglist.append(('error: cannot parse `settingsyml_file`', settingsyml_file))
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append({'settingsyml': copy.deepcopy(settingsyml)})

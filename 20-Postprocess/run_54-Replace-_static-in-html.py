@@ -63,7 +63,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     build_html_folder = lookup(milestones, 'build_html_folder')
 

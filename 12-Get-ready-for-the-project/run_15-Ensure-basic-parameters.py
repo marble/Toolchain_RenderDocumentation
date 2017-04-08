@@ -68,7 +68,7 @@ if exitcode == CONTINUE:
     toolchain_name = facts_get('toolchain_name')
     cwd = facts_get('cwd')
     if not (toolchain_name and cwd):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     makedir = params_get('makedir', '')
@@ -76,7 +76,7 @@ if exitcode == CONTINUE:
         msg = 'Usage: tct run %s --config makedir MAKEDIR [--toolchain-help]' % toolchain_name
         loglist.append(msg)
         print(msg)
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -98,7 +98,7 @@ if exitcode == CONTINUE:
         msg = "makedir not found: %s" % makedir_missing
         loglist.append(msg)
         print(msg)
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     makedir_abspath = makedir

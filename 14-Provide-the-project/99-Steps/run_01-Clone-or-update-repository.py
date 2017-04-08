@@ -66,7 +66,7 @@ if exitcode == CONTINUE:
         v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
-            exitcode = 2
+            exitcode = 22
 
     # fetch
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
@@ -75,7 +75,7 @@ if exitcode == CONTINUE:
 
     # test
     if not gitdir:
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     if not (giturl and gitbranch):
@@ -160,7 +160,7 @@ if exitcode == CONTINUE:
         do_clone_or_pull = 'clone'
         gitdir_must_start_with = lookup(milestones, 'gitdir_must_start_with')
         if not gitdir_must_start_with:
-            exitcode = 2
+            exitcode = 22
 
 if exitcode == CONTINUE:
     if do_clone_or_pull == 'clone':

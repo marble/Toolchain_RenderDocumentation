@@ -56,7 +56,7 @@ if exitcode == CONTINUE:
     masterdocs_initial = lookup(milestones, 'masterdocs_initial')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not (workdir_home and masterdocs_initial and gitdir):
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -79,7 +79,7 @@ if exitcode == CONTINUE:
     TheProject = os.path.join(workdir_home, 'TheProject')
     if os.path.exists(TheProject):
         loglist.append("TheProject already exists: %s" % TheProject)
-        exitcode = 2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     os.mkdir(TheProject)
