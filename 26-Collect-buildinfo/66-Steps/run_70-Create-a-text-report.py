@@ -22,6 +22,8 @@ toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+CONTINUE = -1
+
 
 # ==================================================
 # Make a copy of milestones for later inspection?
