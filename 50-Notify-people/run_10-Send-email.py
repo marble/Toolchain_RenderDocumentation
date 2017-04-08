@@ -83,8 +83,9 @@ if exitcode == CONTINUE:
         loglist.append('No textfile and no htmlfile specified')
         CONTINUE = -1
 
-    smtp_host = lookup(milestones, 'smtp_host')
-    smtp_host = smtp_host or lookup(facts, 'tctconfig', facts['toolchain_name'])
+    smtp_host = lookup(milestones, 'smtp_host') or \
+        lookup(facts, 'run_command', 'smtp_host') or \
+        lookup(facts, 'tctconfig', facts['toolchain_name'], 'smtp_host')
     if not smtp_host:
         loglist.append('No smtp_host specified')
         CONTINUE = -1
