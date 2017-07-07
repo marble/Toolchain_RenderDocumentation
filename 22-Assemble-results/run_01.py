@@ -20,6 +20,14 @@ loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 # ==================================================
+# Define variables
+# --------------------------------------------------
+
+package_file_new_value = None
+pdf_dest_file = None
+pdf_dest_folder = None
+
+# ==================================================
 # Check required milestone(s)
 # --------------------------------------------------
 def milestones_get(name, default=None):
