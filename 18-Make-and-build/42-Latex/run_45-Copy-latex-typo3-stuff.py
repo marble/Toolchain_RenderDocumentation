@@ -86,6 +86,11 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    make_latex = params_get('make_latex')
+    if not make_latex:
+        CONTINUE == -2
+
+if exitcode == CONTINUE:
     build_latex = milestones_get('build_latex')
     build_latex_folder = milestones_get('build_latex_folder')
     latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', toolchain_name, 'latex_contrib_typo3_folder')
@@ -93,8 +98,8 @@ if exitcode == CONTINUE:
     if not (build_latex and build_latex_folder and latex_contrib_typo3_folder):
         CONTINUE = -1
 
-if CONTINUE != 0:
-    loglist.append('not enough info to start')
+    if CONTINUE != 0:
+        loglist.append('not enough info to start')
 
 if exitcode == CONTINUE:
     if not os.path.isdir(latex_contrib_typo3_folder):
