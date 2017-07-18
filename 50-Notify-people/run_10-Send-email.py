@@ -49,7 +49,7 @@ def lookup(D, *keys, **kwdargs):
 smtp_host = None
 sender = 'RenderDocumentation@typo3.org'
 receivers = ''
-subject = lookup(milestones, 'email_user_subject', 'Your project: Documentation rendered')
+subject = lookup(milestones, 'email_user_subject', default='Your project: Documentation rendered')
 textfile = None
 htmlfile = None
 cmdline_reportlines = milestones.get('cmdline_reportlines', [])

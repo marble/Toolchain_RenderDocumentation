@@ -31,29 +31,17 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
 # --------------------------------------------------
-
 
 known_target_folders = ['/typo3cms']
 
@@ -82,20 +70,22 @@ if exitcode == CONTINUE:
 
     # just test
     for requirement in requirements:
-        v = milestones_get(requirement)
+        v = lookup(milestones, requirement)
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
 
     # fetch
-    url_of_webroot = milestones_get('url_of_webroot')
-    TheProjectResult = milestones_get('TheProjectResult')
-    TheProjectResultVersion = milestones_get('TheProjectResultVersion')
-    buildsettings_builddir = milestones_get('buildsettings_builddir')
-    webroot_part_of_builddir = milestones_get('webroot_part_of_builddir')
-    webroot_abspath = milestones_get('webroot_abspath')
-    relative_part_of_builddir = milestones_get('relative_part_of_builddir')
+    url_of_webroot = lookup(milestones, 'url_of_webroot', default=None)
+    TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
+    TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion', default=None)
+    buildsettings_builddir = lookup(milestones, 'buildsettings_builddir', default=None)
+    webroot_part_of_builddir = lookup(milestones, 'webroot_part_of_builddir', default=None)
+    webroot_abspath = lookup(milestones, 'webroot_abspath', default=None)
+    relative_part_of_builddir = lookup(milestones, 'relative_part_of_builddir', default=None)
 
+    # ?
+    create_buildinfo = lookup(milestones, 'create_buildinfo', default=1)
 
     # test
     if not (url_of_webroot and TheProjectResult and TheProjectResultVersion and
@@ -121,7 +111,7 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     TheProjectResultVersionLen = len(TheProjectResultVersion)
 
-    publish_dir_planned = webroot_abspath + relative_part_of_builddir
+    publish_dir_planned = os.path.join(webroot_abspath, relative_part_of_builddir)
     loglist.append(('publish_dir_planned', publish_dir_planned))
 
 if exitcode == CONTINUE:
@@ -152,17 +142,17 @@ if exitcode == CONTINUE:
     publish_settings_cfg_planned = publish_dir_buildinfo_planned + '/Settings.cfg'
 
     publish_dir_singlehtml_planned = ''
-    build_singlehtml_folder = milestones_get('build_singlehtml_folder')
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder', default=None)
     if build_singlehtml_folder:
         publish_dir_singlehtml_planned = publish_dir_planned + '/' + os.path.split(build_singlehtml_folder)[1]
 
     publish_file_pdf_planned = ''
-    pdf_dest_file = milestones_get('pdf_dest_file')
+    pdf_dest_file = lookup(milestones, 'pdf_dest_file', default=None)
     if pdf_dest_file:
         publish_file_pdf_planned = publish_dir_pdf_planned + '/' + os.path.split(pdf_dest_file)[1]
 
     publish_package_file_planned = ''
-    package_file = milestones_get('package_file')
+    package_file = lookup(milestones, 'package_file', default=None)
     if publish_package_dir_planned and package_file:
         publish_package_file_planned = os.path.join(publish_package_dir_planned, os.path.split(package_file)[1])
 
@@ -202,6 +192,8 @@ if exitcode == CONTINUE:
             some_milestones[a] = url_of_webroot + b[len(webroot_abspath):] + c
     result['MILESTONES'].append(some_milestones)
 
+    if create_buildinfo:
+        result['MILESTONES'].append({'create_buildinfo':create_buildinfo})
 
 # ==================================================
 # save result
