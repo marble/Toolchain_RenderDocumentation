@@ -69,18 +69,18 @@ if exitcode == CONTINUE:
             exitcode = 22
 
     # fetch #1
-    toolchain_name = lookup(params, 'toolchain_name')
+    configset = lookup(milestones, 'configset')
     toolchain_temp_home = lookup(params, 'toolchain_temp_home')
     run_id = lookup(facts, 'run_id')
 
     # test #1
-    if not (toolchain_name and toolchain_temp_home and run_id):
+    if not (configset and toolchain_temp_home and run_id):
         exitcode = 22
 
 if exitcode == CONTINUE:
 
     # fetch #2
-    lockfile_name = lookup(facts, 'tctconfig', toolchain_name, 'lockfile_name')
+    lockfile_name = lookup(facts, 'tctconfig', configset, 'lockfile_name')
 
     # text #2
     if not (lockfile_name):
@@ -174,7 +174,7 @@ if exitcode == CONTINUE:
     for action in toolchain_actions:
 
         if action == 'help':
-            'Should not occurr'
+            'Should not occur'
 
         elif action == 'unlock':
             for top, dirs, files in os.walk(toolchain_temp_home):

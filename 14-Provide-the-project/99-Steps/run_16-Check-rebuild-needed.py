@@ -73,7 +73,8 @@ if exitcode == CONTINUE:
     toolname = params_get('toolname')
     workdir = params_get('workdir')
     documentation_folder = milestones_get('documentation_folder')
-    if not (workdir and toolname and documentation_folder):
+    configset = milestones_get('configset')
+    if not (configset and workdir and toolname and documentation_folder):
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -101,7 +102,7 @@ import subprocess
 import time
 
 rebuild_needed_run_command = tct.deepget(facts, 'run_command', 'rebuild_needed', default=None)
-rebuild_needed_tctconfig = tct.deepget(facts, 'tctconfig', toolchain_name, 'rebuild_needed', default=None)
+rebuild_needed_tctconfig = tct.deepget(facts, 'tctconfig', configset, 'rebuild_needed', default=None)
 
 def cmdline(cmd, cwd=None):
     if cwd is None:

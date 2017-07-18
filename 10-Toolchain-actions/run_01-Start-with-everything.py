@@ -16,6 +16,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -30,22 +31,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -61,6 +52,7 @@ import time
 talk = None
 time_started_at_unixtime = time.time()
 time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+configset = lookup(facts, 'run_command', 'configset', default='Default')
 
 
 # ==================================================
@@ -69,9 +61,8 @@ time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fm
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
-    if not toolchain_name:
-        exitcode = 99
+    if not configset:
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -90,16 +81,19 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     talk_builtin = 1
     talk_run_command = tct.deepget(facts, 'run_command', 'talk')
-    talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk')
+    talk_tctconfig = tct.deepget(facts, 'tctconfig', configset, 'talk')
     talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
 if talk > 1:
-    print('# --------', facts['toolchain_name'], time_started_at)
+    print('# --------', toolchain_name, time_started_at)
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
+
+if configset:
+    result['MILESTONES'].append({'configset': configset})
 
 if talk is not None:
     result['MILESTONES'].append({'talk': talk})

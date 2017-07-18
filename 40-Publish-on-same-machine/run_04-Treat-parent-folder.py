@@ -18,6 +18,7 @@ result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
@@ -71,7 +72,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:
@@ -80,19 +81,19 @@ if exitcode == CONTINUE:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
 
+    configset = milestones_get('configset')
     # fetch
     publish_dir = milestones_get('publish_dir')
     publish_parent_dir = milestones_get('publish_parent_dir')
     publish_html_done = milestones_get('publish_html_done')
-    toolchain_name = facts_get('toolchain_name')
 
     # test
     if not (publish_dir and publish_parent_dir and publish_html_done
-            and toolchain_name):
+            and configset):
         exitcode = 22
 
 if exitcode == CONTINUE:
-    htaccess_template_show_latest = tct.deepget(facts, 'tctconfig', toolchain_name, 'htaccess_template_show_latest')
+    htaccess_template_show_latest = tct.deepget(facts, 'tctconfig', configset, 'htaccess_template_show_latest')
     loglist.append(('htaccess_template_show_latest', htaccess_template_show_latest))
 
     # test

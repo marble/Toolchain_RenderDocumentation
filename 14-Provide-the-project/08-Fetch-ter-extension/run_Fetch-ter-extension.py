@@ -17,6 +17,7 @@ result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
@@ -63,8 +64,9 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    configset = lookup(milestones, 'configset')
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:
@@ -86,10 +88,9 @@ if exitcode == CONTINUE:
     giturl = lookup(milestones, 'buildsettings', 'giturl')
     ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
-    toolchain_name = lookup(facts, 'toolchain_name')
 
     # fetch #2
-    extensions_rootfolder = lookup(facts, 'tctconfig', toolchain_name, 'extensions_rootfolder')
+    extensions_rootfolder = lookup(facts, 'tctconfig', configset, 'extensions_rootfolder')
 
     # test
     if not (ter_extkey and ter_extversion):

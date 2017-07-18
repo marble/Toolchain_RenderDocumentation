@@ -66,9 +66,9 @@ copied_latex_resources = []
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    toolchain_name = params_get('toolchain_name')
+    configset = milestones_get('configset')
 
-    if not toolchain_name:
+    if not configset:
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -93,7 +93,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     build_latex = milestones_get('build_latex')
     build_latex_folder = milestones_get('build_latex_folder')
-    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', toolchain_name, 'latex_contrib_typo3_folder')
+    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', configset, 'latex_contrib_typo3_folder')
     loglist.append(('latex_contrib_typo3_folder', latex_contrib_typo3_folder))
     if not (build_latex and build_latex_folder and latex_contrib_typo3_folder):
         CONTINUE = -1

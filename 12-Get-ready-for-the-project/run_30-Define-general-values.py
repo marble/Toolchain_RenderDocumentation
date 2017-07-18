@@ -96,25 +96,26 @@ general_csvlist_options = (
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = facts.get('toolchain_name')
+    # toolchain_name = facts.get('toolchain_name')
+    configset = milestones.get('configset')
 
     # is always on srv123
-    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
+    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', configset, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
     loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
 
-    url_of_webroot = tct.deepget(facts, 'tctconfig', toolchain_name, 'url_of_webroot', default=url_of_webroot)
+    url_of_webroot = tct.deepget(facts, 'tctconfig', configset, 'url_of_webroot', default=url_of_webroot)
     loglist.append(('url_of_webroot', url_of_webroot))
 
-    relative_part_of_builddir = tct.deepget(facts, 'tctconfig', toolchain_name, 'relative_part_of_builddir', default=relative_part_of_builddir)
+    relative_part_of_builddir = tct.deepget(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
     loglist.append(('relative_part_of_builddir', relative_part_of_builddir))
 
-    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath', default=webroot_abspath)
+    webroot_abspath = tct.deepget(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
     loglist.append(('webroot_abspath', webroot_abspath))
 
     buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
     loglist.append(('buildsettings_builddir', buildsettings_builddir))
 
-if not (toolchain_name and webroot_part_of_builddir and url_of_webroot
+if not (configset and webroot_part_of_builddir and url_of_webroot
         and webroot_abspath and buildsettings_builddir):
     exitcode = 22
 
@@ -130,7 +131,7 @@ else:
 
 if exitcode == CONTINUE:
     for option, default in general_int_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
         if not v:
             v = default
         else:
@@ -138,13 +139,13 @@ if exitcode == CONTINUE:
         result['MILESTONES'].append({option: v})
 
     for option, default in general_string_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
         if not v:
             v = default
         result['MILESTONES'].append({option: v})
 
     for option, default in general_csvlist_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', toolchain_name, option)
+        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
         if not v:
             v = default
         v = v.replace(' ', ',').split(',')

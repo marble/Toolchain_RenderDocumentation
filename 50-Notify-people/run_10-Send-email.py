@@ -19,6 +19,7 @@ result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
@@ -64,7 +65,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:
@@ -72,6 +73,8 @@ if exitcode == CONTINUE:
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
+
+    configset = lookup(milestones, 'configset')
     TheProjectLogHtmlmailMessageHtml = lookup(milestones, 'TheProjectLogHtmlmailMessageHtml')
     TheProjectLogHtmlmailMessageMdTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageMdTxt')
     TheProjectLogHtmlmailMessageRstTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageRstTxt')
@@ -85,7 +88,7 @@ if exitcode == CONTINUE:
 
     smtp_host = lookup(milestones, 'smtp_host') or \
         lookup(facts, 'run_command', 'smtp_host') or \
-        lookup(facts, 'tctconfig', facts['toolchain_name'], 'smtp_host')
+        lookup(facts, 'tctconfig', configset, 'smtp_host')
     if not smtp_host:
         loglist.append('No smtp_host specified')
         CONTINUE = -1

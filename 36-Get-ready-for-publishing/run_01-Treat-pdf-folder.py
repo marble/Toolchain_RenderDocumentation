@@ -19,6 +19,7 @@ result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
@@ -68,7 +69,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:
@@ -77,9 +78,9 @@ if exitcode == CONTINUE:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
 
+    configset = milestones_get('configset')
     # fetch
-    toolchain_name = params_get('toolchain_name')
-    webroot_abspath = tct.deepget(facts, 'tctconfig', toolchain_name, 'webroot_abspath')
+    webroot_abspath = tct.deepget(facts, 'tctconfig', configset, 'webroot_abspath')
     loglist.append(('webroot_abspath', webroot_abspath))
 
     # test

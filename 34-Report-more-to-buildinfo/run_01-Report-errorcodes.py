@@ -36,6 +36,7 @@ loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
+toolchain_name = facts['toolchain_name']
 exitcode = CONTINUE = 0
 
 
@@ -68,16 +69,23 @@ def params_get(name, default=None):
 
 
 # ==================================================
-# define
+# define 1
 # --------------------------------------------------
 
 final_exitcode = 0
 talk_builtin = 1
 talk_run_command = tct.deepget(facts, 'run_command', 'talk')
-talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk')
-talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 publish_dir_buildinfo_exitcodes = None
 xeq_name_cnt = 0
+
+
+# ==================================================
+# define 2
+# --------------------------------------------------
+
+configset = milestones_get('configset')
+talk_tctconfig = tct.deepget(facts, 'tctconfig', configset, 'talk')
+talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
 
 # ==================================================
@@ -88,7 +96,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:

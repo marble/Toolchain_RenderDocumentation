@@ -69,14 +69,14 @@ unixtime = None
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
+    configset = milestones_get('configset')
     toolchain_temp_home = params_get('toolchain_temp_home')
-    if not (toolchain_name and toolchain_temp_home):
+    if not (configset and toolchain_temp_home):
         exitcode = 22
 
 if exitcode == CONTINUE:
     lockfile_ttl_seconds = milestones.get('lockfile_ttl_seconds', 3600)
-    lockfile_name = tct.deepget(facts, 'tctconfig', toolchain_name, 'lockfile_name')
+    lockfile_name = tct.deepget(facts, 'tctconfig', configset, 'lockfile_name')
     loglist.append(('lockfile_name', lockfile_name))
     if not lockfile_name:
         exitcode = 22

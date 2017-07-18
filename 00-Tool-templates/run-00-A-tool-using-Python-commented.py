@@ -104,6 +104,7 @@ if exitcode == CONTINUE:
     # required milestones:
     requirements = [
         'url_of_webroot',
+        'configset'
     ]
 
     # just test:
@@ -116,6 +117,7 @@ if exitcode == CONTINUE:
             # do not break here to get info about all required milestones
 
     # fetch: the required parameter(s)
+    configset = milestones_get('configset')
     toolchain_name = params_get('toolchain_name')
 
     # test: Make sure all parameters are set
@@ -168,7 +170,7 @@ if exitcode == CONTINUE:
     # `tct.deepget(adict, key1, key2, ..., keyN, default=x)` take an arbitrary number of parameters
     talk_builtin = 1
     talk_run_command = tct.deepget(facts, 'run_command', 'talk')
-    talk_tctconfig = tct.deepget(facts, 'tctconfig', facts['toolchain_name'], 'talk', default=1)
+    talk_tctconfig = tct.deepget(facts, 'tctconfig', configset, 'talk', default=1)
     talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 
 # only in rare cases something is echoed to stdout

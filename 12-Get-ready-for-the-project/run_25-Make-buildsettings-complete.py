@@ -21,7 +21,6 @@ toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
-
 # ==================================================
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
@@ -45,6 +44,9 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+
+# which section of tctconfig does the Toolchain use?
+configset = None
 
 buildsettings = {}
 
@@ -71,13 +73,6 @@ if 0:
     buildsettings['version'] = ""
 
 
-
-
-
-
-
-
-
 if 0:
     "webroot_abspath, 'typo3cms/drafts', giturlslug"
 
@@ -90,7 +85,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = []
+    requirements = ['configset']
 
     # just test
     for requirement in requirements:
@@ -99,11 +94,15 @@ if exitcode == CONTINUE:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
 
-    # fetch
+    # step 1
+    # Which section of tctconfig.cfg do we use?
+    configset = lookup(milestones, 'configset')
     buildsettings = lookup(milestones, 'buildsettings')
-    extensions_builddir_relpath = lookup(facts, 'tctconfig', facts['toolchain_name'], 'extensions_builddir_relpath')
-    drafts_builddir_relpath = lookup(facts, 'tctconfig', facts['toolchain_name'], 'drafts_builddir_relpath')
-    webroot_abspath = lookup(facts, 'tctconfig', facts['toolchain_name'], 'webroot_abspath')
+
+    # step 2
+    extensions_builddir_relpath = lookup(facts, 'tctconfig', configset, 'extensions_builddir_relpath')
+    drafts_builddir_relpath = lookup(facts, 'tctconfig', configset, 'drafts_builddir_relpath')
+    webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath')
 
     # test
     if not (buildsettings and extensions_builddir_relpath and
@@ -345,6 +344,8 @@ if exitcode == CONTINUE:
 
 if buildsettings:
     result['MILESTONES'].append({'buildsettings': buildsettings})
+if configset:
+    result['MILESTONES'].append({'configset': configset})
 
 
 # ==================================================

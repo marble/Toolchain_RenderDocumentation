@@ -50,7 +50,6 @@ giturl = ''
 repositories_rootfolder = ''
 ter_extkey = ''
 ter_extversion = ''
-toolchain_name = ''
 xeq_name_cnt = 0
 
 
@@ -98,9 +97,9 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not gitdir:
-        toolchain_name = lookup(facts, 'toolchain_name')
-        repositories_rootfolder = lookup(facts, 'tctconfig', toolchain_name, 'repositories_rootfolder')
-        if not (toolchain_name and repositories_rootfolder):
+        configset = lookup(milestones, 'configset')
+        repositories_rootfolder = lookup(facts, 'tctconfig', configset, 'repositories_rootfolder')
+        if not (configset and repositories_rootfolder):
             CONTINUE = -2
 
 if exitcode == CONTINUE:
