@@ -124,8 +124,7 @@ if exitcode == CONTINUE:
         global xeq_name_cnt
         cmd = ' '.join(cmdlist)
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
-        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
         xeq_name_cnt += 1
         filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
         filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
@@ -133,6 +132,10 @@ if exitcode == CONTINUE:
 
         with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
         with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
             f2.write(out.decode('utf-8', 'replace'))
