@@ -65,15 +65,19 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     # required milestones
-    requirements = ['configset']
+    requirements = [
+        'configset',
+        'smtp_host'
+    ]
 
     # just test
     for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
+        v = lookup(milestones, requirement, default=None)
+        if v is None:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
 
+if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
     TheProjectLogHtmlmailMessageHtml = lookup(milestones, 'TheProjectLogHtmlmailMessageHtml')
     TheProjectLogHtmlmailMessageMdTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageMdTxt')
@@ -86,16 +90,12 @@ if exitcode == CONTINUE:
         loglist.append('No textfile and no htmlfile specified')
         CONTINUE = -1
 
-    smtp_host = lookup(milestones, 'smtp_host') or \
-        lookup(facts, 'run_command', 'smtp_host') or \
-        lookup(facts, 'tctconfig', configset, 'smtp_host')
+    smtp_host = lookup(milestones, 'smtp_host')
     if not smtp_host:
-        loglist.append('No smtp_host specified')
-        CONTINUE = -1
+        loglist.append("'Won't send mails. No smtp_host specified.")
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-
-    # fetch
     email_admin = lookup(milestones, 'email_admin')
     email_admin_send_extra_mail = lookup(milestones, 'email_admin_send_extra_mail')
     email_notify_about_new_build = lookup(milestones, 'email_notify_about_new_build')
@@ -106,29 +106,28 @@ if exitcode == CONTINUE:
     email_user_to_instead = lookup(milestones, 'email_user_to_instead')
     emails_user_from_project = lookup(milestones, 'emails_user_from_project')
 
-    # test
-
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
 
+if exitcode == 22:
+    loglist.append('I cannot send mails.')
+
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
     loglist.append('NOTHING to do')
-
 
 # ==================================================
 # functions
 # --------------------------------------------------
 
-import codecs
-import smtplib
-
-from email.header import Header
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
+if exitcode == CONTINUE:
+    import codecs
+    import smtplib
+    from email.header import Header
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
 
 def as_list(v):
     if not v:
@@ -255,4 +254,3 @@ tct.writejson(result, resultfile)
 # --------------------------------------------------
 
 sys.exit(exitcode)
-

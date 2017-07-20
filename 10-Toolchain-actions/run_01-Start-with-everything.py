@@ -34,26 +34,61 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
+deepget = tct.deepget
+
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
+def firstNotNone(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+    else:
+        return None
+
 
 # ==================================================
-# define
+# List all settings we handle here
+# --------------------------------------------------
+
+configset = None
+debug_always_make_milestones_snapshot = None
+smtp_host = None
+talk = None
+time_started_at = None
+time_started_at_unixtime = None
+
+# ==================================================
+# Set initial values (1)
+# --------------------------------------------------
+import time
+
+configset = deepget(facts, 'run_command', 'configset', default='Default')
+time_started_at_unixtime = time.time()
+
+
+# ==================================================
+# Set initial values (2)
 # --------------------------------------------------
 
 # use 0 or 1
 debug_always_make_milestones_snapshot = 1
 
-import time
+smtp_host = firstNotNone(
+    deepget(milestones, 'smtp_host', default=None),
+    deepget(facts, 'run_command', 'smtp_host', default=None),
+    deepget(facts, 'tctconfig', configset, 'smtp_host', default=None),
+    '')
 
-talk = None
-time_started_at_unixtime = time.time()
+talk = firstNotNone(
+    deepget(milestones, 'talk', default=None),
+    deepget(facts, 'run_command', 'talk', default=None),
+    deepget(facts, 'tctconfig', configset, 'talk', default=None),
+    0)
+
 time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
-configset = lookup(facts, 'run_command', 'configset', default='Default')
-
 
 # ==================================================
 # Check params
@@ -92,8 +127,14 @@ if talk > 1:
 # Set MILESTONE
 # --------------------------------------------------
 
-if configset:
+if configset is not None:
     result['MILESTONES'].append({'configset': configset})
+
+if debug_always_make_milestones_snapshot is not None:
+    result['MILESTONES'].append({'debug_always_make_milestones_snapshot': debug_always_make_milestones_snapshot})
+
+if smtp_host is not None:
+    result['MILESTONES'].append({'smtp_host': smtp_host})
 
 if talk is not None:
     result['MILESTONES'].append({'talk': talk})
@@ -103,11 +144,6 @@ if time_started_at:
 
 if time_started_at_unixtime:
     result['MILESTONES'].append({'time_started_at_unixtime': time_started_at_unixtime})
-
-if 'always':
-    result['MILESTONES'].append({'debug_always_make_milestones_snapshot': debug_always_make_milestones_snapshot})
-
-
 
 
 # ==================================================
