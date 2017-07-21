@@ -30,23 +30,22 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+deepget = tct.deepget
+
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
+def firstNotNone(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+    else:
+        return None
 
 
 # ==================================================
@@ -63,8 +62,8 @@ TheProjectTodosMakefolders = []
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    TheProject = milestones_get('TheProject')
-    localization_locales = milestones_get('localization_locales')
+    TheProject = lookup(milestones, 'TheProject')
+    localization_locales = lookup(milestones, 'localization_locales')
     buildsettings = milestones.get('buildsettings', {}).copy()
     project = buildsettings.get('project')
     version = buildsettings.get('version')
@@ -72,13 +71,12 @@ if exitcode == CONTINUE:
     if not (localization_locales):
         loglist.append('Nothing to do - no localizations found')
         CONTINUE = -1
-    if localization:
+    if localization and localization != 'default':
         loglist.append("Nothing to do - we are building '%s' already" % localization)
         CONTINUE = -1
 
-
 if exitcode == CONTINUE:
-    if not (TheProject and buildsettings and project and version):
+    if not (TheProject and localization_locales and buildsettings and project and version):
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -86,9 +84,12 @@ if exitcode == CONTINUE:
 else:
     loglist.append('PROBLEM with params')
 
+if exitcode == 22:
+    loglist.append('Cannot work with these parameters.')
+
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Cannot continue')
 
 
 # ==================================================
@@ -137,11 +138,11 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if TheProjectTodos:
     result['MILESTONES'].append({'TheProjectTodos': TheProjectTodos})
 
-    if TheProjectTodosMakefolders:
-        result['MILESTONES'].append({'TheProjectTodosMakefolders': TheProjectTodosMakefolders})
+if TheProjectTodosMakefolders:
+    result['MILESTONES'].append({'TheProjectTodosMakefolders': TheProjectTodosMakefolders})
 
 
 # ==================================================
