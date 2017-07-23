@@ -48,17 +48,19 @@ def firstNotNone(*args):
     else:
         return None
 
+def findRunParameter(key, default=None, D=None):
+    result = firstNotNone(
+        deepget(milestones, key, default=None),
+        deepget(facts, 'run_command', key, default=None),
+        deepget(facts, 'tctconfig', configset, key, default=None),
+        default,
+        None)
+    if type(D) == type({}):
+        D[key] = result
+    return result
 
-# ==================================================
-# List all settings we handle here
-# --------------------------------------------------
+ATNM = all_the_new_milestones = {}
 
-configset = None
-debug_always_make_milestones_snapshot = None
-smtp_host = None
-talk = None
-time_started_at = None
-time_started_at_unixtime = None
 
 # ==================================================
 # Set initial values (1)
@@ -66,29 +68,23 @@ time_started_at_unixtime = None
 import time
 
 configset = deepget(facts, 'run_command', 'configset', default='Default')
+ATNM['configset'] = configset
 time_started_at_unixtime = time.time()
+ATNM['time_started_at_unixtime'] = time_started_at_unixtime
+time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+ATNM['time_started_at'] = time_started_at
 
 
 # ==================================================
 # Set initial values (2)
 # --------------------------------------------------
 
-# use 0 or 1
-debug_always_make_milestones_snapshot = 1
+debug_always_make_milestones_snapshot = findRunParameter('debug_always_make_milestones_snapshot', 1, ATNM)
+make_latex = findRunParameter('make_latex', 0, ATNM)
+make_pdf = findRunParameter('make_pdf', 0, ATNM)
+smtp_host = findRunParameter('smtp_host', '', ATNM)
+talk = findRunParameter('talk', 0, ATNM)
 
-smtp_host = firstNotNone(
-    deepget(milestones, 'smtp_host', default=None),
-    deepget(facts, 'run_command', 'smtp_host', default=None),
-    deepget(facts, 'tctconfig', configset, 'smtp_host', default=None),
-    '')
-
-talk = firstNotNone(
-    deepget(milestones, 'talk', default=None),
-    deepget(facts, 'run_command', 'talk', default=None),
-    deepget(facts, 'tctconfig', configset, 'talk', default=None),
-    0)
-
-time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 
 # ==================================================
 # Check params
@@ -127,23 +123,8 @@ if talk > 1:
 # Set MILESTONE
 # --------------------------------------------------
 
-if configset is not None:
-    result['MILESTONES'].append({'configset': configset})
-
-if debug_always_make_milestones_snapshot is not None:
-    result['MILESTONES'].append({'debug_always_make_milestones_snapshot': debug_always_make_milestones_snapshot})
-
-if smtp_host is not None:
-    result['MILESTONES'].append({'smtp_host': smtp_host})
-
-if talk is not None:
-    result['MILESTONES'].append({'talk': talk})
-
-if time_started_at:
-    result['MILESTONES'].append({'time_started_at': time_started_at})
-
-if time_started_at_unixtime:
-    result['MILESTONES'].append({'time_started_at_unixtime': time_started_at_unixtime})
+if 'always':
+    result['MILESTONES'].append(ATNM)
 
 
 # ==================================================
@@ -156,5 +137,5 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
+exitcode = 90
 sys.exit(exitcode)
