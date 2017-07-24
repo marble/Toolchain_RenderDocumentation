@@ -2,19 +2,9 @@
 # coding: utf-8
 
 """
-Report errorcodes
+To be written ...
 
-This tool writes a human readable json file :file:`exitcodes.json`
-to the buildinfo folder if that folder exists. The file lists the
-tools in the order that they were run together with their exitcodes.
-
-If there are no exitcodes then the `final_exitcode` is `None`.
-Otherwise the `final_exitcode` is `0`, if all exitcodes are zero.
-If non-zero exitcodes exist the `final_exitcode` is set to `1`.
-
-For `RenderDocumentation -c talk 2` the contents of :file:`exitcodes.json`
-is echoed to the console.
-
+...
 """
 
 # ==================================================
@@ -49,43 +39,30 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
 # ==================================================
-# define 1
+# define
 # --------------------------------------------------
 
 final_exitcode = 0
-talk_builtin = 1
-talk_run_command = tct.deepget(facts, 'run_command', 'talk')
-publish_dir_buildinfo_exitcodes = None
+talk = lookup(milestones, default=0)
 xeq_name_cnt = 0
 
+publish_dir_buildinfo = None
+publish_dir_buildinfo_exitcodes = None
 
-# ==================================================
-# define 2
-# --------------------------------------------------
-
-configset = milestones_get('configset')
-talk_tctconfig = tct.deepget(facts, 'tctconfig', configset, 'talk')
-talk = int(talk_run_command or talk_tctconfig or talk_builtin)
+TheProjectResultBuildinfo = None
+TheProjectResultBuildinfoExitcodes = None
 
 
 # ==================================================
@@ -95,17 +72,12 @@ talk = int(talk_run_command or talk_tctconfig or talk_builtin)
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = ['configset']
+    tools_exitcodes = lookup(milestones, 'tools_exitcodes', default={})
+    # publish_dir_buildinfo = lookup(milestones, 'publish_dir_buildinfo')
+    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
+    if not (tools_exitcodes and TheProjectResultBuildinfo):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -122,14 +94,6 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    tools_exitcodes = milestones.get('tools_exitcodes', {})
-    publish_dir_buildinfo = milestones_get('publish_dir_buildinfo')
-    if 0:
-        if not (publish_dir_buildinfo and tools_exitcodes):
-            loglist.append('no buildinfo, nothing to do')
-            CONTINUE = -1
-
-if exitcode == CONTINUE:
     D = {}
     cnt = 0
     for k in sorted(tools_exitcodes):
@@ -141,7 +105,11 @@ if exitcode == CONTINUE:
     if publish_dir_buildinfo:
         publish_dir_buildinfo_exitcodes = os.path.join(publish_dir_buildinfo, 'exitcodes.json')
         tct.writejson(D, publish_dir_buildinfo_exitcodes)
-        loglist.append(('publish_dir_buildinfo_exitcodes', publish_dir_buildinfo_exitcodes))
+
+    if TheProjectResultBuildinfo:
+        TheProjectResultBuildinfoExitcodes = os.path.join(TheProjectResultBuildinfo, 'exitcodes.json')
+        tct.writejson(D, TheProjectResultBuildinfoExitcodes)
+
 
 if exitcode == CONTINUE:
     for k, v in tools_exitcodes.items():
@@ -160,6 +128,9 @@ if exitcode == CONTINUE:
 
 if publish_dir_buildinfo_exitcodes:
     result['MILESTONES'].append({'publish_dir_buildinfo_exitcodes': publish_dir_buildinfo_exitcodes})
+
+if TheProjectResultBuildinfoExitcodes:
+    result['MILESTONES'].append({'TheProjectResultBuildinfoExitcodes': TheProjectResultBuildinfoExitcodes})
 
 if final_exitcode is not None:
     result['MILESTONES'].append({'FINAL_EXITCODE': final_exitcode})
