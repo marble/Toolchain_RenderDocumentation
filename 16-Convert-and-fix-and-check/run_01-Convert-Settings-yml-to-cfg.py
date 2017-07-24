@@ -30,36 +30,24 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+deepget = tct.deepget
+
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
-# ==================================================
-# Check params
-# --------------------------------------------------
-
-pass
 
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-milestone_abc = None
+has_settingscfg = None
+has_settingscfg_generated = None
+settingscfg_file = None
 
 
 # ==================================================
@@ -91,15 +79,14 @@ else:
 # work
 # --------------------------------------------------
 
-import codecs
-import copy
-import yaml
-import ConfigParser
-
-config = ConfigParser.RawConfigParser()
-
-
 if exitcode == CONTINUE:
+    import codecs
+    import copy
+    import yaml
+    import ConfigParser
+
+    config = ConfigParser.RawConfigParser()
+
     settingsyml = None
     settingsyml_file = milestones['settingsyml_file']
     with codecs.open(settingsyml_file, 'r', 'utf-8') as f1:
@@ -134,6 +121,7 @@ if exitcode == CONTINUE:
     config.set(section, 'github_branch', '')
     config.set(section, 'github_commit_hash', '')
     config.set(section, 'github_repository', '')
+    config.set(section, 'path_to_documentation_dir', '')
     config.set(section, 'github_revision_msg', '')
     config.set(section, 'github_sphinx_locale', '')
     config.set(section, 'project_contact', '')
@@ -201,17 +189,23 @@ if exitcode == CONTINUE:
 # http://mbless.de/blog/2015/10/24/a-new-task-for-an-old-server.html#ini-files
 """)
 
+if exitcode == CONTINUE:
+    has_settingscfg = True
+    has_settingscfg_generated = True
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({
-        'settingscfg_file': settingscfg_file,
-        'has_settingscfg': True,
-        'has_settingscfg_generated': True,
-    })
+if has_settingscfg is not None:
+    result['MILESTONES'].append({'has_settingscfg':has_settingscfg})
+
+if has_settingscfg_generated is not None:
+    result['MILESTONES'].append({'has_settingscfg_generated':has_settingscfg_generated})
+
+if settingscfg_file is not None:
+    result['MILESTONES'].append({'settingscfg_file':settingscfg_file})
+
 
 # ==================================================
 # save result
