@@ -25,7 +25,6 @@ workdir = params['workdir']
 toolchain_name = facts['toolchain_name']
 exitcode = CONTINUE = 0
 
-CONTINUE = -22
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -51,9 +50,8 @@ def lookup(D, *keys, **kwdargs):
 # define 1
 # --------------------------------------------------
 
-buildinfo_settingscfg_file = None
+buildinfo_latex_folder = None
 xeq_name_cnt = 0
-
 
 # ==================================================
 # Check params
@@ -62,19 +60,23 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    has_settingscfg = lookup(milestones, 'has_settingscfg')
-    has_settingscfg_generated = lookup(milestones, 'has_settingscfg_generated')
-    settingscfg_file = lookup(milestones, 'settingscfg_file')
+    # essential
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
-
-    if not (has_settingscfg and has_settingscfg_generated and
-            settingscfg_file and TheProjectResultBuildinfo):
+    latex_file = lookup(milestones, "latex_file")
+    if not latex_file:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    # may be of interest
+    builds_successful = lookup(milestones, 'builds_successful', default=[])
+    latex_successful = 'latex' in builds_successful
+    latex_make_file = lookup(milestones, 'latex_make_file')
+    latex_make_file_tweaked = lookup(milestones, 'latex_make_file_tweaked')
+
+if exitcode == CONTINUE:
+    loglist.append('Ok, PARAMS permit continuation.')
 else:
-    loglist.append('Nothing to do for these PARAMS.')
+    loglist.append('No, cannot work with these PARAMS.')
 
 
 # ==================================================
@@ -84,15 +86,18 @@ else:
 if exitcode == CONTINUE:
     import shutil
 
-    buildinfo_settingscfg_file = os.path.join(TheProjectResultBuildinfo, 'Settings.cfg')
-    shutil.copy(settingscfg_file, buildinfo_settingscfg_file)
+    source_folder = os.path.split(latex_file)[0]
+    source_folder_name = os.path.split(source_folder)[1]
+    buildinfo_latex_folder = os.path.join(TheProjectResultBuildinfo, source_folder_name)
+    destination_folder = buildinfo_latex_folder
+    shutil.copytree(source_folder, destination_folder)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildinfo_settingscfg_file:
-    result['MILESTONES'].append({'buildinfo_settingscfg_file': buildinfo_settingscfg_file})
+if buildinfo_latex_folder:
+    result['MILESTONES'].append({'buildinfo_latex_folder': buildinfo_latex_folder})
 
 
 # ==================================================

@@ -80,11 +80,12 @@ ATNM['time_started_at'] = time_started_at
 # --------------------------------------------------
 
 debug_always_make_milestones_snapshot = findRunParameter('debug_always_make_milestones_snapshot', 1, ATNM)
+force_rebuild_needed = findRunParameter('force_rebuild_needed', 0, ATNM)
 make_html = findRunParameter('make_html', 0, ATNM)
 make_latex = findRunParameter('make_latex', 0, ATNM)
 make_pdf = findRunParameter('make_pdf', 0, ATNM)
 make_singlehtml = findRunParameter('make_singlehtml', 0, ATNM)
-rebuild_needed = findRunParameter('rebuild_needed', 1, ATNM)
+rebuild_needed = findRunParameter('rebuild_needed', 0, ATNM)
 smtp_host = findRunParameter('smtp_host', '', ATNM)
 talk = findRunParameter('talk', 0, ATNM)
 
