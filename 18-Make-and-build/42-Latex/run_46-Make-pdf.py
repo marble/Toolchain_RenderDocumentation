@@ -32,24 +32,15 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
@@ -65,10 +56,9 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    latex_file_folder = milestones_get('latex_file_folder')
-    latex_file_tweaked = milestones_get('latex_file_tweaked')
-    latex_make_file_tweaked  = milestones_get('latex_make_file_tweaked')
-    toolname = params_get('toolname')
+    latex_file_folder = lookup(milestones, 'latex_file_folder')
+    latex_file_tweaked = lookup(milestones, 'latex_file_tweaked')
+    latex_make_file_tweaked  = lookup(milestones, 'latex_make_file_tweaked')
 
     if not (latex_file_folder and latex_file_tweaked and
             latex_make_file_tweaked and toolname):
@@ -104,9 +94,6 @@ if exitcode == CONTINUE:
 
     cmd = 'make -C "' + latex_file_folder + '" all-pdf'
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=latex_file_folder)
-
-    loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])
 
     xeq_name_cnt += 1
     filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
@@ -115,6 +102,12 @@ if exitcode == CONTINUE:
 
     with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
         f2.write(cmd.decode('utf-8', 'replace'))
+
+
+    exitcode, cmd, out, err = cmdline(cmd, cwd=latex_file_folder)
+
+
+    loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])
 
     with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))

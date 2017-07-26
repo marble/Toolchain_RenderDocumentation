@@ -143,7 +143,7 @@ if exitcode == CONTINUE:
         pdf_dest_file = os.path.join(pdf_dest_folder, destname)
         if not os.path.exists(pdf_dest_folder):
             os.makedirs(pdf_dest_folder)
-        shutil.move(pdf_file, pdf_dest_file)
+        shutil.copy(pdf_file, pdf_dest_file)
         assembled.append('pdf')
 
     if package_file:

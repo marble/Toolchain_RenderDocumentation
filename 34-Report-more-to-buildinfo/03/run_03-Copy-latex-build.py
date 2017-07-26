@@ -64,6 +64,13 @@ if exitcode == CONTINUE:
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
     latex_file = lookup(milestones, "latex_file")
     if not latex_file:
+        loglist.append('Nothing to do - we have no PROJECT.tex file')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    pdf_file = lookup(milestones, "pdf_file")
+    if pdf_file:
+        loglist.append('Nothing to do - we already have the PROJECT.pdf file')
         CONTINUE = -2
 
 if exitcode == CONTINUE:

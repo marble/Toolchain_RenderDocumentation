@@ -136,10 +136,11 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     # move our new build in place
-    shutil.move(TheProjectResultVersion, publish_dir_planned)
+    # shutil.move(TheProjectResultVersion, publish_dir_planned)
+    shutil.copytree(TheProjectResultVersion, publish_dir_planned)
     publish_dir = publish_dir_planned
     if not os.path.isdir(publish_dir):
-        loglist.append(('cannot move build to `publish_dir`', publish_dir))
+        loglist.append(('cannot move or copy to `publish_dir`', publish_dir))
         exitcode = 22
 
 if exitcode == CONTINUE:
