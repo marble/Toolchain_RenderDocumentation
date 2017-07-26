@@ -92,7 +92,7 @@ if exitcode == CONTINUE:
     destination_folder = buildinfo_latex_folder
     loglist.append(['shutil.copytree(source_folder, destination_folder) with',
                    source_folder, destination_folder])
-    shutil.copytree(source_folder, destination_folder)
+    # shutil.copytree(source_folder, destination_folder)
 
 # ==================================================
 # Set MILESTONE
@@ -112,5 +112,7 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
+
+exitcode = 99
 
 sys.exit(exitcode)
