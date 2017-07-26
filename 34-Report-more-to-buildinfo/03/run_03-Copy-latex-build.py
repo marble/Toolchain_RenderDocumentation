@@ -90,7 +90,7 @@ if exitcode == CONTINUE:
     source_folder_name = os.path.split(source_folder)[1]
     buildinfo_latex_folder = os.path.join(TheProjectResultBuildinfo, source_folder_name)
     destination_folder = buildinfo_latex_folder
-    result.append(['shutil.copytree(source_folder, destination_folder) with',
+    loglist.append(['shutil.copytree(source_folder, destination_folder) with',
                    source_folder, destination_folder])
     shutil.copytree(source_folder, destination_folder)
 
