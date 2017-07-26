@@ -84,9 +84,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    # import shutil
-    import subprocess
-
     source_folder = os.path.split(latex_file)[0]
     source_folder_name = os.path.split(source_folder)[1]
     buildinfo_latex_folder = os.path.join(TheProjectResultBuildinfo, source_folder_name)
@@ -94,11 +91,12 @@ if exitcode == CONTINUE:
     loglist.append(['shutil.copytree(source_folder, destination_folder) with',
                    source_folder, destination_folder])
 
+    # import shutil
     # doesn't work. Why???
     # shutil.copytree(source_folder, destination_folder)
 
+    import subprocess
     cmd = 'cp -r ' + source_folder + ' ' + TheProjectResultBuildinfo
-    print(cmd)
     subprocess.call(cmd, shell=True)
 
 
@@ -120,7 +118,5 @@ tct.writejson(result, resultfile)
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
-exitcode = 99
 
 sys.exit(exitcode)
