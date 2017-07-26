@@ -63,6 +63,7 @@ list_for_which = [
     'gzip',
     'html2text',
     'latex',
+    'latexmk',
     'makeindex',
     'pandoc',
     'pdflatex',

@@ -65,6 +65,15 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
+
+    latex = lookup(milestones, 'known_systemtools', 'latex')
+    pdflatex = lookup(milestones, 'known_systemtools', 'pdflatex')
+    latexmk = lookup(milestones, 'known_systemtools', 'latexmk')
+    if not (latex or pdflatex or latexmk):
+        loglist.append('It seems LaTeX for PDF generation is not available.')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
