@@ -48,6 +48,7 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 xeq_name_cnt = 0
+makepdf_exitcode =None
 
 
 # ==================================================
@@ -119,6 +120,12 @@ if exitcode == CONTINUE:
 
     exitcode, cmd, out, err = cmdline(cmd, cwd=latex_file_folder)
 
+    if exitcode:
+        # a makepdf failure should not affect the final_exitcode
+        makepdf_exitcode = exitcode
+        loglist.append(('makepdf_exitcode', makepdf_exitcode))
+        exitcode = 22
+
 
     loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])
 
@@ -153,6 +160,8 @@ if exitcode == CONTINUE:
         'builds_successful': builds_successful,
     })
 
+if makepdf_exitcode:
+    result['MILESTONES'].append({'makepdf_exitcode': makepdf_exitcode})
 
 # ==================================================
 # save result
