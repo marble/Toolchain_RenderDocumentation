@@ -67,6 +67,7 @@ list_for_which = [
     'makeindex',
     'pandoc',
     'pdflatex',
+    'pip',
     'python',
     'python2',
     'python3',
@@ -77,12 +78,7 @@ list_for_which = [
 
 known_systemtools = {}
 
-# ==================================================
-# Check params
-# --------------------------------------------------
-
-pass
-
+pip_freeze = None
 
 # ==================================================
 # work
@@ -97,11 +93,22 @@ for k in list_for_which:
         v = ''
     known_systemtools[k] = v.strip()
 
+if known_systemtools.has_key('pip'):
+    try:
+        v = subprocess.check_output('pip freeze', shell=True)
+    except subprocess.CalledProcessError, e:
+        v = ''
+    pip_freeze = v.split('\n')
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-result['MILESTONES'].append({'known_systemtools': known_systemtools})
+if known_systemtools:
+    result['MILESTONES'].append({'known_systemtools': known_systemtools})
+
+if pip_freeze:
+    result['MILESTONES'].append({'pip_freeze': pip_freeze})
 
 # ==================================================
 # save result

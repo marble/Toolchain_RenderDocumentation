@@ -42,6 +42,7 @@ def lookup(D, *keys, **kwdargs):
     loglist.append((keys, result))
     return result
 
+
 # ==================================================
 # define
 # --------------------------------------------------
@@ -56,31 +57,34 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    make_pdf = lookup(milestones, 'make_pdf')
+
+    if not make_pdf:
+        loglist.append('Nothing to do: make_pdf is not requested.')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     latex_file_folder = lookup(milestones, 'latex_file_folder')
     latex_file_tweaked = lookup(milestones, 'latex_file_tweaked')
     latex_make_file_tweaked  = lookup(milestones, 'latex_make_file_tweaked')
 
     if not (latex_file_folder and latex_file_tweaked and
             latex_make_file_tweaked and toolname):
+        loglist.append('parameters not sufficient')
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-
     latex = lookup(milestones, 'known_systemtools', 'latex')
     pdflatex = lookup(milestones, 'known_systemtools', 'pdflatex')
     latexmk = lookup(milestones, 'known_systemtools', 'latexmk')
     if not (latex or pdflatex or latexmk):
-        loglist.append('It seems LaTeX for PDF generation is not available.')
+        loglist.append('It seems the LaTeX PDF builder is not available.')
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
 
 # ==================================================
 # work

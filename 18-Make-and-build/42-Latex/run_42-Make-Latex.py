@@ -32,22 +32,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -65,25 +57,24 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    ready_for_build = milestones_get('ready_for_build')
-    rebuild_needed = milestones_get('rebuild_needed')
-    included_files_check_is_ok = milestones_get('included_files_check_is_ok')
-    toolname = params_get('toolname')
-    build_html = milestones_get('build_html')
-    make_latex = milestones_get('make_latex')
+    make_latex = lookup(milestones, 'make_latex')
+    if not make_latex:
+        loglist.append('Nothing to do - make_latex is not requested.')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    ready_for_build = lookup(milestones, 'ready_for_build')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
+    included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok')
+    toolname = lookup(params, 'toolname')
+    build_html = lookup(milestones, 'build_html')
     loglist.append('End of PARAMS')
 
 if exitcode == CONTINUE:
-    if not make_latex:
-        loglist.append('make_latex is turned off')
-        CONTINUE = -2
-
-if exitcode == CONTINUE:
-    if not (make_latex and ready_for_build and rebuild_needed and
+    if not (ready_for_build and rebuild_needed and
             toolname and included_files_check_is_ok and build_html):
-        loglist.append('requirements are not met')
+        loglist.append('parameters are not sufficient')
         CONTINUE = -2
-
 
 # ==================================================
 # work
