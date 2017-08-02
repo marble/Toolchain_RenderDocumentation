@@ -21,6 +21,7 @@ result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 

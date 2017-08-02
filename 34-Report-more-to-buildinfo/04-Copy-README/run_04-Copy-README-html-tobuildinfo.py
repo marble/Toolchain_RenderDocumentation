@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""..."""
-
 # ==================================================
 # open
 # --------------------------------------------------
@@ -47,11 +45,12 @@ def lookup(D, *keys, **kwdargs):
 
 
 # ==================================================
-# define 1
+# define
 # --------------------------------------------------
 
-buildinfo_latex_folder = None
+TheProjectResultBuildinfoREADMEfile = None
 xeq_name_cnt = 0
+
 
 # ==================================================
 # Check params
@@ -60,59 +59,35 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # essential
+    TheProjectLogREADMEfile = lookup(milestones, 'TheProjectLogREADMEfile')
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
-    latex_file = lookup(milestones, "latex_file")
-    if not latex_file:
-        loglist.append('Nothing to do - we have no PROJECT.tex file')
+
+    if not (TheProjectLogREADMEfile and TheProjectResultBuildinfo):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    pdf_file = lookup(milestones, "pdf_file")
-    if pdf_file:
-        loglist.append('Nothing to do - we already have the PROJECT.pdf file')
-        CONTINUE = -2
-
-if exitcode == CONTINUE:
-    # may be of interest
-    builds_successful = lookup(milestones, 'builds_successful', default=[])
-    latex_successful = 'latex' in builds_successful
-    latex_make_file = lookup(milestones, 'latex_make_file')
-    latex_make_file_tweaked = lookup(milestones, 'latex_make_file_tweaked')
-
-if exitcode == CONTINUE:
-    loglist.append('Ok, PARAMS permit continuation.')
+    loglist.append('PARAMS are ok')
 else:
-    loglist.append('No, cannot work with these PARAMS.')
+    loglist.append('Nothing to do for these params')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import shutil
+
 if exitcode == CONTINUE:
-    source_folder = os.path.split(latex_file)[0]
-    source_folder_name = os.path.split(source_folder)[1]
-    buildinfo_latex_folder = os.path.join(TheProjectResultBuildinfo, source_folder_name)
-    destination_folder = buildinfo_latex_folder
-    loglist.append(['shutil.copytree(source_folder, destination_folder) with',
-                   source_folder, destination_folder])
+    dummy, fname = os.path.split(TheProjectLogREADMEfile)
+    TheProjectResultBuildinfoREADMEfile = os.path.join(TheProjectResultBuildinfo, fname)
 
-    # import shutil
-    # doesn't work. Why???
-    # shutil.copytree(source_folder, destination_folder)
-
-    import subprocess
-    cmd = 'cp -r ' + source_folder + ' ' + TheProjectResultBuildinfo
-    subprocess.call(cmd, shell=True)
-
+    shutil.copy(TheProjectLogREADMEfile, TheProjectResultBuildinfoREADMEfile)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
-
-if buildinfo_latex_folder:
-    result['MILESTONES'].append({'buildinfo_latex_folder': buildinfo_latex_folder})
+if TheProjectResultBuildinfoREADMEfile:
+    result['MILESTONES'].append({'TheProjectResultBuildinfoREADMEfile': TheProjectResultBuildinfoREADMEfile})
 
 
 # ==================================================
