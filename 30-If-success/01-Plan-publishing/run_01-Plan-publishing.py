@@ -83,8 +83,6 @@ if exitcode == CONTINUE:
     webroot_part_of_builddir = lookup(milestones, 'webroot_part_of_builddir', default=None)
     webroot_abspath = lookup(milestones, 'webroot_abspath', default=None)
     relative_part_of_builddir = lookup(milestones, 'relative_part_of_builddir', default=None)
-
-    # ?
     create_buildinfo = lookup(milestones, 'create_buildinfo', default=1)
 
     # test
@@ -111,8 +109,12 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     TheProjectResultVersionLen = len(TheProjectResultVersion)
 
-    publish_dir_planned = os.path.join(webroot_abspath, relative_part_of_builddir)
-    loglist.append(('publish_dir_planned', publish_dir_planned))
+    # we need at least three parts! project/default/0.0.0
+    if len(relative_part_of_builddir.strip('/').split('/')) >= 3:
+        publish_dir_planned = os.path.join(webroot_abspath, relative_part_of_builddir)
+
+    if not publish_dir_planned:
+        exitcode = 22
 
 if exitcode == CONTINUE:
     publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]

@@ -17,6 +17,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -31,22 +32,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 # ==================================================
@@ -60,7 +53,7 @@ lockfile_ttl_seconds = 1800
 relative_part_of_builddir = ''
 url_of_webroot = ''
 webroot_abspath = ''
-webroot_part_of_builddir = ''
+webroot_part_of_builddir = '/ALL/dummy_webroot'
 xeq_name_cnt = 0
 
 email_user_do_not_send = 0
@@ -83,6 +76,7 @@ general_int_options = (
     ('email_user_do_not_send', 0),
     ('make_latex', 1),
     ('make_package', 1),
+    ('make_pdf', 1),
     ('make_singlehtml', 1),
 )
 general_csvlist_options = (
@@ -96,24 +90,15 @@ general_csvlist_options = (
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    # toolchain_name = facts.get('toolchain_name')
+
     configset = milestones.get('configset')
 
-    # is always on srv123
-    webroot_part_of_builddir = tct.deepget(facts, 'tctconfig', configset, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
-    loglist.append(('webroot_part_of_builddir', webroot_part_of_builddir))
-
-    url_of_webroot = tct.deepget(facts, 'tctconfig', configset, 'url_of_webroot', default=url_of_webroot)
-    loglist.append(('url_of_webroot', url_of_webroot))
-
-    relative_part_of_builddir = tct.deepget(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
-    loglist.append(('relative_part_of_builddir', relative_part_of_builddir))
-
-    webroot_abspath = tct.deepget(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
-    loglist.append(('webroot_abspath', webroot_abspath))
-
-    buildsettings_builddir = tct.deepget(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
-    loglist.append(('buildsettings_builddir', buildsettings_builddir))
+    # is always on srv123 (?)
+    webroot_part_of_builddir = lookup(facts, 'tctconfig', configset, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
+    url_of_webroot = lookup(facts, 'tctconfig', configset, 'url_of_webroot', default=url_of_webroot)
+    # relative_part_of_builddir = lookup(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
+    webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
+    buildsettings_builddir = lookup(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
 
 if not (configset and webroot_part_of_builddir and url_of_webroot
         and webroot_abspath and buildsettings_builddir):
@@ -122,7 +107,7 @@ if not (configset and webroot_part_of_builddir and url_of_webroot
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('Cannot work with these PARAMS')
 
 
 # ==================================================
@@ -131,34 +116,37 @@ else:
 
 if exitcode == CONTINUE:
     for option, default in general_int_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
-        if not v:
-            v = default
-        else:
-            v = int(v)
-        result['MILESTONES'].append({option: v})
+        v = deepget(facts, 'run_command', option, default=None)
+        if v is None:
+            v = deepget(facts, 'tctconfig', configset, option, default=default)
+        result['MILESTONES'].append({option: int(v)})
 
     for option, default in general_string_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
-        if not v:
-            v = default
+        v = deepget(facts, 'run_command', option, default=None)
+        if v is None:
+            v = deepget(facts, 'tctconfig', configset, option, default=default)
         result['MILESTONES'].append({option: v})
 
     for option, default in general_csvlist_options:
-        v = tct.deepget(facts, 'run_command', option) or tct.deepget(facts, 'tctconfig', configset, option)
-        if not v:
-            v = default
+        v = deepget(facts, 'run_command', option, default=None)
+        if v is None:
+            v= deepget(facts, 'tctconfig', configset, option, default=default)
         v = v.replace(' ', ',').split(',')
         v = [item for item in v if item]
         result['MILESTONES'].append({option: v})
 
 
 if exitcode == CONTINUE:
+    # calculate relative_par_of_builddir. E.g.: typo3cms/Project/default/0.0.0
     if not relative_part_of_builddir:
         if buildsettings_builddir.startswith(webroot_part_of_builddir):
             relative_part_of_builddir = buildsettings_builddir[len(webroot_part_of_builddir):]
         elif buildsettings_builddir.startswith(webroot_abspath):
             relative_part_of_builddir = buildsettings_builddir[len(webroot_abspath):]
+        else:
+            relative_part_of_builddir = buildsettings_builddir
+
+    relative_part_of_builddir = relative_part_of_builddir.strip('/')
 
 
 # ==================================================

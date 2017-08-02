@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""..."""
-
 # ==================================================
 # open
 # --------------------------------------------------
 
 from __future__ import print_function
+import cgi
 import os
-import tct
+import shutil
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -45,13 +45,14 @@ def lookup(D, *keys, **kwdargs):
     loglist.append((keys, result))
     return result
 
-
 # ==================================================
-# define 1
+# define
 # --------------------------------------------------
 
-buildinfo_latex_folder = None
+TheProjectLogHtmlmail = ''
+TheProjectLogREADMEfile = ''
 xeq_name_cnt = 0
+
 
 # ==================================================
 # Check params
@@ -60,59 +61,53 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # essential
-    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
-    latex_file = lookup(milestones, "latex_file")
-    if not latex_file:
-        loglist.append('Nothing to do - we have no PROJECT.tex file')
+    TheProjectLogHtmlmailMessageHtml = lookup( milestones, 'TheProjectLogHtmlmailMessageHtml')
+    # "https://t3docs.local/typo3cms/Project/default/0.0.0/"
+    absurl_html_dir = lookup(milestones, 'absurl_html_dir')
+
+    if not (TheProjectLogHtmlmailMessageHtml and absurl_html_dir):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    pdf_file = lookup(milestones, "pdf_file")
-    if pdf_file:
-        loglist.append('Nothing to do - we already have the PROJECT.pdf file')
-        CONTINUE = -2
-
-if exitcode == CONTINUE:
-    # may be of interest
-    builds_successful = lookup(milestones, 'builds_successful', default=[])
-    latex_successful = 'latex' in builds_successful
-    latex_make_file = lookup(milestones, 'latex_make_file')
-    latex_make_file_tweaked = lookup(milestones, 'latex_make_file_tweaked')
-
-if exitcode == CONTINUE:
-    loglist.append('Ok, PARAMS permit continuation.')
+    loglist.append('PARAMS are ok')
 else:
-    loglist.append('No, cannot work with these PARAMS.')
+    loglist.append('Cannot work with these PARAMS')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import codecs
+
 if exitcode == CONTINUE:
-    source_folder = os.path.split(latex_file)[0]
-    source_folder_name = os.path.split(source_folder)[1]
-    buildinfo_latex_folder = os.path.join(TheProjectResultBuildinfo, source_folder_name)
-    destination_folder = buildinfo_latex_folder
-    loglist.append(['shutil.copytree(source_folder, destination_folder) with',
-                   source_folder, destination_folder])
+    TheProjectLogREADMEfile = os.path.join(os.path.split(TheProjectLogHtmlmailMessageHtml)[0], 'README.html')
 
-    # import shutil
-    # doesn't work. Why???
-    # shutil.copytree(source_folder, destination_folder)
+    with codecs.open(TheProjectLogHtmlmailMessageHtml, 'r', 'utf-8') as f1:
+        uhtml = f1.read().decode('utf-8', 'replace')
 
-    import subprocess
-    cmd = 'cp -r ' + source_folder + ' ' + TheProjectResultBuildinfo
-    subprocess.call(cmd, shell=True)
+    replacements = [
+        ('href="' + absurl_html_dir + '_buildinfo/',
+         'href="./'),
+        ('href="' + absurl_html_dir + 'singlehtml/"',
+         'href="../singlehtml/Index.html"'),
+        ('href="' + absurl_html_dir + '"',
+         'href="../Index.html"'),
+        ('href="' + absurl_html_dir,
+         'href="../') ]
 
+    for a, b in replacements:
+        uhtml = uhtml.replace(a, b)
+
+    with codecs.open(TheProjectLogREADMEfile, 'w', 'utf-8') as f2:
+        f2.write(uhtml)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildinfo_latex_folder:
-    result['MILESTONES'].append({'buildinfo_latex_folder': buildinfo_latex_folder})
+if TheProjectLogREADMEfile:
+    result['MILESTONES'].append({'TheProjectLogREADMEfile': TheProjectLogREADMEfile})
 
 
 # ==================================================
@@ -120,7 +115,6 @@ if buildinfo_latex_folder:
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
-
 
 # ==================================================
 # Return with proper exitcode
