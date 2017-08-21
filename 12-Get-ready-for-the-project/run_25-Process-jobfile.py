@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 # ==================================================
 # open
@@ -11,15 +10,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params["toolname"]
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -45,7 +44,10 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-postprocess_remove_static_folder_from_html = None
+buildsettings_changed = False
+initial_working_dir = None
+jobfile_abspath = None
+jobfile_data = None
 xeq_name_cnt = 0
 
 
@@ -56,17 +58,30 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    postprocess_replace_static_in_html = lookup(milestones, 'postprocess_replace_static_in_html')
-    build_html_folder = lookup(milestones, 'build_html_folder')
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
-
-    if not (postprocess_replace_static_in_html and (build_html_folder or build_singlehtml_folder)):
+    buildsettings = lookup(milestones, 'buildsettings')
+    if not buildsettings:
         CONTINUE = -2
+
+if exitcode == CONTINUE:
+    jobfile_abspath = lookup(milestones, 'jobfile_abspath')
+    jobfile = lookup(facts, 'run_command', 'jobfile')
+    initial_working_dir = lookup(facts, 'initial_working_dir')
+    if not (jobfile_abspath or jobfile):
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    if not jobfile_abspath:
+        if os.path.isabs(jobfile):
+            jobfile_abspath = jobfile
+        elif initial_working_dir:
+            jobfile_abspath = os.path.abspath(os.path.join(initial_working_dir, jobfile))
+        else:
+            CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('PROBLEM with required params')
 
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
@@ -78,29 +93,24 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    import shutil
-
-    todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
-    for build_folder in todolist:
-        if not build_folder:
-            continue
-        fpath = os.path.join(build_folder, '_static')
-        if os.path.exists(fpath):
-            shutil.rmtree(fpath)
-            loglist.append('%s, %s' % ('remove', fpath))
-
-    postprocess_remove_static_folder_from_html = 'done'
-
+    jobfile_data = tct.readjson(jobfile_abspath)
+    for k, v in jobfile_data.get('buildsettings', {}).items():
+        buildsettings[k] = v
+        buildsettings_changed = True
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if postprocess_remove_static_folder_from_html:
-    result['MILESTONES'].append(
-        {'postprocess_remove_static_folder_from_html':
-         postprocess_remove_static_folder_from_html})
+if buildsettings_changed:
+    result['MILESTONES'].append({'buildsettings': buildsettings})
+
+if jobfile_data is not None:
+    result['MILESTONES'].append({'jobfile_data': jobfile_data})
+
+if jobfile_abspath is not None:
+    result['MILESTONES'].append({'jobfile_abspath': jobfile_abspath})
+
 
 
 # ==================================================
@@ -108,7 +118,6 @@ if postprocess_remove_static_folder_from_html:
 # --------------------------------------------------
 
 tct.writejson(result, resultfile)
-
 
 # ==================================================
 # Return with proper exitcode

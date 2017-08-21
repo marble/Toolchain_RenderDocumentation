@@ -32,31 +32,22 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
 # --------------------------------------------------
 
 xeq_name_cnt = 0
-
+postprocess_cleanup_files = None
 
 # ==================================================
 # Check params
@@ -65,19 +56,9 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    build_html = milestones_get('build_html')
-    build_singlehtml = milestones_get('build_singlehtml')
-    TheProject = milestones_get('TheProject')
+    build_html = lookup(milestones, 'build_html')
+    build_singlehtml = lookup(milestones, 'build_singlehtml')
+    TheProject = lookup(milestones, 'TheProject')
 
     if not (TheProject and (build_html or build_singlehtml)):
         exitcode = 22
@@ -97,12 +78,12 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    build_html_folder = milestones_get('build_html_folder')
-    build_singlehtml_folder = milestones_get('build_singlehtml_folder')
+    build_html_folder = lookup(milestones, 'build_html_folder')
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
 
 if exitcode == CONTINUE:
-    loglist.append('Here we remove files that are - unfortunately - still in the theme but are not needed.')
-
+    loglist.append('Here we remove files that are - unfortunately - '
+                   'still in the theme but are not needed.')
 
 if exitcode == CONTINUE:
 
@@ -134,14 +115,16 @@ if exitcode == CONTINUE:
         if os.path.exists(fpath):
             os.remove(fpath)
 
+if exitcode == CONTINUE:
+    postprocess_cleanup_files = 'done'
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if postprocess_cleanup_files is not None:
     result['MILESTONES'].append({
-        'cleanup_files': 'done',
+        'postprocess_cleanup_files': postprocess_cleanup_files,
     })
 
 

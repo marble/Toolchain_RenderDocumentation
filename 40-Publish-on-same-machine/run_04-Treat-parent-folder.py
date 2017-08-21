@@ -101,6 +101,11 @@ if exitcode == CONTINUE:
         exitcode = 22
 
 if exitcode == CONTINUE:
+    if not os.path.exists(htaccess_template_show_latest):
+        loglist.append('htaccess_template_show_latest does not exist')
+        exitcode = 22
+
+if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')

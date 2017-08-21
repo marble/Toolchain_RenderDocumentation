@@ -32,29 +32,23 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
 # --------------------------------------------------
 
+package_file = None
+package_name = 'manual.zip'
+pdf_name = 'manual.pdf'
 xeq_name_cnt = 0
 
 
@@ -65,39 +59,26 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    package_file = None
-    buildsettings = milestones_get('buildsettings', {})
-    make_package = milestones_get('make_package')
-    package_language = buildsettings.get('package_language')
-    loglist.append(('package_language', package_language))
-    package_key = buildsettings.get('package_key')
-    loglist.append(('package_key', package_key))
+    buildsettings = lookup(milestones, 'buildsettings')
+    make_package = lookup(milestones, 'make_package')
+    package_language = lookup(milestones, 'buildsettings', 'package_language', default=None)
+    package_key = lookup(milestones, 'buildsettings', 'package_key', default=None)
 
     # build_html = milestones_get('build_html')
-    build_html_folder = milestones_get('build_html_folder')
+    build_html_folder = lookup(milestones, 'build_html_folder')
     # build_singlehtml = milestones_get('build_singlehtml')
     # build_singlehtml_folder = milestones_get('build_singlehtml_folder')
     # build_latex = milestones_get('build_latex')
     # build_pdf = milestones_get('build_pdf')
-    pdf_file = milestones_get('pdf_file')
+    pdf_file = lookup(milestones, 'pdf_file')
     # TheProject = milestones_get('TheProject')
-    pdf_name = milestones_get('NAMING', {}).get('pdf_name', 'manual.pdf')
-    package_name = milestones.get('NAMING', {}).get('package_name', 'manual.zip')
-    TheProjectBuild = milestones_get('TheProjectBuild')
+    pdf_name = lookup(milestones, 'NAMING', 'pdf_name', default=pdf_name)
+    package_name = lookup(milestones, 'NAMING', 'package_name', default=package_name)
+    TheProjectBuild = lookup(milestones, 'TheProjectBuild')
 
     if not (make_package and package_key and package_language
             and build_html_folder and TheProjectBuild):
-        CONTINUE = -1
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -160,9 +141,14 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    if package_file:
-        result['MILESTONES'].append({'package_file': package_file})
+if pdf_name:
+    result['MILESTONES'].append({'pdf_name': pdf_name})
+
+if package_name:
+    result['MILESTONES'].append({'package_name': package_name})
+
+if package_file:
+    result['MILESTONES'].append({'package_file': package_file})
 
 
 # ==================================================

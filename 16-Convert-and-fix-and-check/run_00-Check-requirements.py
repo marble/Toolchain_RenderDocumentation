@@ -73,7 +73,7 @@ if exitcode == CONTINUE:
 
     for requirement in requirements:
         v = milestones_get(requirement)
-        if not v:
+        if v is None:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
             break

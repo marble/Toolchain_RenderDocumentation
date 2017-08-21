@@ -6,7 +6,6 @@
 
 from __future__ import print_function
 import tct
-import os
 import sys
 
 params = tct.readjson(sys.argv[1])
@@ -67,7 +66,10 @@ ATNM = all_the_new_milestones = {}
 # --------------------------------------------------
 import time
 
-configset = deepget(facts, 'run_command', 'configset', default='Default')
+# configset = deepget(facts, 'run_command', 'configset', default='default')
+ATNM['active_section'] = (milestones.get('active_section')
+                  or deepget(facts, 'active_section', default='default'))
+configset = ATNM['active_section']
 ATNM['configset'] = configset
 time_started_at_unixtime = time.time()
 ATNM['time_started_at_unixtime'] = time_started_at_unixtime
@@ -88,7 +90,7 @@ make_singlehtml = findRunParameter('make_singlehtml', 1, ATNM)
 rebuild_needed = findRunParameter('rebuild_needed', 1, ATNM)
 smtp_host = findRunParameter('smtp_host', '', ATNM)
 talk = findRunParameter('talk', 0, ATNM)
-
+replace_static_in_html = findRunParameter('replace_static_in_html', 0, ATNM)
 
 
 # ==================================================
