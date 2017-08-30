@@ -46,7 +46,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-smtp_host = None
+smtp_host = "None"
 sender = 'RenderDocumentation@typo3.org'
 receivers = ''
 subject = lookup(milestones, 'email_user_subject', default='Your project: Documentation rendered')
@@ -64,21 +64,12 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = [
-        'configset',
-        'smtp_host'
-    ]
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement, default=None)
-        if v is None:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
 if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
+    if not configset:
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     TheProjectLogHtmlmailMessageHtml = lookup(milestones, 'TheProjectLogHtmlmailMessageHtml')
     TheProjectLogHtmlmailMessageMdTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageMdTxt')
     TheProjectLogHtmlmailMessageRstTxt = lookup(milestones, 'TheProjectLogHtmlmailMessageRstTxt')
@@ -88,10 +79,10 @@ if exitcode == CONTINUE:
     htmlfile = TheProjectLogHtmlmailMessageHtml
     if not (textfile or htmlfile):
         loglist.append('No textfile and no htmlfile specified')
-        CONTINUE = -1
+        CONTINUE = -2
 
-    smtp_host = lookup(milestones, 'smtp_host')
-    if not smtp_host:
+    smtp_host = lookup(milestones, 'smtp_host', default="None")
+    if not smtp_host or smtp_host == "None":
         loglist.append("'Won't send mails. No smtp_host specified.")
         CONTINUE = -2
 
@@ -101,7 +92,7 @@ if exitcode == CONTINUE:
     email_notify_about_new_build = lookup(milestones, 'email_notify_about_new_build')
     email_user_bcc = lookup(milestones, 'email_user_bcc')
     email_user_cc = lookup(milestones, 'email_user_cc')
-    email_user_do_not_send = lookup(milestones, 'email_user_do_not_send') # at the commandline
+    email_user_do_not_send = lookup(milestones, 'email_user_do_not_send')
     email_user_notify_is_turned_off = lookup(milestones, 'email_user_notify_is_turned_off')
     email_user_to_instead = lookup(milestones, 'email_user_to_instead')
     emails_user_from_project = lookup(milestones, 'emails_user_from_project')
@@ -110,9 +101,6 @@ if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEMS with params')
-
-if exitcode == 22:
-    loglist.append('I cannot send mails.')
 
 if CONTINUE != 0:
     loglist.append({'CONTINUE': CONTINUE})
@@ -235,7 +223,7 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
-if 1:
+if 'always':
     result['MILESTONES'].append({'cmdline_reportlines': cmdline_reportlines})
 
 if exitcode == CONTINUE:
