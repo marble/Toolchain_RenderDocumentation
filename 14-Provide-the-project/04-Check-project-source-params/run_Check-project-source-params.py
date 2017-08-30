@@ -60,16 +60,6 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
     buildsettings = lookup(milestones, 'buildsettings')
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
@@ -91,7 +81,7 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if (gitdir or giturl) and (ter_extkey or ter_extversion):
+    if (gitdir or giturl) and (ter_extkey):
         loglist.append('we either expect a manual or a ter extension. ')
         exitcode = 99
 
