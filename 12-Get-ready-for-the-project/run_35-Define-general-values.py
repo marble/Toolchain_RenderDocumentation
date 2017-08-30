@@ -42,6 +42,27 @@ def lookup(D, *keys, **kwdargs):
     loglist.append((keys, result))
     return result
 
+def firstNotNone(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+    else:
+        return None
+
+def findRunParameter(key, default=None, D=None):
+    result = firstNotNone(
+        deepget(milestones, key, default=None),
+        deepget(facts, 'run_command', key, default=None),
+        deepget(facts, 'tctconfig', configset, key, default=None),
+        default,
+        None)
+    if type(D) == type({}):
+        D[key] = result
+    return result
+
+ATNM = all_the_new_milestones = {}
+
+
 # ==================================================
 # define
 # --------------------------------------------------
@@ -78,7 +99,10 @@ general_int_options = (
     ('make_package', 1),
     ('make_pdf', 1),
     ('make_singlehtml', 1),
+    ('rebuild_needed', 0),
+    ('replace_static_in_html', 0),
 )
+
 general_csvlist_options = (
     ('email_user_receivers_exlude_list', ''),
 )
@@ -116,24 +140,21 @@ else:
 
 if exitcode == CONTINUE:
     for option, default in general_int_options:
-        v = deepget(facts, 'run_command', option, default=None)
-        if v is None:
-            v = deepget(facts, 'tctconfig', configset, option, default=default)
-        result['MILESTONES'].append({option: int(v)})
+        v = findRunParameter(option, default)
+        if v is not None:
+            result['MILESTONES'].append({option: int(v)})
 
     for option, default in general_string_options:
-        v = deepget(facts, 'run_command', option, default=None)
-        if v is None:
-            v = deepget(facts, 'tctconfig', configset, option, default=default)
-        result['MILESTONES'].append({option: v})
+        v = findRunParameter(option, default)
+        if v is not None:
+            result['MILESTONES'].append({option: v})
 
     for option, default in general_csvlist_options:
-        v = deepget(facts, 'run_command', option, default=None)
-        if v is None:
-            v= deepget(facts, 'tctconfig', configset, option, default=default)
-        v = v.replace(' ', ',').split(',')
-        v = [item for item in v if item]
-        result['MILESTONES'].append({option: v})
+        v = findRunParameter(option, default)
+        if v is not None:
+            v = v.replace(' ', ',').split(',')
+            v = [item for item in v if item]
+            result['MILESTONES'].append({option: v})
 
 
 if exitcode == CONTINUE:
