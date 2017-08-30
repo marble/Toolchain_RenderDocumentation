@@ -77,7 +77,10 @@ else:
 if exitcode == CONTINUE:
     TheProjectResultBuildinfoResultJsonfile = os.path.join(TheProjectResultBuildinfo, 'results.json')
 
-    mapping = {'checksum_new': 'checksum'}
+    mapping = {
+        'checksum_new': 'checksum',
+        'builddir': 'publish_dir',
+    }
     keys = [
         "checksum_new",
         "checksum_old",
@@ -88,9 +91,45 @@ if exitcode == CONTINUE:
     R = {}
     for k in keys:
         v = milestones.get(k)
-        if v is not None:
+        if v:
             k2 = mapping.get(k, k)
             R[k2] = v
+
+    buildsettings = milestones.get('buildsettings', {})
+    for k in [
+        'builddir',
+        'gitbranch',
+        'gitdir',
+        'giturl',
+        'localization',
+        'ter_extension',
+        'ter_extkey',
+        'ter_extversion',
+        'ter_version',
+        ]:
+        v = buildsettings.get(k)
+        if v:
+            k2 = mapping.get(k, k)
+            R[k2] = v
+
+    html_key_values = milestones.get('html_key_values', {})
+    for k in ['build_time']:
+        v = html_key_values.get(k)
+        if v:
+            R[k] = v
+
+    settings_cfg_general = milestones.get('settings_cfg', {}).get('general', {})
+    for k in [
+        'copyright',
+        'description',
+        'project',
+        'release',
+        't3author',
+        'version']:
+        v = settings_cfg_general.get(k)
+        if v:
+            R[k] = v
+
     tct.writejson(R, TheProjectResultBuildinfoResultJsonfile)
 
 # ==================================================
