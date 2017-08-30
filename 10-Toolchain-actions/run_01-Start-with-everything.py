@@ -87,10 +87,11 @@ make_html = findRunParameter('make_html', 1, ATNM)
 make_latex = findRunParameter('make_latex', 1, ATNM)
 make_pdf = findRunParameter('make_pdf', 1, ATNM)
 make_singlehtml = findRunParameter('make_singlehtml', 1, ATNM)
+makedir = findRunParameter('makedir', None, ATNM)
 rebuild_needed = findRunParameter('rebuild_needed', 1, ATNM)
-smtp_host = findRunParameter('smtp_host', '', ATNM)
-talk = findRunParameter('talk', 0, ATNM)
 replace_static_in_html = findRunParameter('replace_static_in_html', 0, ATNM)
+smtp_host = findRunParameter('smtp_host', 'None', ATNM)
+talk = findRunParameter('talk', 0, ATNM)
 
 
 # ==================================================
