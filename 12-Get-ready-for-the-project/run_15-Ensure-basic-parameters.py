@@ -30,22 +30,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -65,13 +57,13 @@ talk = milestones.get('talk', 1)
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = facts_get('toolchain_name')
-    cwd = facts_get('cwd')
-    if not (toolchain_name and cwd):
+    toolchain_name = lookup(facts, 'toolchain_name')
+    initial_working_dir = lookup(facts, 'initial_working_dir')
+    if not (toolchain_name and initial_working_dir):
         exitcode = 22
 
 if exitcode == CONTINUE:
-    makedir = params_get('makedir', '')
+    makedir = lookup(milestones, 'makedir')
     if not makedir:
         msg = 'Usage: tct run %s --config makedir MAKEDIR [--toolchain-help]' % toolchain_name
         loglist.append(msg)
@@ -90,7 +82,7 @@ else:
 
 if exitcode == CONTINUE:
     if not os.path.isabs(makedir):
-        makedir = os.path.join(facts['cwd'], makedir)
+        makedir = os.path.join(initial_working_dir, makedir)
     makedir = os.path.abspath(os.path.normpath(makedir))
     if not os.path.isdir(makedir):
         makedir_missing = makedir
