@@ -93,8 +93,9 @@ Options:
 
 Toolchain options:
   -T clean                       Let the toolchain delete prior builds, then exit.
-  -T help                        Let the toolchain show this help, then exit.
-  -T unlock                      Let the toolchain remove existing locks, then exit
+  -T help                        Show toolchain help and e exit.
+  -T unlock                      Remove possible lock and exit.
+  -T version                     Show toolchain version and exit.
 
   -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
   -c rebuild_needed 1            Force rebuild regardless of checksum

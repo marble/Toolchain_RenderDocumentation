@@ -10,6 +10,8 @@ import os
 import tct
 import sys
 
+VERSION = '1.0.0-dev'
+
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
@@ -167,37 +169,36 @@ if 0 and exitcode == CONTINUE and 'This clause is experimental research':
         if one is not None:
             exitcode_temp, cmd, out, err = execute_cmdlist(['ps', str(one)])
 
-
 if exitcode == CONTINUE:
     import shutil
 
-    for action in toolchain_actions:
+if 'help' in toolchain_actions and exitcode == CONTINUE:
+    'Should not occur'
 
-        if action == 'help':
-            'Should not occur'
+if 'version' in toolchain_actions and exitcode == CONTINUE:
+    print(VERSION)
+    exitcode = 90
 
-        elif action == 'unlock':
-            for top, dirs, files in os.walk(toolchain_temp_home):
-                dirs[:] = [] # stop recursion
-                for fname in files:
-                    if fname == lockfile_name:
-                        lockfile = os.path.join(top, fname)
-                        os.remove(lockfile)
-                        lockfiles_removed.append(lockfile)
-            exitcode = 90
-            break
+if 'unlock' in toolchain_actions and exitcode == CONTINUE:
+    for top, dirs, files in os.walk(toolchain_temp_home):
+        dirs[:] = [] # stop recursion
+        for fname in files:
+            if fname == lockfile_name:
+                lockfile = os.path.join(top, fname)
+                os.remove(lockfile)
+                lockfiles_removed.append(lockfile)
+    exitcode = 90
 
-        elif action == 'clean':
-            for top, dirs, files in os.walk(toolchain_temp_home):
-                dirs.sort()
-                for adir in dirs:
-                    fpath = os.path.join(top, adir)
-                    if not run_id in adir:
-                        if os.path.isdir(fpath):
-                            shutil.rmtree(fpath)
-                dirs[:] = [] # stop recursion
-            exitcode = 90
-            break
+if 'clean' in toolchain_actions and exitcode == CONTINUE:
+    for top, dirs, files in os.walk(toolchain_temp_home):
+        dirs.sort()
+        for adir in dirs:
+            fpath = os.path.join(top, adir)
+            if not run_id in adir:
+                if os.path.isdir(fpath):
+                    shutil.rmtree(fpath)
+        dirs[:] = [] # stop recursion
+    exitcode = 90
 
 
 # ==================================================
