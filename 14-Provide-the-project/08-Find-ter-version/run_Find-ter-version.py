@@ -44,16 +44,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-buildsettings = {}
-extension_file = ''
-extension_file_abspath = ''
-extensions_rootfolder = None
-gitbranch = ''
-gitdir = ''
-gitdir_unpacked = ''
-giturl = ''
-ter_extkey = ''
-ter_extversion = ''
+buildsettings_changed = False
+ter_extversion_highest = None
 xeq_name_cnt = 0
 
 
@@ -65,40 +57,15 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     configset = lookup(milestones, 'configset')
-    # required milestones
-    requirements = ['configset']
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     buildsettings = lookup(milestones, 'buildsettings')
-    if not buildsettings:
-        exitcode = 22
-
-if exitcode == CONTINUE:
-
-    # fetch #1
-    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
-    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
-    giturl = lookup(milestones, 'buildsettings', 'giturl')
     ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
-    ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
-
-    # fetch #2
-    extensions_rootfolder = lookup(facts, 'tctconfig', configset, 'extensions_rootfolder')
-
-    # test
-    if not (ter_extkey and ter_extversion):
-        loglist.append('For a TER extension we need the key and the version.')
+    if not (configset and buildsettings and ter_extkey):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if not gitdir and not extensions_rootfolder:
+    ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
+    if ter_extversion:
+        loglist.append('Nothing to do. TER_EXTKEY and TER_VERSION are defined.')
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -134,8 +101,6 @@ if exitcode == CONTINUE:
         global xeq_name_cnt
         cmd = ' '.join(cmdlist)
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
-        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
         xeq_name_cnt += 1
         filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
         filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
@@ -143,6 +108,10 @@ if exitcode == CONTINUE:
 
         with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
         with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
             f2.write(out.decode('utf-8', 'replace'))
@@ -154,42 +123,62 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    foldername = ter_extkey + '_' + ter_extversion
-    foldername = foldername.replace('*', '').replace('?', '')
-    if not foldername:
-        loglist.append('illegal extension specification')
-        exitcode = 22
-
-if exitcode == CONTINUE:
-    gitdir = os.path.join(extensions_rootfolder, foldername)
-    if os.path.exists(gitdir):
-        shutil.rmtree(gitdir)
-    gitdir_unpacked = os.path.join(gitdir, 'unpacked')
-    os.makedirs(gitdir_unpacked)
-
-if exitcode == CONTINUE:
     exitcode, cmd, out, err = execute_cmdlist([
-        't3xutils.phar', 'fetch', '--use-curl', ter_extkey, ter_extversion, gitdir])
+        't3xutils.phar', 'info', ter_extkey])
 
 if exitcode == CONTINUE:
-    extension_file = ''
-    for name in os.listdir(gitdir):
-        if name.startswith(ter_extkey):
-            extension_file = name
-            break
+    example = """
+Available versions:
+ 0.1.0    uploaded: 19.04.2013 16:05:26
+ 0.2.0    uploaded: 27.04.2013 11:42:13
+ 0.3.0    uploaded: 10.05.2013 13:45:01
+ 0.4.0    uploaded: 28.05.2013 11:51:38
+ 0.5.0    uploaded: 04.06.2013 16:39:00
+ 0.6.0    uploaded: 18.06.2013 09:10:45
+ 1.0.0    uploaded: 05.07.2013 10:33:43
+ 1.1.0    uploaded: 09.08.2013 19:43:04
+ 1.1.1    uploaded: 24.08.2013 15:47:11
+ 1.2.0    uploaded: 22.09.2013 18:54:58
+ 1.2.1    uploaded: 23.09.2013 14:22:14
+ 1.2.2    uploaded: 15.10.2013 23:23:41
+ 1.3.0    uploaded: 05.01.2014 19:25:18
+ 1.3.1    uploaded: 16.01.2014 22:16:20
+ 1.3.2    uploaded: 16.03.2014 17:25:00
+ 2.0.0    uploaded: 07.04.2014 17:41:53
+ 2.0.1    uploaded: 20.04.2014 10:07:55
+ 2.1.0    uploaded: 05.06.2014 11:36:53
+ 2.2.0    uploaded: 04.12.2014 17:01:28
+ 2.2.1    uploaded: 03.03.2015 17:25:23
+ 2.2.2    uploaded: 17.03.2015 16:04:30
+ 2.2.3    uploaded: 11.04.2015 11:39:46
+ 2.3.0    uploaded: 18.08.2015 15:38:46
+ 2.3.1    uploaded: 10.11.2015 13:43:53
+ 2.4.0    uploaded: 03.10.2016 08:52:54
+ 2.5.0    uploaded: 08.01.2017 11:16:36
+ 2.5.1    uploaded: 05.05.2017 12:12:21
+"""
+    for line in out.split('\n'):
+        parts = line.split()
+        # ['0.1.0', 'uploaded:', '19.04.2013', '16:05:26']
+        if len(parts) != 4:
+            continue
+        if parts[1] != 'uploaded:':
+            continue
+        version = parts[0].split('.')
+        if len(version) != 3:
+            continue
+        try:
+            version = [int(item) for item in version]
+        except ValueError:
+            continue
+        if ter_extversion_highest is None:
+            ter_extversion_highest = version
+        else:
+            ter_extversion_highest = max(ter_extversion_highest, version)
 
-    if extension_file:
-        extension_file_abspath = os.path.join(gitdir, extension_file)
-
-    if not extension_file_abspath:
-        exit = 2
-
-if exitcode == CONTINUE:
-    exitcode, cmd, out, err = execute_cmdlist([
-        't3xutils.phar', 'extract', extension_file_abspath, gitdir_unpacked])
-
-if exitcode == CONTINUE:
-    buildsettings['gitdir'] = gitdir_unpacked
+    if ter_extversion_highest:
+        buildsettings['ter_extversion'] = '.'.join([str(item) for item in ter_extversion_highest])
+        buildsettings_changed = True
 
 # ==================================================
 # Set MILESTONE
@@ -198,14 +187,11 @@ if exitcode == CONTINUE:
 
 D = {}
 
-if extension_file:
-    D['extension_file'] = extension_file
-
-if extension_file_abspath:
-    D['extension_file_abspath'] = extension_file_abspath
-
-if buildsettings:
+if buildsettings_changed:
     D['buildsettings'] = buildsettings
+
+if ter_extversion_highest:
+    D['ter_extversion_highest'] = ter_extversion_highest
 
 if D:
     result['MILESTONES'].append(D)
