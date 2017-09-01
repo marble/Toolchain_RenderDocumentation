@@ -9,6 +9,11 @@ import os
 import tct
 import sys
 
+# special
+import glob
+import shutil
+
+
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
@@ -16,6 +21,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -30,31 +36,25 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 # ==================================================
 # define
 # --------------------------------------------------
 
+localization_folder_names = []  # ['Localization.de_DE']
 localization_folders = []
 localization_locales = []       # ['de_DE', 'en_US']
-localization_folder_names = []  # ['Localization.de_DE']
+localization_pattern = None
+TheProjectLocalization = None
 
 
 # ==================================================
@@ -63,50 +63,31 @@ localization_folder_names = []  # ['Localization.de_DE']
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
-    if not toolchain_name:
-        exitcode = 99
+
+    TheProject = lookup(milestones, 'TheProject')
+    localization_has_localization = lookup(milestones, 'localization_has_localization')
+    if not (TheProject and localization_has_localization):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
-
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
-
-if exitcode == CONTINUE:
-    localization_has_localization = milestones_get('localization_has_localization')
-    if not localization_has_localization:
-        loglist.append('nothing to do - no localization found')
-        CONTINUE = -1
 
 if exitcode == CONTINUE:
     localization = tct.deepget(milestones, 'buildsettings', 'localization', default='')
     if not localization in ['', 'default']:
         loglist.append(('Nothing to move away. We want to render localization', localization))
-        CONTINUE = -1
-
-
-# ==================================================
-# work
-# --------------------------------------------------
-
-import glob
-import shutil
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    TheProject = milestones['TheProject']
     TheProjectLocalization = TheProject + 'Localization'
 
-if exitcode == CONTINUE:
     if not os.path.exists(TheProjectLocalization):
         os.makedirs(TheProjectLocalization)
 
@@ -118,25 +99,24 @@ if exitcode == CONTINUE:
         localization_folder_names.append(localization_folder_name)
         localization_locales.append(localization_folder_name[len('Localization.'):])
 
-
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({'TheProjectLocalization': TheProjectLocalization})
+if localization_folder_names:    result['MILESTONES'].append(
+    {'localization_folder_names': localization_folder_names})
 
-    if localization_folders:
-        result['MILESTONES'].append({'localization_folders': localization_folders})
+if localization_folders:    result['MILESTONES'].append(
+    {'localization_folders': localization_folders})
 
-    if localization_pattern:
-        result['MILESTONES'].append({'localization_pattern': localization_pattern})
+if localization_locales:    result['MILESTONES'].append(
+    {'localization_locales': localization_locales})
 
-    if localization_folder_names:
-        result['MILESTONES'].append({'localization_folder_names': localization_folder_names})
+if localization_pattern:    result['MILESTONES'].append(
+    {'localization_pattern': localization_pattern})
 
-    if localization_locales:
-        result['MILESTONES'].append({'localization_locales': localization_locales})
+if TheProjectLocalization:    result['MILESTONES'].append(
+    {'TheProjectLocalization': TheProjectLocalization})
 
 
 # ==================================================

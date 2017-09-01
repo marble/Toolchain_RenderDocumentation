@@ -8,20 +8,25 @@ from __future__ import print_function
 import os
 import tct
 import sys
+import shutil
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
 toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+# This tool is about creating an .htaccess file.
+# We turn that step off.
+# This needs to be done by the final publisher.
+
+CONTINUE = -2
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -32,22 +37,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -71,49 +68,27 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = ['configset']
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    configset = milestones_get('configset')
-    # fetch
-    publish_dir = milestones_get('publish_dir')
-    publish_parent_dir = milestones_get('publish_parent_dir')
-    publish_html_done = milestones_get('publish_html_done')
-
-    # test
-    if not (publish_dir and publish_parent_dir and publish_html_done
-            and configset):
-        exitcode = 22
+    configset = lookup(milestones, 'configset')
+    publish_dir = lookup(milestones, 'publish_dir')
+    publish_html_done = lookup(milestones, 'publish_html_done')
+    publish_parent_dir = lookup(milestones, 'publish_parent_dir')
+    if not (configset and publish_dir and publish_html_done and publish_parent_dir):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    htaccess_template_show_latest = tct.deepget(facts, 'tctconfig', configset, 'htaccess_template_show_latest')
-    loglist.append(('htaccess_template_show_latest', htaccess_template_show_latest))
-
-    # test
+    htaccess_template_show_latest = lookup(facts, 'tctconfig', configset, 'htaccess_template_show_latest')
     if not htaccess_template_show_latest:
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     if not os.path.exists(htaccess_template_show_latest):
         loglist.append('htaccess_template_show_latest does not exist')
-        exitcode = 22
+        exitcode = 1
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
-
+    loglist.append('Bad PARAMS or nothing to do')
 
 # ==================================================
 # work
@@ -123,7 +98,6 @@ if exitcode == CONTINUE:
     ter_extension = int(tct.deepget(milestones, 'buildsettings', 'ter_extension'))
     loglist.append(('ter_extension', ter_extension))
 
-import shutil
 
 if exitcode == CONTINUE:
     # provide .htaccess

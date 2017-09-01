@@ -16,6 +16,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -30,22 +31,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -55,9 +48,6 @@ def params_get(name, default=None):
 xeq_name_cnt = 0
 TheProjectMakedir = None
 
-print('The makedir may have buildsettings.sh and Overrides.cfg overridden')
-exitcode = 90
-
 # ==================================================
 # Check params
 # --------------------------------------------------
@@ -65,20 +55,16 @@ exitcode = 90
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    makedir = milestones_get('makedir')
-    TheProject = milestones_get('TheProject')
+    makedir = lookup(milestones, 'makedir')
+    TheProject = lookup(milestones, 'TheProject')
 
     if not (makedir and TheProject):
-        CONTINUE = -1
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append('Good PARAMS - I can work with these')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS - I cannot work with these')
 
 
 # ==================================================

@@ -53,6 +53,7 @@ publish_parent_dir = None
 publish_parent_dir_planned = ''
 publish_parent_parent_dir = None
 publish_parent_parent_dir_planned = ''
+publish_project_dir_planned = ''
 publish_settings_cfg_planned = ''
 publish_warnings_txt_planned = ''
 xeq_name_cnt = 0
@@ -65,17 +66,6 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     url_of_webroot = lookup(milestones, 'url_of_webroot', default=None)
     TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
     TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion', default=None)
@@ -85,21 +75,19 @@ if exitcode == CONTINUE:
     relative_part_of_builddir = lookup(milestones, 'relative_part_of_builddir', default=None)
     create_buildinfo = lookup(milestones, 'create_buildinfo', default=1)
 
-    # test
     if not (url_of_webroot and TheProjectResult and TheProjectResultVersion and
             buildsettings_builddir and
             webroot_part_of_builddir and webroot_abspath and
             relative_part_of_builddir):
         exitcode = 22
 
+    buildsettings_localization = lookup(milestones, 'buildsettings', 'localization', default='')
+
+
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -118,9 +106,12 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]
-    loglist.append(('publish_parent_dir_planned', publish_parent_dir_planned))
-    publish_package_dir_planned = os.path.join(publish_parent_dir_planned, 'packages')
-    loglist.append(('publish_package_dir_planned', publish_package_dir_planned))
+    if buildsettings_localization in ['', 'default']:
+        publish_project_dir_planned = publish_parent_dir_planned
+    else:
+        publish_project_dir_planned, dummy = os.path.split(publish_parent_dir_planned)
+
+    publish_package_dir_planned = os.path.join(publish_project_dir_planned, 'packages')
 
 if exitcode == CONTINUE:
     publish_parent_parent_dir_planned = os.path.split(publish_parent_dir_planned)[0]
@@ -169,6 +160,7 @@ if exitcode == CONTINUE:
         'publish_parent_dir_planned':           publish_parent_dir_planned,
         'publish_parent_parent_dir':            publish_parent_parent_dir,
         'publish_parent_parent_dir_planned':    publish_parent_parent_dir_planned,
+        'publish_project_dir_planned':          publish_project_dir_planned,
         'publish_settings_cfg_planned':         publish_settings_cfg_planned,
         'publish_warnings_txt_planned':         publish_warnings_txt_planned,
     })

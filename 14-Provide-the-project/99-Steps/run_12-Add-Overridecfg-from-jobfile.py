@@ -9,6 +9,11 @@ import os
 import tct
 import sys
 
+# specific
+import codecs
+import ConfigParser
+import shutil
+
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
@@ -34,8 +39,10 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
+deepget = tct.deepget
+
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -43,13 +50,7 @@ def lookup(D, *keys, **kwdargs):
 # ==================================================
 # define
 # --------------------------------------------------
-
-buildsettings_changed = False
-initial_working_dir = None
-jobfile_abspath = None
-jobfile_data = None
 xeq_name_cnt = 0
-
 
 # ==================================================
 # Check params
@@ -58,34 +59,20 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    buildsettings = lookup(milestones, 'buildsettings')
-    if not buildsettings:
+    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
+    jobfile_data = lookup(milestones, 'jobfile_data')
+    if not (TheProjectMakedir and jobfile_data):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    jobfile_abspath = lookup(milestones, 'jobfile_abspath')
-    jobfile = lookup(facts, 'run_command', 'jobfile')
-    initial_working_dir = lookup(facts, 'initial_working_dir')
-    if not (jobfile_abspath or jobfile):
+    override_data = jobfile_data.get('Overrides_cfg')
+    if not override_data:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if not jobfile_abspath:
-        if os.path.isabs(jobfile):
-            jobfile_abspath = jobfile
-        elif initial_working_dir:
-            jobfile_abspath = os.path.abspath(os.path.join(initial_working_dir, jobfile))
-        else:
-            CONTINUE = -2
-
-if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append('PARAMS are good')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -94,35 +81,34 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
-    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
-    jobfile_data = tct.readjson(jobfile_abspath)
+    loglist.append('Start with empty config object')
+    override_data_result = ConfigParser.RawConfigParser()
 
-    # ADD buildsettings we find in jobfile to the existing ones
-    if 'buildsettings_sh' in jobfile_data:
-        for k, v in jobfile_data.get('buildsettings_sh', {}).items():
-            buildsettings[k] = v
-            buildsettings_changed = True
+    destfile = os.path.join(TheProjectMakedir, 'Overrides.cfg')
+    if os.path.exists(destfile):
+        shutil.copy(destfile, destfile + '.original')
+        loglist.append('Add data from existing TheProjectMakedir/Overrides.cfg')
+        with codecs.open(destfile, 'r', 'utf-8') as f1:
+            override_data_result.readfp(f1)
 
-    # ADD data we find to the existing in TheProjectMakedir/Overrides.cfg
-    if 0 and TheProjectMakedir:
-        if 'buildsettings_sh' in jobfile_data:
-            for k, v in jobfile_data.get('buildsettings_sh', {}).items():
-                buildsettings[k] = v
-                buildsettings_changed = True
+    loglist.append('Overwrite with data from jobfile')
+    for k_section, v_section in sorted(override_data.items()):
+        if not override_data_result.has_section(k_section):
+            override_data_result.add_section(k_section)
+        for k in sorted(v_section.keys()):
+            v = v_section[k]
+            override_data_result.set(k_section, k, v)
+
+    loglist.append('Save as TheProjectMakedir/Overrides.cfg')
+    with codecs.open(destfile, 'w', 'utf-8') as f2:
+        override_data_result.write(f2)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings_changed:
-    result['MILESTONES'].append({'buildsettings': buildsettings})
-
-if jobfile_data is not None:
-    result['MILESTONES'].append({'jobfile_data': jobfile_data})
-
-if jobfile_abspath is not None:
-    result['MILESTONES'].append({'jobfile_abspath': jobfile_abspath})
-
+if 0:
+    result['MILESTONES'].append({'name': 'value'})
 
 
 # ==================================================
@@ -131,8 +117,8 @@ if jobfile_abspath is not None:
 
 tct.writejson(result, resultfile)
 
+
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 sys.exit(exitcode)

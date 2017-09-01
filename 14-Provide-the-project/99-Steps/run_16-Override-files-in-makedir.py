@@ -34,8 +34,10 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
+deepget = tct.deepget
+
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -43,13 +45,7 @@ def lookup(D, *keys, **kwdargs):
 # ==================================================
 # define
 # --------------------------------------------------
-
-buildsettings_changed = False
-initial_working_dir = None
-jobfile_abspath = None
-jobfile_data = None
 xeq_name_cnt = 0
-
 
 # ==================================================
 # Check params
@@ -58,71 +54,50 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    buildsettings = lookup(milestones, 'buildsettings')
-    if not buildsettings:
-        CONTINUE = -2
+    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
+    if not (TheProjectMakedir):
+        exitcode = 22
 
 if exitcode == CONTINUE:
-    jobfile_abspath = lookup(milestones, 'jobfile_abspath')
-    jobfile = lookup(facts, 'run_command', 'jobfile')
-    initial_working_dir = lookup(facts, 'initial_working_dir')
-    if not (jobfile_abspath or jobfile):
-        CONTINUE = -2
-
-if exitcode == CONTINUE:
-    if not jobfile_abspath:
-        if os.path.isabs(jobfile):
-            jobfile_abspath = jobfile
-        elif initial_working_dir:
-            jobfile_abspath = os.path.abspath(os.path.join(initial_working_dir, jobfile))
-        else:
-            CONTINUE = -2
-
-if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append('Good PARAMS - I can work with these')
 else:
-    loglist.append('PROBLEM with required params')
+    loglist.append('Bad PARAMS - I cannot work with these')
 
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
-
+if exitcode == CONTINUE:
+    fpath_buildsettings_sh = lookup(facts, 'run_command', 'buildsettings_sh')
+    fpath_overrides_cfg = lookup(facts, 'run_command', 'overrides_cfg')
+    if not (fpath_buildsettings_sh or fpath_overrides_cfg):
+        CONTINUE = -2
+        loglist.append('Nothing to do.')
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+import shutil
+
 if exitcode == CONTINUE:
 
-    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
-    jobfile_data = tct.readjson(jobfile_abspath)
+    if fpath_buildsettings_sh:
+        destfile = os.path.join(TheProjectMakedir, 'buildsettings.sh')
+        shutil.copy(fpath_buildsettings_sh, destfile)
+        loglist.append(('copy file',
+                        ('from: %s' % fpath_buildsettings_sh,
+                         'to: %s' % destfile)))
 
-    # ADD buildsettings we find in jobfile to the existing ones
-    if 'buildsettings_sh' in jobfile_data:
-        for k, v in jobfile_data.get('buildsettings_sh', {}).items():
-            buildsettings[k] = v
-            buildsettings_changed = True
-
-    # ADD data we find to the existing in TheProjectMakedir/Overrides.cfg
-    if 0 and TheProjectMakedir:
-        if 'buildsettings_sh' in jobfile_data:
-            for k, v in jobfile_data.get('buildsettings_sh', {}).items():
-                buildsettings[k] = v
-                buildsettings_changed = True
+    if fpath_overrides_cfg:
+        destfile = os.path.join(TheProjectMakedir, 'Overrides.cfg')
+        shutil.copy(fpath_overrides_cfg, destfile)
+        loglist.append(('copy file',
+                        ('from: %s' % fpath_overrides_cfg,
+                         'to: %s' % destfile)))
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings_changed:
-    result['MILESTONES'].append({'buildsettings': buildsettings})
-
-if jobfile_data is not None:
-    result['MILESTONES'].append({'jobfile_data': jobfile_data})
-
-if jobfile_abspath is not None:
-    result['MILESTONES'].append({'jobfile_abspath': jobfile_abspath})
-
+if 0:
+    result['MILESTONES'].append({'name': 'value'})
 
 
 # ==================================================
@@ -131,8 +106,8 @@ if jobfile_abspath is not None:
 
 tct.writejson(result, resultfile)
 
+
 # ==================================================
 # Return with proper exitcode
 # --------------------------------------------------
-
 sys.exit(exitcode)

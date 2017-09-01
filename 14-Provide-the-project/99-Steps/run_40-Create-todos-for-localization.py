@@ -9,6 +9,7 @@ import os
 import tct
 import sys
 
+import re
 import shutil
 import stat
 
@@ -123,36 +124,64 @@ if exitcode == CONTINUE:
     if not os.path.exists(toolchain_temp_home_todo_folder):
         os.makedirs(toolchain_temp_home_todo_folder)
 
+    # create the original commandline again but
+    # but use 'makedir' as value here: '-c makedir makedir'
     words = []
-    cnt = 0
+    state = 0
     for word in cmdline.split():
-        if word == '-c':
-            cnt = 1
-        elif cnt == 1 and word == 'makedir':
-            cnt = 2
-        elif cnt == 2:
-            word = 'makedir'
-        else:
-            cnt = 0
-        words.append(word)
+        if state == 0:
+            if word == '-c':
+                state = 1
+            else:
+                words.append(word)
+        elif state == 1:
+            k = word
+            state = 2
+        elif state == 2:
+            v = word
+            state = 3
+
+        if state == 3:
+            if k == 'makedir':
+                # write '-c makedir ~~~makedir~~~'
+                words.append('-c')
+                words.append('makedir')
+                words.append('~~~makedir~~~')
+                state = 0
+            elif k == 'jobfile':
+                # leave out jobfile
+                state = 0
+            else:
+                words.append('c')
+                words.append(k)
+                words.append(v)
+                state = 0
+
     new_cmdline = ' '.join(words)
 
 if exitcode == CONTINUE:
 
     # /ALL/dummy_webroot/typo3cms/project/default/0.0.0
-    path_to_builddir = buildsettings['builddir']
-    path_to_builddir, builddir_version = os.path.split(path_to_builddir)
-    path_to_builddir, builddir_localization = os.path.split(path_to_builddir)
-    path_to_builddir, builddir_project = os.path.split(path_to_builddir)
-    a = path_to_builddir
-    b = builddir_project
-    c = builddir_localization
-    d = builddir_version
-    for locale in localization_locales:
+    path_to_builddir = buildsettings['builddir'].strip('/')
+    a, d = os.path.split(path_to_builddir)
+    a, c = os.path.split(a)
+    a, b = os.path.split(a)
+    # a = path_to_builddir
+    # b = builddir_project
+    # c = builddir_localization
+    # d = builddir_version
+    strtest = re.compile('([a-z]{2}-[a-z]{2})|default')
 
+    if not strtest.match(c):
+        a, b, c, d = os.path.join(a, b), c, '' ,d
+
+    for locale in localization_locales:
         # builddir
         c = locale.lower().replace('_', '-')
         buildsettings['builddir'] = os.path.join(a, b, c, d)
+
+        # package_language
+        buildsettings['package_language'] = c
 
         # localization
         buildsettings['localization'] = locale
@@ -183,7 +212,7 @@ if exitcode == CONTINUE:
         if toolchain_temp_home_todo_folder:
             toolchain_temp_home_todo_file = os.path.join(toolchain_temp_home_todo_folder, locale)
             toolchain_temp_home_todo_file_all = os.path.join(toolchain_temp_home_todo_folder, 'ALL.source-me.sh')
-            line = new_cmdline.replace('-c makedir makedir', '-c makedir ' + TheProjectTodosMakefolder)
+            line = new_cmdline.replace('-c makedir ~~~makedir~~~', '-c makedir ' + TheProjectTodosMakefolder)
             with file(toolchain_temp_home_todo_file, 'a') as f2:
                 f2.write('#!/bin/sh\n\n')
                 f2.write(line + '\n')
