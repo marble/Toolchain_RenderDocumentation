@@ -19,7 +19,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
-toolname = params["toolname"]
+toolname = params['toolname']
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
@@ -59,16 +59,6 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
 
     # fetch #1
     configset = lookup(milestones, 'configset')

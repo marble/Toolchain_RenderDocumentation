@@ -14,7 +14,7 @@ facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
+toolname = params['toolname']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 

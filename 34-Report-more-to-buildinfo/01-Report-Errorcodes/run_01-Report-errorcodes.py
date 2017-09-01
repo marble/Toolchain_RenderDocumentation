@@ -23,7 +23,7 @@ milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
-toolname = params["toolname"]
+toolname = params['toolname']
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 toolchain_name = facts['toolchain_name']

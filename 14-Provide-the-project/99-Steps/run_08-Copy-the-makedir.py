@@ -14,7 +14,7 @@ facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
+toolname = params['toolname']
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
@@ -55,6 +55,8 @@ def params_get(name, default=None):
 xeq_name_cnt = 0
 TheProjectMakedir = None
 
+print('The makedir may have buildsettings.sh and Overrides.cfg overridden')
+exitcode = 90
 
 # ==================================================
 # Check params

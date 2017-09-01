@@ -14,7 +14,7 @@ facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-toolname = params["toolname"]
+toolname = params['toolname']
 toolname_pure = params['toolname_pure']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
@@ -98,6 +98,13 @@ Toolchain options:
   -T version                     Show toolchain version and exit.
 
   -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
+
+  -c buildsettings PATH/TO/FILE  If specified, this file overrides the normal
+                                 makedir/buildsettings.sh
+
+  -c overrides PATH/TO/FILE      If specified, this file is used instead of the
+                                 normal makedir/Overrides.cfg
+
   -c rebuild_needed 1            Force rebuild regardless of checksum
 
   -c make_singlehtml 1           yes (default)
