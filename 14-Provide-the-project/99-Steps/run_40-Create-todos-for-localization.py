@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import tct
 import sys
-
+#
 import re
 import shutil
 import stat
@@ -94,6 +94,8 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
+    webroot_abspath = lookup(milestones, 'webroot_abspath')
+    webroot_part_of_builddir = lookup(milestones, 'webroot_part_of_builddir')
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -152,7 +154,7 @@ if exitcode == CONTINUE:
                 # leave out jobfile
                 state = 0
             else:
-                words.append('c')
+                words.append('-c')
                 words.append(k)
                 words.append(v)
                 state = 0
@@ -170,15 +172,23 @@ if exitcode == CONTINUE:
     # b = builddir_project
     # c = builddir_localization
     # d = builddir_version
-    strtest = re.compile('([a-z]{2}-[a-z]{2})|default')
+    xx_xx = re.compile('([a-z]{2}-[a-z]{2})|default')
 
-    if not strtest.match(c):
+    if not xx_xx.match(c):
         a, b, c, d = os.path.join(a, b), c, '' ,d
 
     for locale in localization_locales:
         # builddir
         c = locale.lower().replace('_', '-')
-        buildsettings['builddir'] = os.path.join(a, b, c, d)
+        abcd = os.path.join(a, b, c, d)
+        # "webroot_abspath": "/ALL/dummy_webroot",
+        # "webroot_part_of_builddir": "/ALL/dummy_webroot"
+        abspart = webroot_abspath or webroot_part_of_builddir
+        if not abspart:
+            abspart = ''
+        if abspart and abcd.startswith(abspart):
+            abcd = abcd[len(abspart):]
+        buildsettings['builddir'] = abcd
 
         # package_language
         buildsettings['package_language'] = c
