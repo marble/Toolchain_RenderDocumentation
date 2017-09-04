@@ -8,6 +8,8 @@ from __future__ import print_function
 import os
 import sys
 import tct
+#
+import re
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -47,14 +49,14 @@ xeq_name_cnt = 0
 
 # which section of tctconfig does the Toolchain use?
 configset = None
-
-buildsettings = {}
+buildsettings_changed = None
 
 if 0:
     # defining this buildsettings here allows PyCharm to
     # autocomplete the names of the keys
     # The Python compiler will generate no code though since the
     # if clause is always False
+    buildsettings = {}
     buildsettings['builddir'] = ""
     buildsettings['gitbranch'] = ""
     buildsettings['gitdir'] = ""
@@ -73,10 +75,6 @@ if 0:
     buildsettings['version'] = ""
 
 
-if 0:
-    "webroot_abspath, 'typo3cms/drafts', giturlslug"
-
-
 # ==================================================
 # Check params
 # --------------------------------------------------
@@ -84,39 +82,33 @@ if 0:
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = ['configset']
+    xx_XX = re.compile('([a-z]{2}_[a-z]{2})|default')
 
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # step 1
-    # Which section of tctconfig.cfg do we use?
     configset = lookup(milestones, 'configset')
     buildsettings = lookup(milestones, 'buildsettings')
+    if not (configset and buildsettings):
+        CONTINUE = -22
 
-    # step 2
+if exitcode == CONTINUE:
+    localization = buildsettings.get('localization', '')
+    if localization and not xx_XX.match(localization):
+        loglist.append('bad buildsettings.localization')
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     extensions_builddir_relpath = lookup(facts, 'tctconfig', configset, 'extensions_builddir_relpath')
     drafts_builddir_relpath = lookup(facts, 'tctconfig', configset, 'drafts_builddir_relpath')
     webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath')
 
-    # test
     if not (buildsettings and extensions_builddir_relpath and
             drafts_builddir_relpath and webroot_abspath):
-        exitcode = 99
+        CONTINUE = -2
+
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -149,201 +141,109 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
 
-
-    def by_terextkey(ter_extkey, ter_extversion):
-        if ter_extkey and ter_extversion:
-
-            # 01 builddir
-            if not buildsettings['builddir']:
-                buildsettings['builddir'] = os.path.join(
-                    webroot_abspath, extensions_builddir_relpath,
-                    buildsettings['ter_extkey'], buildsettings['ter_extversion'])
-
-            # 02 gitbranch
-            # 03 gitdir
-            # 04 giturl
-
-            # 05 localization
-            if not buildsettings['localization']:
-                buildsettings['localization'] = 'default'
-
-            # 07 logdir
-            # 08 masterdoc
-
-            # 09 package_key
-            # 10 package_language
-            # 11 package_zip
-
-            if buildsettings_initial.get('package_zip') is None:
-                buildsettings['package_zip'] = 1
-            if buildsettings['package_zip']:
-                if not buildsettings['package_language']:
-                    buildsettings['package_language'] = buildsettings['localization']
-                if not buildsettings['package_key']:
-                    buildsettings['package_key'] = buildsettings['ter_extkey']
-
-            # 12 project
-            if not buildsettings['project']:
-                buildsettings['project'] = buildsettings['ter_extkey']
-
-            # 13 t3docdir
-
-            # 14 ter_extension
-            if buildsettings_initial.get('ter_extension') is None:
-                buildsettings['ter_extension'] = 1
-
-            # 15 ter_extkey
-            # 16 ter_extversion
-
-
-            # 17 version
-            if not buildsettings['version']:
-                buildsettings['version'] = buildsettings['ter_extversion']
-
-            CONTINUE = -2
-
-
-    def by_giturl(giturl):
-
-        made_a_change = False
-
-        parts = giturl.split('/') # ['https', '', 'github.com', 'user', 'repo']
-        if len(parts) < 4 or not (parts[0] in ['https:', 'http:']) or parts[1]:
-            # we can't handle this
-            return made_a_change
-
-        repo_domain = parts[2]
-        repo_domain_slugified = repo_domain.replace('.', '-')
-        repo_relpath = '/'.join(parts[3:])
-        repo_relpath_without_ext = os.path.splitext(repo_relpath)[0]
-
-        # 01 builddir
-        if not buildsettings['builddir']:
-            if repo_relpath_without_ext:
-                buildsettings['builddir'] = os.path.join(
-                    webroot_abspath, drafts_builddir_relpath,
-                    repo_domain_slugified, repo_relpath_without_ext, 'latest')
-                made_a_change = True
-
-        # 02 gitbranch
-        if not buildsettings['gitbranch']:
-            buildsettings['gitbranch'] = 'master'
-            made_a_change = True
-
-        # 03 gitdir
-        # 04 giturl
-
-        # 05 localization
-        if not buildsettings['localization']:
-            buildsettings['localization'] = 'default'
-            made_a_change = True
-
-        # 07 logdir
-        # 08 masterdoc
-
-        # 09 package_key
-        # 10 package_language
-        if not buildsettings['package_language']:
-            buildsettings['package_language'] = 'default'
-            made_a_change = True
-
-        # 11 package_zip
-
-        # 12 project
-        if not buildsettings['project']:
-            buildsettings['project'] = repo_relpath_without_ext.replace('/', '-')
-            made_a_change = True
-
-        # 13 t3docdir
-        # 14 ter_extension
-        # 15 ter_extkey
-        # 16 ter_extversion
-
-        # 17 version
-        if not buildsettings['version']:
-            buildsettings['version'] = '0.0.0'
-            made_a_change = True
-
-        return made_a_change
-
-    def by_gitdir(gitdir):
-
-        gitdir = gitdir.strip('/')
-        gitdir = gitdir.strip('\\')
-        made_a_change = False
-
-        if not gitdir:
-            return made_a_change
-
-        gitdir_slugified = gitdir
-        for old, new in ((':', '-'), ('/', '-'), ('\\', '-'), ('--', '-')):
-            while old in gitdir_slugified:
-                gitdir_slugified = gitdir_slugified.replace(old, new)
-
-        # 01 builddir
-        if not buildsettings['builddir']:
-            buildsettings['builddir'] = os.path.join(
-                webroot_abspath, drafts_builddir_relpath, gitdir_slugified, 'latest')
-            made_a_change = True
-
-        # 02 gitbranch
-        # 03 gitdir
-        # 04 giturl
-        # 05 localization
-        if not buildsettings['localization']:
-            buildsettings['localization'] = 'default'
-            made_a_change = True
-
-        # 07 logdir
-        # 08 masterdoc
-        # 09 package_key
-        # 10 package_language
-        if not buildsettings['package_language']:
-            buildsettings['package_language'] = 'default'
-            made_a_change = True
-
-        # 11 package_zip
-        # 12 project
-        if not buildsettings['project']:
-            buildsettings['project'] = 'Project'
-            made_a_change = True
-        # 13 t3docdir
-        # 14 ter_extension
-        # 15 ter_extkey
-        # 16 ter_extversion
-        # 17 version
-        if not buildsettings['version']:
-            buildsettings['version'] = '0.0.0'
-            made_a_change = True
-
-        return made_a_change
+    if 0 and 'all':
+        buildsettings['builddir']  # 01 builddir
+        buildsettings['gitbranch']  # 02 gitbranch
+        buildsettings['gitdir']  # 03 gitdir
+        buildsettings['giturl']  # 04 giturl
+        buildsettings['localization']  # 05 localization
+        buildsettings['logdir']  # 07 logdir
+        buildsettings['masterdoc']  # 08 masterdoc
+        buildsettings['package_key']  # 09 package_key
+        buildsettings['package_language']  # 10 package_language
+        buildsettings['package_zip']  # 11 package_zip
+        buildsettings['project']  # 12 project
+        buildsettings['t3docdir']  # 13 t3docdir
+        buildsettings['ter_extension']  # 14 ter_extension
+        buildsettings['ter_extkey']  # 15 ter_extkey
+        buildsettings['ter_extversion']  # 16 ter_extversion
+        buildsettings['version']  # 17 version
 
 
 if exitcode == CONTINUE:
 
-    changed = False
+    if not buildsettings['localization']:
+        buildsettings['localization'] = 'default'
+        buildsettings_changed = True
 
-    ter_extkey = buildsettings['ter_extkey']
-    ter_extversion = buildsettings['ter_extversion']
-    giturl = buildsettings.get('giturl', '')
-    gitdir = buildsettings.get('gitdir', '')
+    if not buildsettings['package_language']:
+        buildsettings['package_language'] = localization.lower().replace('_', '-')
+        buildsettings_changed = True
 
-    if ter_extkey and ter_extversion:
-        changed = by_terextkey(ter_extkey, ter_extversion)
+    if buildsettings['ter_extkey']:
+        buildsettings_changed = True
+        buildsettings['gitbranch'] = ''  # 02 gitbranch
+        buildsettings['gitdir']    = ''     # 03 gitdir
+        buildsettings['giturl']    = ''     # 04 giturl
+        buildsettings['package_key'] = 'typo3cms.extensions.' + buildsettings['ter_extkey']  # 09 package_key
 
-    elif giturl and not gitdir:
-        changed = by_giturl(giturl)
+        if buildsettings['project'].lower() in ['', 'project']:
+            buildsettings['project'] = buildsettings['ter_extkey']
 
-    elif gitdir and not giturl:
-        changed = by_gitdir(gitdir)
+        if buildsettings['version'].lower() in ['', '0.0.0']:
+            if buildsettings['ter_extversion']:
+                buildsettings['version'] = buildsettings['ter_extversion']
+
+        if buildsettings['builddir'].lower() in ['', 'typo3cms/project/0.0.0']:
+            parts = [extensions_builddir_relpath, buildsettings['ter_extkey']]
+            if buildsettings['localization'] and buildsettings['localization'] != 'default':
+                parts.append(buildsettings['localization'].lower().replace('_', '-'))
+            parts.append(buildsettings['ter_extversion'])
+            buildsettings['builddir'] = '/'.join(parts)
 
 
-# ==================================================
+    elif buildsettings['giturl']:
+        buildsettings_changed = True
+        buildsettings['gitdir'] = '' # 03 gitdir
+        buildsettings['ter_extkey'] = '' # 15 ter_extkey
+        buildsettings['ter_extversion'] = ''  # 16 ter_extversion
+
+        parts = buildsettings['giturl'].split('/') # ['https', '', 'github.com', 'user', 'repo']
+        if len(parts) < 4 or not (parts[0] in ['https:', 'http:']) or parts[1]:
+            CONTINUE = -2
+            loglist.append('giturl is to short')
+
+        if exitcode == CONTINUE:
+            repo_domain = parts[2]
+            repo_domain_slugified = repo_domain.replace('.', '-')
+            repo_relpath = '/'.join(parts[3:])
+            repo_relpath_without_ext = os.path.splitext(repo_relpath)[0]
+
+            if buildsettings['builddir'] in ['', 'typo3cms/project/0.0.0']:
+                if repo_relpath_without_ext:
+                    buildsettings['builddir'] = os.path.join(
+                        drafts_builddir_relpath, repo_domain_slugified,
+                        repo_relpath_without_ext, 'latest')
+
+            if buildsettings['project'].lower() in ['', 'project']:
+                buildsettings['project'] = repo_relpath_without_ext.replace('/', '-')
+
+    elif buildsettings['gitdir']:
+        buildsettings_changed = True
+        buildsettings['gitbranch'] = ''  # 02 gitbranch
+        buildsettings['giturl'] = '' # 04 giturl
+        buildsettings['ter_extkey'] = '' # 15 ter_extkey
+        buildsettings['ter_extversion'] = '' # 16 ter_extversion
+
+        gitdir_slugified = buildsettings['gitdir'].lower()
+        for old, new in ((':', '-'), ('/', '-'), ('\\', '-'), ('--', '-')):
+            while old in gitdir_slugified:
+                gitdir_slugified = gitdir_slugified.replace(old, new)
+        gitdir_slugified = gitdir_slugified.strip('-')
+        if not gitdir_slugified:
+            gitdir_slugified = 'project'
+
+        if buildsettings['builddir'] in ['', 'typo3cms/project/0.0.0']:
+            buildsettings['builddir'] = os.path.join(drafts_builddir_relpath, gitdir_slugified, '0.0.0')
+
+
+        # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings:
+if buildsettings_changed is not None:
     result['MILESTONES'].append({'buildsettings': buildsettings})
+
 if configset:
     result['MILESTONES'].append({'configset': configset})
 
