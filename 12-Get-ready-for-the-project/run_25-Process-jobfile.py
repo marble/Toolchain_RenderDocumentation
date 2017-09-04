@@ -21,6 +21,8 @@ workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
+configset = milestones['configset']
+
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -34,11 +36,36 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
+deepget = tct.deepget
+
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
+def firstNotNone(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+    else:
+        return None
+
+def findRunParameterAgain(key, default, D=None, fconv=None, jobfile_data={}):
+    result = firstNotNone(
+        deepget(facts, 'run_command', key, default=None),
+        deepget(jobfile_data, 'tctconfig', key, default=None),
+        deepget(facts, 'tctconfig', configset, key, default=None),
+        default)
+    # function convert
+    if fconv is not None:
+        result = fconv(result)
+    if result != default:
+        if type(D) == type({}):
+            D[key] = result
+    return result
+
+frpa = findRunParameterAgain
+ATNM = all_the_new_milestones = {}
 
 # ==================================================
 # define
@@ -81,12 +108,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
-
+    loglist.append('Bad PARAMS or nothing to do')
 
 # ==================================================
 # work
@@ -110,14 +132,34 @@ if exitcode == CONTINUE:
                 buildsettings[k] = v
                 buildsettings_changed = True
 
+    if jobfile_data:
+        # we check these settings again, since we now have jobfile available
+        force_rebuild_needed = frpa('force_rebuild_needed',
+                                   milestones['force_rebuild_needed'], ATNM,
+                                   int, jobfile_data)
+        make_html = frpa('make_html', milestones['make_html'], ATNM, int, jobfile_data)
+        make_latex = frpa('make_latex', milestones['make_latex'], ATNM, int, jobfile_data)
+        make_pdf = frpa('make_pdf', milestones['make_pdf'], ATNM, int, jobfile_data)
+        make_singlehtml = frpa('make_singlehtml',
+                               milestones['make_singlehtml'], ATNM, int, jobfile_data)
+        rebuild_needed = frpa('rebuild_needed', milestones['rebuild_needed'],
+                             ATNM, int, jobfile_data)
+        replace_static_in_html = frpa('replace_static_in_html',
+                                     milestones['replace_static_in_html'],
+                                     ATNM, int, jobfile_data)
+        talk = frpa('talk', milestones['talk'], ATNM, int, jobfile_data)
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
+if ATNM:
+    result['MILESTONES'].append(ATNM)
+
 if buildsettings_changed:
     result['MILESTONES'].append({'buildsettings': buildsettings})
 
-if jobfile_data is not None:
+if jobfile_data:
     result['MILESTONES'].append({'jobfile_data': jobfile_data})
 
 if jobfile_abspath is not None:
