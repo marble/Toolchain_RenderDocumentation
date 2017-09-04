@@ -7,6 +7,11 @@
 from __future__ import print_function
 import tct
 import sys
+#
+import codecs
+import os
+import subprocess
+
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -65,27 +70,18 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
     if ter_extversion:
-        loglist.append('Nothing to do. TER_EXTKEY and TER_VERSION are defined.')
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-import codecs
-import os
-import shutil
-import subprocess
 
 if exitcode == CONTINUE:
 
@@ -178,6 +174,13 @@ Available versions:
 
     if ter_extversion_highest:
         buildsettings['ter_extversion'] = '.'.join([str(item) for item in ter_extversion_highest])
+        if buildsettings['version'] in ['', '0.0.0']:
+            buildsettings['version'] = buildsettings['ter_extversion']
+        parts = buildsettings['builddir'].split('/')
+        if parts:
+            if parts[-1] in ['', '0.0.0']:
+                parts[-1] = buildsettings['ter_extversion']
+            buildsettings['builddir'] = '/'.join(parts)
         buildsettings_changed = True
 
 # ==================================================
