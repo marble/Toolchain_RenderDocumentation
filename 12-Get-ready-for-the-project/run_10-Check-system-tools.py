@@ -8,6 +8,9 @@ from __future__ import print_function
 import tct
 import os
 import sys
+#
+import codecs
+import subprocess
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -16,6 +19,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -30,22 +34,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -77,28 +73,62 @@ list_for_which = [
     ]
 
 known_systemtools = {}
-
 pip_freeze = None
+xeq_name_cnt = 0
 
 # ==================================================
-# work
+# prepare for shell calls
 # --------------------------------------------------
 
-import subprocess
+if exitcode == CONTINUE:
 
-for k in list_for_which:
-    try:
-        v = subprocess.check_output('which ' + k, shell=True)
-    except subprocess.CalledProcessError, e:
-        v = ''
-    known_systemtools[k] = v.strip()
+    def cmdline(cmd, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        out, err = process.communicate()
+        exitcode = process.returncode
+        return exitcode, cmd, out, err
+
+    def execute_cmdlist(cmdlist, cwd=None):
+        global xeq_name_cnt
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
+        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+
+        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+
+        return exitcode, cmd, out, err
+
+if exitcode == CONTINUE:
+   for k in list_for_which:
+       cmdlist = ['which', k ]
+       xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+       if xcode == 0:
+           known_systemtools[k] = out
+       else:
+           known_systemtools[k] = ''
 
 if known_systemtools.has_key('pip'):
-    try:
-        v = subprocess.check_output('pip freeze', shell=True)
-    except subprocess.CalledProcessError, e:
-        v = ''
-    pip_freeze = v.split('\n')
+    cmdlist = ['which freeze']
+    xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+    if xcode == 0:
+        pip_freeze = v.split('\n')
 
 # ==================================================
 # Set MILESTONE
@@ -107,7 +137,7 @@ if known_systemtools.has_key('pip'):
 if known_systemtools:
     result['MILESTONES'].append({'known_systemtools': known_systemtools})
 
-if pip_freeze:
+if pip_freeze is not None:
     result['MILESTONES'].append({'pip_freeze': pip_freeze})
 
 # ==================================================
