@@ -9,6 +9,8 @@ from __future__ import print_function
 import os
 import tct
 import sys
+#
+import shutil
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -45,7 +47,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-postprocess_remove_static_folder_from_html = None
+remove_static_folder_from_html_done = None
+remove_static_folder_from_html_happened = None
 xeq_name_cnt = 0
 
 
@@ -56,21 +59,18 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    postprocess_replace_static_in_html = lookup(milestones, 'postprocess_replace_static_in_html')
+    replace_static_in_html_done = lookup(milestones, 'replace_static_in_html_done')
     build_html_folder = lookup(milestones, 'build_html_folder')
     build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
 
-    if not (postprocess_replace_static_in_html and (build_html_folder or build_singlehtml_folder)):
+    if not (replace_static_in_html_done
+            and (build_html_folder or build_singlehtml_folder)):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -79,28 +79,31 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
-    import shutil
-
-    todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
-    for build_folder in todolist:
+    for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
             continue
         fpath = os.path.join(build_folder, '_static')
         if os.path.exists(fpath):
             shutil.rmtree(fpath)
             loglist.append('%s, %s' % ('remove', fpath))
+            remove_static_folder_from_html_happened = 1
 
-    postprocess_remove_static_folder_from_html = 'done'
+    remove_static_folder_from_html_done = 1
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if postprocess_remove_static_folder_from_html:
-    result['MILESTONES'].append(
-        {'postprocess_remove_static_folder_from_html':
-         postprocess_remove_static_folder_from_html})
+if remove_static_folder_from_html_done:
+    result['MILESTONES'].append({
+        'remove_static_folder_from_html_done':
+        remove_static_folder_from_html_done})
+
+if remove_static_folder_from_html_happened:
+    result['MILESTONES'].append({
+        'remove_static_folder_from_html_happened':
+        remove_static_folder_from_html_happened})
 
 
 # ==================================================
