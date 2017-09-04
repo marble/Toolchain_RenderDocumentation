@@ -9,6 +9,10 @@ from __future__ import print_function
 import os
 import tct
 import sys
+#
+import codecs
+import glob
+import re
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -46,7 +50,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-postprocess_replace_static_in_html = None
+replace_static_in_html_done = None
+replace_static_in_html_happened = None
 xeq_name_cnt = 0
 
 # ==================================================
@@ -57,7 +62,7 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     build_html_folder = lookup(milestones, 'build_html_folder')
-    replace_static_in_html = lookup(milestones, 'replace_static_in_html', default=0)
+    replace_static_in_html = lookup(milestones, 'replace_static_in_html', default=None)
     url_of_webroot = lookup(milestones, 'url_of_webroot')
 
     if not (build_html_folder and replace_static_in_html and url_of_webroot):
@@ -66,27 +71,16 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
-
-    #url_of_webroot = lookup(milestones, 'url_of_webroot')
-    #if not url_of_webroot in ['https://docs.typo3.org']:
-    #    loglist.append(('Nothing to do for server', url_of_webroot))
-    #    CONTINUE = -2
-
-
 # """
+# Example:
+#
 # old: href="../../_static/css/t3more.css"
 # new: href="/t3SphinxThemeRtd/3.6.0/css/t3more.css"
 #
@@ -98,10 +92,6 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
 
     # Find the version. Look for a file like '_static/t3SphinxThemeRtd-3.6.0.txt'
-
-    import codecs
-    import glob
-    import re
 
     # should become something like '3.6.0'
     version = None
@@ -146,6 +136,7 @@ if exitcode == CONTINUE:
     replacement = unicode(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor +
                           '/' + '\g<payload>\g<quote>')
 
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
     for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
             continue
@@ -164,19 +155,23 @@ if exitcode == CONTINUE:
                     data = f1.read()
                 data, cnt = regexpattern.subn(replacement, data)
                 if cnt:
+                    replace_static_in_html_happened = 1
                     with codecs.open(fpath, 'w', 'utf-8') as f2:
                         f2.write(data)
                 loglist.append('%s, %s, %s' % (cnt, builder_logname, file_logname))
-
-    postprocess_replace_static_in_html = 'done'
-
+    replace_static_in_html_done = 1
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if postprocess_replace_static_in_html:
-    result['MILESTONES'].append({'postprocess_replace_static_in_html': postprocess_replace_static_in_html})
+if replace_static_in_html_done:
+    result['MILESTONES'].append(
+        {'replace_static_in_html_done': replace_static_in_html_done})
+
+if replace_static_in_html_happened:
+    result['MILESTONES'].append(
+        {'replace_static_in_html_happened': replace_static_in_html_happened})
 
 
 # ==================================================
