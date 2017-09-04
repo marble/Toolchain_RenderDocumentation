@@ -485,7 +485,6 @@ def do_the_work():
 
     for pre in soup.find_all('pre'):
         pre.string.replace_with(u'\n'.join([part.lstrip() for part in pre.string.split('\n')]))
-        print(pre.string)
 
     # create outfile
     # replace variables
