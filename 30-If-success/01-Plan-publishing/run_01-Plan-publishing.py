@@ -43,21 +43,32 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+# we assume:
+#     typo3cms/project/0.0.0        publish_dir
+#     typo3cms/project              publish_dir_language
+#     typo3cms/project              publish_dir_project
+
+#     typo3cms/project/fr-fr/0.0.0  publish_dir
+#     typo3cms/project/fr-fr        publish_dir_language
+#     typo3cms/project              publish_dir_project
+
+
 known_target_folders = ['/typo3cms']
 
+localized = None
 publish_dir = None
 publish_dir_buildinfo_planned = ''
-publish_dir_planned = ''
+publish_dir_planned = None
+publish_language_dir_planned = None
 publish_package_dir_planned = ''
 publish_parent_dir = None
-publish_parent_dir_planned = ''
-publish_parent_parent_dir = None
-publish_parent_parent_dir_planned = ''
-publish_project_dir_planned = ''
-publish_settings_cfg_planned = ''
-publish_warnings_txt_planned = ''
+publish_parent_dir_planned = None
+publish_project_dir_planned = None
+publish_project_parent_dir = None
+publish_project_parent_dir_planned = None
+publish_settings_cfg_planned = None
+publish_warnings_txt_planned = None
 xeq_name_cnt = 0
-
 
 # ==================================================
 # Check params
@@ -66,19 +77,22 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    url_of_webroot = lookup(milestones, 'url_of_webroot', default=None)
+    buildsettings_builddir = lookup(milestones, 'buildsettings_builddir', default=None)
+    create_buildinfo = lookup(milestones, 'create_buildinfo', default=1)
+    relative_part_of_builddir = lookup(milestones, 'relative_part_of_builddir', default=None)
     TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
     TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion', default=None)
-    buildsettings_builddir = lookup(milestones, 'buildsettings_builddir', default=None)
-    webroot_part_of_builddir = lookup(milestones, 'webroot_part_of_builddir', default=None)
+    url_of_webroot = lookup(milestones, 'url_of_webroot', default=None)
     webroot_abspath = lookup(milestones, 'webroot_abspath', default=None)
-    relative_part_of_builddir = lookup(milestones, 'relative_part_of_builddir', default=None)
-    create_buildinfo = lookup(milestones, 'create_buildinfo', default=1)
 
-    if not (url_of_webroot and TheProjectResult and TheProjectResultVersion and
-            buildsettings_builddir and
-            webroot_part_of_builddir and webroot_abspath and
-            relative_part_of_builddir):
+    if not (1
+            and buildsettings_builddir
+            and relative_part_of_builddir
+            and TheProjectResult
+            and TheProjectResultVersion
+            and url_of_webroot
+            and webroot_abspath
+            ):
         exitcode = 22
 
     buildsettings_localization = lookup(milestones, 'buildsettings', 'localization', default='')
@@ -96,33 +110,49 @@ else:
 
 if exitcode == CONTINUE:
     TheProjectResultVersionLen = len(TheProjectResultVersion)
+    relative_part_of_builddir_stripped = relative_part_of_builddir.strip('/')
 
-    # we need at least three parts! project/default/0.0.0
-    if len(relative_part_of_builddir.strip('/').split('/')) >= 3:
-        publish_dir_planned = os.path.join(webroot_abspath, relative_part_of_builddir)
+    if buildsettings_localization in ['', 'default']:
+        localized = 0
+        required_parts = 2
+    else:
+        localized = 1
+        required_parts = 3
 
-    if not publish_dir_planned:
+    # project/[language/]0.0.0
+    if len(relative_part_of_builddir_stripped.split('/')) < required_parts:
         exitcode = 22
 
 if exitcode == CONTINUE:
-    publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]
-    if buildsettings_localization in ['', 'default']:
-        publish_project_dir_planned = publish_parent_dir_planned
+
+    if localized:
+        a, d = os.path.split(relative_part_of_builddir_stripped)
+        a, c = os.path.split(a)
+        a, b = os.path.split(a)
     else:
-        publish_project_dir_planned, dummy = os.path.split(publish_parent_dir_planned)
+        a, d = os.path.split(relative_part_of_builddir_stripped)
+        a, b = os.path.split(a)
+        c = ''
+
+    publish_project_parent_dir_planned = os.path.join(webroot_abspath, a)
+    publish_project_dir_planned = os.path.join(webroot_abspath, a, b)
+    publish_language_dir_planned = os.path.join(webroot_abspath, a, b, c)
+    publish_dir_planned = os.path.join(webroot_abspath, a, b, c, d)
+    loglist.append(('abcd', (a,b,c,d)))
+
+    # eliminate this one!
+    publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]
 
     publish_package_dir_planned = os.path.join(publish_project_dir_planned, 'packages')
 
+if 0 and "Eliminate!" and exitcode == CONTINUE:
+    publish_project_parent_dir_planned = os.path.split(publish_parent_dir_planned)[0]
+    if os.path.exists(publish_project_parent_dir_planned):
+        publish_project_parent_dir = publish_project_parent_dir_planned
+
 if exitcode == CONTINUE:
-    publish_parent_parent_dir_planned = os.path.split(publish_parent_dir_planned)[0]
-    if os.path.exists(publish_parent_parent_dir_planned):
-        publish_parent_parent_dir = publish_parent_parent_dir_planned
-
-    if 0:
-        if not os.path.exists(publish_parent_parent_dir):
-            loglist.append(('publish_parent_parent_dir does not exist', publish_parent_parent_dir))
-            exitcode = 22
-
+    if os.path.exists(publish_project_parent_dir_planned):
+        publish_project_dir = publish_project_dir_planned
 
 # ==================================================
 # Set MILESTONE
@@ -155,12 +185,13 @@ if exitcode == CONTINUE:
         'publish_dir_pdf_planned':              publish_dir_pdf_planned,
         'publish_dir_planned':                  publish_dir_planned,
         'publish_file_pdf_planned':             publish_file_pdf_planned,
+        'publish_language_dir_planned':         publish_language_dir_planned,
         'publish_package_dir_planned':          publish_package_dir_planned,
         'publish_package_file_planned':         publish_package_file_planned,
         'publish_parent_dir_planned':           publish_parent_dir_planned,
-        'publish_parent_parent_dir':            publish_parent_parent_dir,
-        'publish_parent_parent_dir_planned':    publish_parent_parent_dir_planned,
         'publish_project_dir_planned':          publish_project_dir_planned,
+        'publish_project_parent_dir':           publish_project_parent_dir,
+        'publish_project_parent_dir_planned':   publish_project_parent_dir_planned,
         'publish_settings_cfg_planned':         publish_settings_cfg_planned,
         'publish_warnings_txt_planned':         publish_warnings_txt_planned,
     })
@@ -171,8 +202,8 @@ if exitcode == CONTINUE:
         ('absurl_package_dir',                  publish_package_dir_planned,        '/'),
         ('absurl_package_file',                 publish_package_file_planned,       '' ),
         ('absurl_parent_dir',                   publish_parent_dir_planned,         '/'),
-        ('absurl_parent_parent_dir',            publish_parent_parent_dir,          '/'),
-        ('absurl_parent_parent_dir_planned',    publish_parent_parent_dir_planned,  '/'),
+        ('absurl_project_parent_dir',            publish_project_parent_dir,          '/'),
+        ('absurl_project_parent_dir_planned',    publish_project_parent_dir_planned,  '/'),
         ('absurl_pdf_dir',                      publish_dir_pdf_planned,            '/'),
         ('absurl_pdf_file',                     publish_file_pdf_planned,           '' ),
         ('absurl_settings_cfg_file',            publish_settings_cfg_planned,       '' ),

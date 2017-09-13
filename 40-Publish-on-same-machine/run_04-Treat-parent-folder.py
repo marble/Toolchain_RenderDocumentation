@@ -71,8 +71,8 @@ if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
     publish_dir = lookup(milestones, 'publish_dir')
     publish_html_done = lookup(milestones, 'publish_html_done')
-    publish_parent_dir = lookup(milestones, 'publish_parent_dir')
-    if not (configset and publish_dir and publish_html_done and publish_parent_dir):
+    publish_project_dir = lookup(milestones, 'publish_project_dir')
+    if not (configset and publish_dir and publish_html_done and publish_project_dir):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -101,14 +101,14 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     # provide .htaccess
-    htaccess_file = os.path.join(publish_parent_dir, '.htaccess')
+    htaccess_file = os.path.join(publish_project_dir, '.htaccess')
     if not os.path.exists(htaccess_file):
         shutil.copy(htaccess_template_show_latest, htaccess_file)
         publish_html_htaccess_copied = htaccess_file
 
 if exitcode == CONTINUE:
     # remove 'latest' if not dir
-    latest_file = os.path.join(publish_parent_dir, 'latest')
+    latest_file = os.path.join(publish_project_dir, 'latest')
     if os.path.islink(latest_file):
         publish_latest_file_target_old = os.readlink(latest_file)
     if os.path.isfile(latest_file):
@@ -118,7 +118,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     # find existing versions
     publish_existing_versions = []
-    for top, dirs, files in os.walk(publish_parent_dir):
+    for top, dirs, files in os.walk(publish_project_dir):
         for dir in dirs:
             if dir[0] in '0123456789':
                 publish_existing_versions.append(dir)
@@ -126,7 +126,7 @@ if exitcode == CONTINUE:
     publish_existing_versions.sort(key=tct.versiontuple, reverse=True)
 
 if exitcode == CONTINUE:
-    publish_stable_file = os.path.join(publish_parent_dir, 'stable')
+    publish_stable_file = os.path.join(publish_project_dir, 'stable')
     if ter_extension:
         # for extensions 'stable' should always point to the highest
         # version denoted by numbers

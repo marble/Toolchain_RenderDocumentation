@@ -95,19 +95,11 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
     webroot_abspath = lookup(milestones, 'webroot_abspath')
-    webroot_part_of_builddir = lookup(milestones, 'webroot_part_of_builddir')
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
-
-if exitcode == 22:
-    loglist.append('Cannot work with these parameters.')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('Cannot continue')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -182,12 +174,8 @@ if exitcode == CONTINUE:
         c = locale.lower().replace('_', '-')
         abcd = os.path.join(a, b, c, d)
         # "webroot_abspath": "/ALL/dummy_webroot",
-        # "webroot_part_of_builddir": "/ALL/dummy_webroot"
-        abspart = webroot_abspath or webroot_part_of_builddir
-        if not abspart:
-            abspart = ''
-        if abspart and abcd.startswith(abspart):
-            abcd = abcd[len(abspart):]
+        if abcd.startswith(webroot_abspath):
+            abcd = abcd[len(webroot_abspath):]
         buildsettings['builddir'] = abcd
 
         # package_language

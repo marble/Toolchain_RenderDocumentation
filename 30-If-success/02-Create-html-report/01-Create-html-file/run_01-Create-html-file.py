@@ -153,7 +153,7 @@ if exitcode == CONTINUE:
     absurl_package_dir          = milestones_get('absurl_package_dir')
     absurl_package_file         = milestones_get('absurl_package_file')
     absurl_parent_dir           = milestones_get('absurl_parent_dir')
-    absurl_parent_parent_dir    = milestones_get('absurl_parent_parent_dir')
+    absurl_project_parent_dir    = milestones_get('absurl_project_parent_dir')
     absurl_pdf_dir              = milestones_get('absurl_pdf_dir')
     absurl_pdf_file             = milestones_get('absurl_pdf_file')
     absurl_settings_cfg_file    = milestones_get('absurl_settings_cfg_file')

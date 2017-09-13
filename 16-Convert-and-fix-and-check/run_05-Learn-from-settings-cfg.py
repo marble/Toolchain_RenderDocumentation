@@ -90,7 +90,13 @@ import ConfigParser
 
 if exitcode == CONTINUE:
     config = ConfigParser.RawConfigParser()
-    config.readfp(codecs.open(settingscfg_file, 'r', 'utf-8'))
+    try:
+        config.readfp(codecs.open(settingscfg_file, 'r', 'utf-8'))
+    except ConfigParser.ParsingError, e:
+        loglist.append(('ConfigParser.ParsingError', (settingscfg_file, repr(e))))
+        exitcode = 5
+
+if exitcode == CONTINUE:
     for s in config.sections():
         settings_cfg_data[s] = settings_cfg_data.get(s, {})
         for o in config.options(s):

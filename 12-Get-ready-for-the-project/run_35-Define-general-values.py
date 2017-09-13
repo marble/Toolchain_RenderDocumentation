@@ -73,8 +73,7 @@ gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/:/tmp/'
 lockfile_ttl_seconds = 1800
 relative_part_of_builddir = ''
 url_of_webroot = ''
-webroot_abspath = ''
-webroot_part_of_builddir = '/ALL/dummy_webroot'
+webroot_abspath = '' # '/ALL/dummy_webroot'
 xeq_name_cnt = 0
 
 email_user_do_not_send = 0
@@ -118,20 +117,23 @@ if exitcode == CONTINUE:
     configset = milestones.get('configset')
 
     # is always on srv123 (?)
-    webroot_part_of_builddir = lookup(facts, 'tctconfig', configset, 'webroot_part_of_builddir', default=webroot_part_of_builddir)
     url_of_webroot = lookup(facts, 'tctconfig', configset, 'url_of_webroot', default=url_of_webroot)
     # relative_part_of_builddir = lookup(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
     webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
     buildsettings_builddir = lookup(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
 
-if not (configset and webroot_part_of_builddir and url_of_webroot
-        and webroot_abspath and buildsettings_builddir):
+if not (1
+        and buildsettings_builddir
+        and configset
+        and url_of_webroot
+        and webroot_abspath
+    ):
     exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Cannot work with these PARAMS')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -158,11 +160,9 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    # calculate relative_par_of_builddir. E.g.: typo3cms/Project/default/0.0.0
+    # calculate relative_part_of_builddir. E.g.: typo3cms/Project/default/0.0.0
     if not relative_part_of_builddir:
-        if buildsettings_builddir.startswith(webroot_part_of_builddir):
-            relative_part_of_builddir = buildsettings_builddir[len(webroot_part_of_builddir):]
-        elif buildsettings_builddir.startswith(webroot_abspath):
+        if buildsettings_builddir.startswith(webroot_abspath):
             relative_part_of_builddir = buildsettings_builddir[len(webroot_abspath):]
         else:
             relative_part_of_builddir = buildsettings_builddir
@@ -197,9 +197,6 @@ if url_of_webroot:
 
 if webroot_abspath:
     result['MILESTONES'].append({'webroot_abspath': webroot_abspath})
-
-if webroot_part_of_builddir:
-    result['MILESTONES'].append({'webroot_part_of_builddir': webroot_part_of_builddir})
 
 if gitdir_must_start_with:
     result['MILESTONES'].append({'gitdir_must_start_with': gitdir_must_start_with})

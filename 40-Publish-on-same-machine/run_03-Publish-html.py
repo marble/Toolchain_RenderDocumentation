@@ -55,12 +55,13 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-publish_dir = ''
-publish_dir_buildinfo = ''
-publish_html_done = False
-publish_parent_dir = ''
-publish_parent_parent_dir = ''
-publish_removed_old = False
+publish_dir = None
+publish_dir_buildinfo = None
+publish_html_done = None
+publish_language_dir = None
+publish_project_dir = None
+publish_project_parent_dir = None
+publish_removed_old = None
 xeq_name_cnt = 0
 
 
@@ -83,16 +84,18 @@ if exitcode == CONTINUE:
 
     # fetch
     publish_dir_planned = milestones_get('publish_dir_planned')
-    publish_parent_dir_planned = milestones_get('publish_parent_dir_planned')
-    publish_parent_parent_dir_planned = milestones_get('publish_parent_parent_dir_planned')
+    publish_language_dir_planned = milestones_get('publish_language_dir_planned')
+    publish_project_dir_planned = milestones_get('publish_project_dir_planned')
+    publish_project_parent_dir_planned = milestones_get('publish_project_parent_dir_planned')
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
 
     # test
     if not (
         publish_dir_planned and
-        publish_parent_dir_planned and
-        publish_parent_parent_dir_planned and
+        publish_language_dir_planned and
+        publish_project_dir_planned and
+        publish_project_parent_dir_planned and
         TheProjectResult and
         TheProjectResultVersion):
         exitcode = 22
@@ -100,11 +103,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -113,17 +112,17 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
-    if not os.path.exists(publish_parent_parent_dir_planned):
-        os.makedirs(publish_parent_parent_dir_planned)
-    publish_parent_parent_dir = publish_parent_parent_dir_planned
+    if not os.path.exists(publish_project_parent_dir_planned):
+        os.makedirs(publish_project_parent_dir_planned)
+    publish_project_parent_dir = publish_project_parent_dir_planned
 
-    if not os.path.exists(publish_parent_dir_planned):
-        os.mkdir(publish_parent_dir_planned)
-    publish_parent_dir = publish_parent_dir_planned
+    if not os.path.exists(publish_project_dir_planned):
+        os.mkdir(publish_project_dir_planned)
+    publish_project_dir = publish_project_dir_planned
 
     if os.path.isdir(publish_dir_planned):
         shutil.rmtree(publish_dir_planned)
-        publish_removed_old = True
+        publish_removed_old = 1
 
     # should not happen
     if os.path.exists(publish_dir_planned):
@@ -131,7 +130,7 @@ if exitcode == CONTINUE:
 
     if os.path.exists(publish_dir_planned):
         loglist.append(('cannot remove `publish_dir_planned`', publish_dir_planned))
-        publish_removed_old = False
+        publish_removed_old = 0
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -139,12 +138,14 @@ if exitcode == CONTINUE:
     # shutil.move(TheProjectResultVersion, publish_dir_planned)
     shutil.copytree(TheProjectResultVersion, publish_dir_planned)
     publish_dir = publish_dir_planned
+    publish_project_dir = publish_project_dir_planned
+    publish_language_dir = publish_project_dir_planned
     if not os.path.isdir(publish_dir):
         loglist.append(('cannot move or copy to `publish_dir`', publish_dir))
         exitcode = 22
 
 if exitcode == CONTINUE:
-    publish_html_done = True
+    publish_html_done = 1
     publish_dir_buildinfo_planned = milestones_get('publish_dir_buildinfo_planned')
     if publish_dir_buildinfo_planned and os.path.isdir(publish_dir_buildinfo_planned):
         publish_dir_buildinfo = publish_dir_buildinfo_planned
@@ -162,14 +163,20 @@ if publish_html_done:
 if publish_removed_old:
     D['publish_removed_old'] = publish_removed_old
 
-if publish_parent_dir:
-    D['publish_parent_dir'] = publish_parent_dir
+if publish_project_dir:
+    D['publish_project_dir'] = publish_project_dir
 
-if publish_parent_parent_dir:
-    D['publish_parent_parent_dir'] = publish_parent_parent_dir
+if publish_project_parent_dir:
+    D['publish_project_parent_dir'] = publish_project_parent_dir
 
 if publish_dir:
     D['publish_dir'] = publish_dir
+
+if publish_language_dir:
+    D['publish_language_dir'] = publish_language_dir
+
+if publish_project_dir:
+    D['publish_project_dir'] = publish_project_dir
 
 if publish_dir_buildinfo:
     D['publish_dir_buildinfo'] = publish_dir_buildinfo

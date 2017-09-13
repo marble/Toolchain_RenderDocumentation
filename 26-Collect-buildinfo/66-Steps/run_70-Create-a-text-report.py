@@ -9,6 +9,9 @@ from __future__ import print_function
 import os
 import tct
 import sys
+#
+import codecs
+import shutil
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -83,18 +86,22 @@ if exitcode == CONTINUE:
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
     buildsettings = milestones_get('buildsettings')
-    webroot_part_of_builddir = milestones_get('webroot_part_of_builddir')
     url_of_webroot = milestones_get('url_of_webroot')
     buildsettings_builddir = milestones_get('buildsettings_builddir')
     relative_part_of_builddir = milestones_get('relative_part_of_builddir')
     webroot_abspath = milestones_get('webroot_abspath')
 
     # test
-    if not (TheProjectResult and TheProjectResultVersion and
-            TheProjectResultBuildinfo and buildsettings and
-            webroot_part_of_builddir and url_of_webroot and
-            buildsettings_builddir and relative_part_of_builddir and
-            webroot_abspath):
+    if not (1
+            and buildsettings
+            and buildsettings_builddir
+            and relative_part_of_builddir
+            and TheProjectResult
+            and TheProjectResultBuildinfo
+            and TheProjectResultVersion
+            and url_of_webroot
+            and webroot_abspath
+            ):
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -124,9 +131,6 @@ if exitcode == CONTINUE:
     email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off')
     logstamp_finish = milestones_get('logstamp_finish', tct.logstamp())
     subject = u''
-
-import codecs
-import shutil
 
 letter_to_owner = [u'']
 subject = u'Documentation rendered: '
