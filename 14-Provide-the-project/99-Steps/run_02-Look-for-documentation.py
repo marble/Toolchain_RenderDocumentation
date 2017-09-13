@@ -44,12 +44,10 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 buildsettings = {}
-
 locale_folders = {'': '', 'default': ''} # 'fr_FR':'Localization.fr_FR'
 locale_locales = []
 locale_masterdocs = []
 localization = 'default'
-
 masterdoc_candidates = [
     'Documentation/Index.rst',
     'Documentation/index.rst',
@@ -72,7 +70,6 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # fetch
     buildsettings = lookup(milestones, 'buildsettings')
     localization = lookup(milestones, 'buildsettings', 'localization', default='default')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
@@ -82,11 +79,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -183,9 +176,10 @@ if masterdoc_selected:
     })
     masterdoc = masterdoc_selected.get(localization)
     if masterdoc:
-        buildsettings['masterdoc'] = os.path.join(gitdir, masterdoc)
+        masterdoc_no_ext = os.path.splitext(masterdoc)[0]
+        buildsettings['masterdoc'] = os.path.join(gitdir, masterdoc_no_ext)
         hit = None
-        left, right = os.path.split(masterdoc)
+        left, right = os.path.split(masterdoc_no_ext)
         while left:
             hit = left
             left = os.path.split(left)[0]
