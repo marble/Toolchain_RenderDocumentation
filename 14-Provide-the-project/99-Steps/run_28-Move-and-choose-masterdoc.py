@@ -8,6 +8,8 @@ from __future__ import print_function
 import os
 import tct
 import sys
+#
+import shutil
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -67,11 +69,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # =========================================================
@@ -96,8 +94,7 @@ if exitcode == CONTINUE:
         global xeq_name_cnt
         cmd = ' '.join(cmdlist)
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
-        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
         xeq_name_cnt += 1
         filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
         filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
@@ -105,6 +102,9 @@ if exitcode == CONTINUE:
 
         with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
         with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
             f2.write(out.decode('utf-8', 'replace'))
@@ -147,8 +147,6 @@ if exitcode == CONTINUE and pandoc:
                 exitcode_, cmd, out, err = execute_cmdlist([pandoc, '--from markdown --to rst', mdfile, '-o', rstfile])
 
 if exitcode == CONTINUE:
-    import shutil
-
     for candidate in masterdoc_candidates:
         left, right = os.path.split(candidate)
         fpath = os.path.join(TheProject, left, locale_folders[localization], right)
@@ -160,7 +158,7 @@ if exitcode == CONTINUE:
         candidate = None
         masterdoc = None
 
-if exitcode == CONTINUE and masterdoc and candidate:
+if (exitcode == CONTINUE) and masterdoc and candidate:
 
     if candidate.lower().startswith('documentation/index.'):
         pass
@@ -203,8 +201,12 @@ if exitcode == CONTINUE and masterdoc and candidate:
 # --------------------------------------------------
 
 if masterdoc:
-    buildsettings['masterdoc'] = masterdoc
-    result['MILESTONES'].append({'masterdoc': masterdoc})
+    masterdoc_no_ext = os.path.splitext(masterdoc)[0]
+    buildsettings['masterdoc'] = masterdoc_no_ext
+    result['MILESTONES'].append({
+        'masterdoc': masterdoc_no_ext,
+        'masterdoc_with_ext': masterdoc,
+    })
 
 if documentation_folder_created:
     result['MILESTONES'].append({'documentation_folder_created': documentation_folder_created})
