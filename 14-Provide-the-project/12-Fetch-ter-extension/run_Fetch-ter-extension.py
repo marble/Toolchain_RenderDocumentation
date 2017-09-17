@@ -51,7 +51,6 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-buildsettings = None
 buildsettings_builddir_new = None
 buildsettings_changed = False
 extension_file = ''
@@ -77,6 +76,11 @@ if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
     buildsettings = lookup(milestones, 'buildsettings')
     if not (configset and buildsettings):
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    gitdir_is_ready_for_use = buildsettings.get('gitdir_is_ready_for_use')
+    if gitdir_is_ready_for_use:
         CONTINUE = -2
 
 if exitcode == CONTINUE:

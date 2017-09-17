@@ -9,15 +9,15 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -33,17 +33,18 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
+deepget = tct.deepget
+
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
-
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-buildsettings = None
+buildsettings_changed = None
 gitbranch = ''
 gitdir = ''
 giturl = ''
@@ -63,6 +64,7 @@ if exitcode == CONTINUE:
     buildsettings = lookup(milestones, 'buildsettings')
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    gitdir_is_ready_for_use = lookup(milestones, 'buildsettings', 'gitdir_is_ready_for_use', None)
     giturl = lookup(milestones, 'buildsettings', 'giturl')
     ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
@@ -76,12 +78,12 @@ if exitcode == CONTINUE:
         exitcode = 22
 
 if exitcode == CONTINUE:
-    if giturl and not gitbranch:
-        loglist.append('we need to know the branch of the repository')
-        CONTINUE = -2
+    if not gitdir_is_ready_for_use and giturl and not gitbranch:
+            loglist.append('we need to know the branch of the repository')
+            CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if (gitdir or giturl) and (ter_extkey):
+    if not gitdir_is_ready_for_use and (gitdir or giturl) and (ter_extkey):
         loglist.append('we either expect a manual or a ter extension. ')
         exitcode = 99
 
@@ -95,11 +97,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -120,16 +118,16 @@ def slugify_url(url):
     return ''.join(result)
 
 if exitcode == CONTINUE:
-    if not gitdir and giturl:
+    if not gitdir_is_ready_for_use and not gitdir and giturl:
         gitdir = os.path.join(repositories_rootfolder, slugify_url('-'.join(giturl.split('://'))))
         buildsettings['gitdir'] = gitdir
-
+        buildsettings_changed = True
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if buildsettings:
+if buildsettings_changed:
     result['MILESTONES'].append({'buildsettings': buildsettings})
 
 # ==================================================

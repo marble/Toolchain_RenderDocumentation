@@ -58,37 +58,25 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
-    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
-    giturl = lookup(milestones, 'buildsettings', 'giturl')
-
-    # test
-    if not gitdir:
+    if not gitdir :
         exitcode = 22
 
 if exitcode == CONTINUE:
+    gitdir_is_ready_for_use = lookup(milestones, 'buildsettings', 'gitdir_is_ready_for_use')
+    if gitdir_is_ready_for_use:
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    giturl = lookup(milestones, 'buildsettings', 'giturl')
+    gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     if not (giturl and gitbranch):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # =========================================================

@@ -198,6 +198,7 @@ if exitcode == CONTINUE:
             for k in sorted(buildsettings):
                 v = buildsettings[k]
                 f2.write('%s=%s\n' % (k.upper(), v))
+            f2.write('GITDIR_IS_READY_FOR_USE=1\n')
 
         if TheProjectMakedir:
             makedirfiles = ['.gitignore', '_htaccess', '_info.txt', 'conf.py', 'Overrides.cfg']
