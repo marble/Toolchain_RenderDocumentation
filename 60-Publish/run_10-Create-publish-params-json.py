@@ -56,18 +56,29 @@ xeq_name_cnt = 0
 # example - just for demonstration
 # --------------------------------------------------
 
-example = {
-    "publish_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog/blog/8.7.0",
-    "publish_dir_buildinfo": "/ALL/dummy_webroot/typo3cms/extensions/blog/blog/8.7.0/_buildinfo",
-    "publish_html_done": 1,
-    "publish_language_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog",
-    "publish_package_file": "/ALL/dummy_webroot/typo3cms/extensions/blog/packages/blog-8.7.0-default.zip",
-    "publish_packages_xml_file": "/ALL/dummy_webroot/typo3cms/extensions/blog/packages/packages.xml",
-    "publish_project_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog",
-    "publish_project_parent_dir": "/ALL/dummy_webroot/typo3cms/extensions",
-    "publish_removed_old": 1,
-    "webroot_abspath": "/ALL/dummy_webroot",
-}
+example_list = [
+    {
+        "publish_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog/blog/8.7.0",
+        "publish_dir_buildinfo": "/ALL/dummy_webroot/typo3cms/extensions/blog/blog/8.7.0/_buildinfo",
+        "publish_html_done": 1,
+        "publish_language_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog",
+        "publish_package_file": "/ALL/dummy_webroot/typo3cms/extensions/blog/packages/blog-8.7.0-default.zip",
+        "publish_packages_xml_file": "/ALL/dummy_webroot/typo3cms/extensions/blog/packages/packages.xml",
+        "publish_project_dir": "/ALL/dummy_webroot/typo3cms/extensions/blog",
+        "publish_project_parent_dir": "/ALL/dummy_webroot/typo3cms/extensions",
+        "publish_removed_old": 1,
+        "webroot_abspath": "/ALL/dummy_webroot",
+    },
+    {
+        "publish_dir": "typo3cms/extensions/sphinx/fr-fr/2.5.1",
+        "publish_dir_buildinfo": "typo3cms/extensions/sphinx/fr-fr/2.5.1/_buildinfo",
+        "publish_language_dir": "typo3cms/extensions/sphinx",
+        "publish_package_file": "typo3cms/extensions/sphinx/packages/sphinx-2.5.1-fr-fr.zip",
+        "publish_packages_xml_file": "typo3cms/extensions/sphinx/packages/packages.xml",
+        "publish_project_dir": "typo3cms/extensions/sphinx",
+        "publish_project_parent_dir": "typo3cms/extensions",
+        "todo_update_stable_symlink": 1
+    }]
 
 
 # ==================================================
@@ -126,7 +137,14 @@ if exitcode == CONTINUE:
     publish_params_data['todo_update_stable_symlink'] = 1 if ter_extension else 0
 
     publish_params_json_file = os.path.join(webroot_abspath, 'publish-params.json')
-    tct.writejson(publish_params_data, publish_params_json_file)
+
+    if os.path.exists(publish_params_json_file):
+        publish_params_existing_data = tct.readjson(publish_params_json_file)
+    else:
+        publish_params_existing_data = []
+
+    publish_params_existing_data.append(publish_params_data)
+    tct.writejson(publish_params_existing_data, publish_params_json_file)
 
 
 # ==================================================

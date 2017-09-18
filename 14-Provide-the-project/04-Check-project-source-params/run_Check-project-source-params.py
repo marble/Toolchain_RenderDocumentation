@@ -64,7 +64,7 @@ if exitcode == CONTINUE:
     buildsettings = lookup(milestones, 'buildsettings')
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
-    gitdir_is_ready_for_use = lookup(milestones, 'buildsettings', 'gitdir_is_ready_for_use', None)
+    gitdir_is_ready_for_use = lookup(milestones, 'buildsettings', 'gitdir_is_ready_for_use')
     giturl = lookup(milestones, 'buildsettings', 'giturl')
     ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
