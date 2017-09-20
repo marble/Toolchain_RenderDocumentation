@@ -25,6 +25,12 @@ toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 exitcode = CONTINUE = 0
 
+# Let's disable this feature. It's wasting disk space
+# and doesn't seem necessary any more since the Docker
+# container for easy local rendering is available.
+
+CONTINUE = -2
+
 
 # ==================================================
 # Make a copy of milestones for later inspection?
