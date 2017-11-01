@@ -1,9 +1,9 @@
 
 
-2.1.0
+2.1.1
 
 
-This is version 2.1.0. Make sure this version number is the same in these
+This is version 2.1.1. Make sure this version number is the same in these
 files:
 
 - README.rst

@@ -133,7 +133,7 @@ if exitcode == CONTINUE:
     absurl_settings_cfg_file        = lookup(milestones, 'absurl_settings_cfg_file')
     absurl_singlehtml_dir           = lookup(milestones, 'absurl_singlehtml_dir')
     absurl_warnings_txt_file        = lookup(milestones, 'absurl_warnings_txt_file')
-    documentation_zip_file          = lookup(milestones, 'DocumentationGeneratedZipFile')
+    documentation_zip_file          = lookup(milestones, 'DocumentationGeneratedZipFile', default='')
     email_notify_about_new_build    = lookup(milestones, 'email_notify_about_new_build', default=[])
     email_user_notify_is_turned_off = lookup(milestones, 'email_user_notify_is_turned_off', default=0)
     emails_user_from_project        = lookup(milestones, 'emails_user_from_project')
@@ -141,7 +141,7 @@ if exitcode == CONTINUE:
     if documentation_zip_file:
         absurl_documentation_zip_file = '%s/%s' % (absurl_buildinfo_dir.rstrip('/'), documentation_zip_file)
     else:
-        absurl_documentation_zip_file = None
+        absurl_documentation_zip_file = ''
 
 
 # ==================================================
