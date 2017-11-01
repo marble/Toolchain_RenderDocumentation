@@ -199,7 +199,7 @@ def do_the_work():
 
     idDivYourProject              = soup.find(id="idDivYourProject")
     idCalloutSettingsFile         = soup.find(id="idCalloutSettingsFile")
-    idCalloutDocumentationFromOpenOffice = soup.find(id="idCalloutDocumentationFromOpenOffice")
+    idDocumentationFromOpenOffice = soup.find(id="idDocumentationFromOpenOffice")
     idCalloutCongratulations      = soup.find(id="idCalloutCongratulations")
     idCalloutThereAreWarnings     = soup.find(id="idCalloutThereAreWarnings")
     idDivAboutThisMail            = soup.find(id="idDivAboutThisMail")
@@ -391,7 +391,7 @@ def do_the_work():
     else:
         # no
         if not debugkeepAllBlocks:
-            idCalloutDocumentationFromOpenOffice = decompose_these(idCalloutDocumentationFromOpenOffice)
+            idDocumentationFromOpenOffice = decompose_these(idDocumentationFromOpenOffice)
 
 
     warnings_file_size = lookup(milestones, 'warnings_file_size')
