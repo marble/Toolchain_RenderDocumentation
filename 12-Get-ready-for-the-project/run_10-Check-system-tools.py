@@ -67,9 +67,11 @@ list_for_which = [
     'python',
     'python2',
     'python3',
+    'soffice',
     'sphinx-build',
     't3xutils.phar',
     'tidy',
+    'zip',
     ]
 
 known_systemtools = {}

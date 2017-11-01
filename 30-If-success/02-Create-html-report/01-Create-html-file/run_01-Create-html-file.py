@@ -6,22 +6,24 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+import tct
+import sys
+#
+import copy
 import cgi
 import os
 import shutil
-import sys
-import tct
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -34,24 +36,15 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
@@ -82,59 +75,40 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
+    create_buildinfo = lookup(milestones, 'create_buildinfo')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
-    create_buildinfo = milestones_get('create_buildinfo')
-    TheProjectLog = milestones_get('TheProjectLog')
-    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
-    toolchain_name = params_get('toolchain_name')
-
-    # test
-    if not (
-        create_buildinfo and
-        TheProjectLog and
-        TheProjectResultBuildinfo and
-        toolchain_name):
-
-        CONTINUE = -1
+    if not (create_buildinfo and TheProjectLog and TheProjectResultBuildinfo):
+        CONTINUE = -2
 
 
 if exitcode == CONTINUE:
-    TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
+    TheProjectResultBuildinfoMessage = lookup(milestones, 'TheProjectResultBuildinfoMessage')
     if not TheProjectResultBuildinfoMessage:
         TheProjectResultBuildinfoMessage = os.path.join(TheProjectResultBuildinfo, 'DearProjectOwner')
     TheProjectResultHtmlmailMessageHtml = TheProjectResultBuildinfoMessage + '.html'
 
-    toolfolderabspath = params_get('toolfolderabspath')
+    toolfolderabspath = lookup(params, 'toolfolderabspath')
     if not toolfolderabspath:
-        exitcode = 22
+        CONTINUE = -2
 
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
+# DocumentationGeneratedZipFile
+
+
 if exitcode == CONTINUE:
-    TheProjectLogHtmlmail = milestones_get('TheProjectLogHtmlmail')
+    TheProjectLogHtmlmail = lookup(milestones, 'TheProjectLogHtmlmail')
     if not TheProjectLogHtmlmail:
         TheProjectLogHtmlmail = os.path.join(TheProjectLog, 'htmlmail')
     if not os.path.exists(TheProjectLogHtmlmail):
@@ -148,21 +122,26 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     # use individual variables for nice code completion in PyCharm
-    absurl_buildinfo_dir        = milestones_get('absurl_buildinfo_dir')
-    absurl_html_dir             = milestones_get('absurl_html_dir')
-    absurl_package_dir          = milestones_get('absurl_package_dir')
-    absurl_package_file         = milestones_get('absurl_package_file')
-    absurl_parent_dir           = milestones_get('absurl_parent_dir')
-    absurl_project_parent_dir    = milestones_get('absurl_project_parent_dir')
-    absurl_pdf_dir              = milestones_get('absurl_pdf_dir')
-    absurl_pdf_file             = milestones_get('absurl_pdf_file')
-    absurl_settings_cfg_file    = milestones_get('absurl_settings_cfg_file')
-    absurl_singlehtml_dir       = milestones_get('absurl_singlehtml_dir')
-    absurl_warnings_txt_file    = milestones_get('absurl_warnings_txt_file')
+    absurl_buildinfo_dir            = lookup(milestones, 'absurl_buildinfo_dir')
+    absurl_html_dir                 = lookup(milestones, 'absurl_html_dir')
+    absurl_package_dir              = lookup(milestones, 'absurl_package_dir')
+    absurl_package_file             = lookup(milestones, 'absurl_package_file')
+    absurl_parent_dir               = lookup(milestones, 'absurl_parent_dir')
+    absurl_project_parent_dir       = lookup(milestones, 'absurl_project_parent_dir')
+    absurl_pdf_dir                  = lookup(milestones, 'absurl_pdf_dir')
+    absurl_pdf_file                 = lookup(milestones, 'absurl_pdf_file')
+    absurl_settings_cfg_file        = lookup(milestones, 'absurl_settings_cfg_file')
+    absurl_singlehtml_dir           = lookup(milestones, 'absurl_singlehtml_dir')
+    absurl_warnings_txt_file        = lookup(milestones, 'absurl_warnings_txt_file')
+    documentation_zip_file          = lookup(milestones, 'DocumentationGeneratedZipFile')
+    email_notify_about_new_build    = lookup(milestones, 'email_notify_about_new_build', default=[])
+    email_user_notify_is_turned_off = lookup(milestones, 'email_user_notify_is_turned_off', default=0)
+    emails_user_from_project        = lookup(milestones, 'emails_user_from_project')
 
-    email_notify_about_new_build = milestones_get('email_notify_about_new_build', [])
-    email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off', 0)
-    emails_user_from_project = milestones_get('emails_user_from_project')
+    if documentation_zip_file:
+        absurl_documentation_zip_file = '%s/%s' % (absurl_buildinfo_dir.rstrip('/'), documentation_zip_file)
+    else:
+        absurl_documentation_zip_file = None
 
 
 # ==================================================
@@ -218,30 +197,44 @@ def do_the_work():
     h4_attrs = h4.attrs.copy() if h4 else {}
     p_attrs = p.attrs.copy() if p else {}
 
-    idDivYourProject = first_or_none(soup.find_all(id="idDivYourProject"))
-    idCalloutSettingsFile = first_or_none(soup.find_all(id="idCalloutSettingsFile"))
-    idCalloutCongratulations = first_or_none(soup.find_all(id="idCalloutCongratulations"))
-    idCalloutThereAreWarnings = first_or_none(soup.find_all(id="idCalloutThereAreWarnings"))
-    idDivAboutThisMail = first_or_none(soup.find_all(id="idDivAboutThisMail"))
-    idDivGeneralInformation = first_or_none(soup.find_all(id="idDivGeneralInformation"))
-    idDivMoreOnYourProject = first_or_none(soup.find_all(id="idDivMoreOnYourProject"))
+    idDivYourProject              = soup.find(id="idDivYourProject")
+    idCalloutSettingsFile         = soup.find(id="idCalloutSettingsFile")
+    idCalloutDocumentationFromOpenOffice = soup.find(id="idCalloutDocumentationFromOpenOffice")
+    idCalloutCongratulations      = soup.find(id="idCalloutCongratulations")
+    idCalloutThereAreWarnings     = soup.find(id="idCalloutThereAreWarnings")
+    idDivAboutThisMail            = soup.find(id="idDivAboutThisMail")
+    idDivGeneralInformation       = soup.find(id="idDivGeneralInformation")
+    idDivMoreOnYourProject        = soup.find(id="idDivMoreOnYourProject")
+    idSpanISendToReceivers        = soup.find(id="idSpanISendToReceivers")
+    idSpanISawANo                 = soup.find(id="idSpanISawANo")
+    idFoundSettingAboutEmailing   = soup.find(id="idFoundSettingAboutEmailing")
+    idFoundNoSettingAboutEmailing = soup.find(id="idFoundNoSettingAboutEmailing")
+    idSendToProjectEmails         = soup.find(id="idSendToProjectEmails")
+    idABUILDINFO                  = soup.find(id="idABUILDINFO")
+    idAHTML                       = soup.find(id="idAHTML")
+    idASINGLEHTML                 = soup.find(id="idASINGLEHTML")
+    idAPDF                        = soup.find(id="idAPDF")
+    idAPACKAGE                    = soup.find(id="idAPACKAGE")
 
-    idSpanISendToReceivers = first_or_none(soup.find_all(id="idSpanISendToReceivers"))
-    idSpanISawANo = first_or_none(soup.find_all(id="idSpanISawANo"))
-    idFoundSettingAboutEmailing = first_or_none(soup.find_all(id="idFoundSettingAboutEmailing"))
-    idFoundNoSettingAboutEmailing = first_or_none(soup.find_all(id="idFoundNoSettingAboutEmailing"))
-    idSendToProjectEmails = first_or_none(soup.find_all(id="idSendToProjectEmails"))
 
-    idABUILDINFO = first_or_none(soup.find_all(id="idABUILDINFO"))
-    idAHTML= first_or_none(soup.find_all(id="idAHTML"))
-    idASINGLEHTML= first_or_none(soup.find_all(id="idASINGLEHTML"))
-    idAPDF = first_or_none(soup.find_all(id="idAPDF"))
-    idAPACKAGE= first_or_none(soup.find_all(id="idAPACKAGE"))
-
+    # # there is this 'clone' functionality
+    # # https://stackoverflow.com/questions/23057631/clone-element-with-beautifulsoup
+    #
+    # idCalloutDocumentationFromOpenOffice = copy.copy(idCalloutSettingsFile)
+    # if idCalloutDocumentationFromOpenOffice:
+    #     idCalloutDocumentationFromOpenOffice.attrs['id'] = 'idCalloutDocumentationFromOpenOffice'
+    #     idCalloutSettingsFile.insert_after(idCalloutDocumentationFromOpenOffice)
+    #
+    #     for elm in idCalloutDocumentationFromOpenOffice.find_all('p'):
+    #         elm.decompose()
+    #
+    #     ptag = soup.new_tag('p', **p_attrs)
+    #     ptag.string = 'Important!'
+    #     idCalloutDocumentationFromOpenOffice.h2.insert_after(ptag)
 
     # Add info about localization
 
-    localization_has_localization = milestones_get('localization_has_localization')
+    localization_has_localization = lookup(milestones, 'localization_has_localization')
     localization = tct.deepget(milestones, 'buildsettings', 'localization')
     if localization_has_localization:
         h3tag = soup.new_tag('h3', **h3_attrs)
@@ -261,7 +254,7 @@ def do_the_work():
     successparts = []
     failparts = []
 
-    build_html = milestones_get('build_html')
+    build_html = lookup(milestones, 'build_html')
     if build_html and absurl_html_dir:
         attrs = a.attrs.copy()
         attrs['href'] = absurl_html_dir
@@ -271,7 +264,7 @@ def do_the_work():
     else:
         failparts.append('html')
 
-    build_singlehtml = milestones_get('build_singlehtml')
+    build_singlehtml = lookup(milestones, 'build_singlehtml')
     if build_singlehtml and absurl_singlehtml_dir:
         attrs = a.attrs.copy()
         attrs['href'] = absurl_singlehtml_dir
@@ -338,15 +331,16 @@ def do_the_work():
 
     # The values are filled into the HTML code directly.
     # So we have to escape them.
-    HKV['project_name']         = htmlesc(project_name)
-    HKV['project_version']      = htmlesc(project_version)
-    HKV['build_time']           = htmlesc(build_time)
-    HKV['this_was_made']        = u', '.join(successparts) + '.'
-    HKV['this_failed']          = u', '.join(failparts) + '.'
-    HKV['absurl_buildinfo']     = htmlesc(absurl_buildinfo_dir)
-    HKV['absurl_publish_dir']   = htmlesc(absurl_html_dir)
-    HKV['absurl_warnings_txt']  = htmlesc(absurl_warnings_txt_file)
-    HKV['absurl_settings_cfg']  = htmlesc(absurl_settings_cfg_file)
+    HKV['project_name']             = htmlesc(project_name)
+    HKV['project_version']          = htmlesc(project_version)
+    HKV['build_time']               = htmlesc(build_time)
+    HKV['this_was_made']            = u', '.join(successparts) + '.'
+    HKV['this_failed']              = u', '.join(failparts) + '.'
+    HKV['absurl_buildinfo']         = htmlesc(absurl_buildinfo_dir)
+    HKV['absurl_publish_dir']       = htmlesc(absurl_html_dir)
+    HKV['absurl_warnings_txt']      = htmlesc(absurl_warnings_txt_file)
+    HKV['absurl_settings_cfg']      = htmlesc(absurl_settings_cfg_file)
+    HKV['absurl_documentation_zip'] = htmlesc(absurl_documentation_zip_file)
 
     HKV['receivers_from_settings_cfg']  = '<a href="mailto:one@mail.com>one@mail.com</a>, <a href="mailto:two@mail.com>two@mail.com</a>'
     HKV['receivers_from_project']       = '<a href="mailto:three@mail.com>three@mail.com</a>, <a href="mailto:four@mail.com>four@mail.com</a>'
@@ -379,7 +373,8 @@ def do_the_work():
     # text block logic
     # we remove textblocks that shall not appear
 
-    has_settingscfg_generated = milestones_get('has_settingscfg_generated')
+
+    has_settingscfg_generated = lookup(milestones, 'has_settingscfg_generated')
     if has_settingscfg_generated:
         # We have created a Settings.cfg from a Yaml file
         pass
@@ -387,7 +382,19 @@ def do_the_work():
         if not debugkeepAllBlocks:
             idCalloutSettingsFile = decompose_these(idCalloutSettingsFile)
 
-    warnings_file_size = milestones_get('warnings_file_size')
+
+
+    # Documentation generated from OpenOffice?
+    if documentation_zip_file:
+        # yes
+        pass
+    else:
+        # no
+        if not debugkeepAllBlocks:
+            idCalloutDocumentationFromOpenOffice = decompose_these(idCalloutDocumentationFromOpenOffice)
+
+
+    warnings_file_size = lookup(milestones, 'warnings_file_size')
     if warnings_file_size == 0:
         # Congratulations!
         if not debugkeepAllBlocks:
@@ -398,12 +405,12 @@ def do_the_work():
             idCalloutCongratulations = decompose_these(idCalloutCongratulations)
 
     # explicitly turn off by config or commandline
-    email_user_do_not_send = milestones_get('email_user_do_not_send', 0)
+    email_user_do_not_send = lookup(milestones, 'email_user_do_not_send', default=0)
     # explicitly turn off by 'no' as email
-    email_user_notify_is_turned_off = milestones_get('email_user_notify_is_turned_off')
+    email_user_notify_is_turned_off = lookup(milestones, 'email_user_notify_is_turned_off')
 
     # list of emails. May be empty.
-    email_notify_about_new_build = milestones_get('email_notify_about_new_build')
+    email_notify_about_new_build = lookup(milestones, 'email_notify_about_new_build')
 
     if not email_user_notify_is_turned_off: # and email_notify_about_new_build: # ?
         # We really send to receivers we found in settings
@@ -414,7 +421,7 @@ def do_the_work():
         if not debugkeepAllBlocks:
             idSpanISendToReceivers = decompose_these(idSpanISendToReceivers)
 
-    email_user_notify_setting_exists = milestones_get('email_user_notify_setting_exists')
+    email_user_notify_setting_exists = lookup(milestones, 'email_user_notify_setting_exists')
     if email_user_notify_setting_exists:
         # We found an entry about emailing in the settings
         if not debugkeepAllBlocks:
@@ -424,7 +431,7 @@ def do_the_work():
         if not debugkeepAllBlocks:
             decompose_these(idFoundSettingAboutEmailing)
 
-    emails_user_from_project = milestones_get('emails_user_from_project')
+    emails_user_from_project = lookup(milestones, 'emails_user_from_project')
     if idSendToProjectEmails and not email_user_do_not_send and not email_notify_about_new_build and emails_user_from_project:
         pass
     else:
@@ -506,7 +513,7 @@ if exitcode == CONTINUE:
 if 0:
     # atm there may be a DearProjectOwner.txt as well. Rename that file
     # so it is flagged as disabled
-    TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
+    TheProjectResultBuildinfoMessage = lookup(milestones, 'TheProjectResultBuildinfoMessage')
     if TheProjectResultBuildinfoMessage:
         fpath, fname = os.path.split(TheProjectResultBuildinfoMessage)
         obsolete = os.path.join(fpath, 'zzz-OBSOLETE-' + fname)
