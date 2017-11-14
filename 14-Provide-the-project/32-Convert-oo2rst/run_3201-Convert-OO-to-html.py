@@ -147,6 +147,8 @@ if exitcode == CONTINUE:
         '--headless',
         '--convert-to', 'html',
         '--outdir', TheProjectBuildOpenOffice2Rest,
+        # provide configdir, otherwise soffice will not run with user permissions
+        '-env:UserInstallation=file:///tmp/soffice_config',
         masterdoc_manual_openoffice])
 
 if exitcode == CONTINUE:
