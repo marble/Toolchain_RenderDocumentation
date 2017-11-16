@@ -56,7 +56,7 @@ masterdoc_candidates = [
     'README.rst',
     'README.md',
     'doc/manual.sxw',
-    'doc/manual.pdf',
+    # 'doc/manual.pdf',
 ]
 masterdoc_selected = {}
 masterdocs_initial = {}
