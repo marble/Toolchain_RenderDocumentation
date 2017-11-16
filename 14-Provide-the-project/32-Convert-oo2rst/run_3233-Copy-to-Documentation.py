@@ -53,6 +53,20 @@ TheProjectDocumentation = None
 TheProjectDocumentationManualFile = None
 TheProjectDocumentationSaved = None
 xeq_name_cnt = 0
+masterdoc_manual_rst_selected = None
+
+dummy = {"masterdoc_manual_html_005_as_rst":
+     {
+        "dl": {
+            "outfile":
+            "/home/marble/Repositories/mbnas/mbgit/Rundir/00-TEMPROOT_NOT_VERSIONED/RenderDocumentation/2017-11-15_15-01-29_607017/TheProjectBuild/OpenOffice2Rest/manual-005.dl.rst"
+        },
+        "t3flt": {
+            "outfile":
+            "/home/marble/Repositories/mbnas/mbgit/Rundir/00-TEMPROOT_NOT_VERSIONED/RenderDocumentation/2017-11-15_15-01-29_607017/TheProjectBuild/OpenOffice2Rest/manual-005.t3flt.rst"
+        }
+     }
+    }
 
 
 # ==================================================
@@ -61,11 +75,11 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    masterdoc_manual_005_rst = lookup(milestones, 'masterdoc_manual_005_rst')
+    masterdoc_manual_html_005_as_rst = lookup(milestones, 'masterdoc_manual_html_005_as_rst')
+    oo_parser = lookup(milestones, 'oo_parser', default='dl')
     TheProject = lookup(milestones, 'TheProject')
     TheProjectBuildOpenOffice2Rest = lookup(milestones, 'TheProjectBuildOpenOffice2Rest')
-
-    if not (masterdoc_manual_005_rst and TheProject and TheProjectBuildOpenOffice2Rest):
+    if not (masterdoc_manual_html_005_as_rst and oo_parser and TheProject and TheProjectBuildOpenOffice2Rest):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -121,6 +135,12 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    if masterdoc_manual_rst_selected is None:
+        masterdoc_manual_rst_selected = lookup(masterdoc_manual_html_005_as_rst, oo_parser, 'outfile', default=None)
+    if not masterdoc_manual_rst_selected:
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     TheProjectDocumentation = os.path.join(TheProject, 'Documentation')
     if os.path.exists(TheProjectDocumentation):
         TheProjectDocumentationSaved = os.path.join(TheProject, 'Documentation-Saved')
@@ -131,7 +151,8 @@ if exitcode == CONTINUE:
 
     TheProjectDocumentationManualFolder = os.path.join(TheProjectDocumentation, 'Manual')
     TheProjectDocumentationManualFile = os.path.join(TheProjectDocumentation, 'Manual', 'Index.rst')
-    shutil.copyfile(masterdoc_manual_005_rst, TheProjectDocumentationManualFile)
+
+    shutil.copyfile(masterdoc_manual_rst_selected, TheProjectDocumentationManualFile)
 
     for fname in os.listdir(TheProjectBuildOpenOffice2Rest):
         if os.path.splitext(fname)[1].lower() in ['.gif', '.png', '.jpg', '.jpeg']:
@@ -151,6 +172,9 @@ if TheProjectDocumentationManualFile:
 
 if TheProjectDocumentationSaved:
     result['MILESTONES'].append({'TheProjectDocumentationSaved': TheProjectDocumentationSaved})
+
+if masterdoc_manual_rst_selected:
+    result['MILESTONES'].append({'masterdoc_manual_rst_selected': masterdoc_manual_rst_selected})
 
 
 

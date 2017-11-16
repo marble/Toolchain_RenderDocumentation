@@ -9,7 +9,10 @@ import os
 import tct
 import sys
 #
+import normalize_empty_lines
 import ooxhtml2rst
+import prepend_sections_with_labels
+import tweak_dllisttables
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -47,6 +50,7 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 masterdoc_manual_html_004_as_rst = {}
+masterdoc_manual_html_005_as_rst = {}
 xeq_name_cnt = 0
 
 
@@ -119,14 +123,17 @@ if exitcode == CONTINUE:
 
     infile = masterdoc_manual_html_003_from_tidy
     outfile = os.path.join(TheProjectBuildOpenOffice2Rest, 'manual-004.rst')
+    outfile005 = os.path.join(TheProjectBuildOpenOffice2Rest, 'manual-005.rst')
 
     appendlog = 0
     taginfo = 0
     tabletypes = ['t3flt', 'dl']
 
     for i, tablesas in enumerate(tabletypes):
-        thisFiles = {}
+        thisFiles004 = {}
+        thisFiles005 = {}
         thisOutfile = outfile[:-3] + tablesas + '.rst'
+        thisOutfile005 = outfile005[:-3] + tablesas + '.rst'
         thisTreefile = thisOutfile + '.restparser-tree.txt'
         thisLogfile = thisOutfile + '.restparser-log.txt'
 
@@ -135,21 +142,48 @@ if exitcode == CONTINUE:
 
         if os.path.exists(thisOutfile):
             exitcode = 0
+            normalize_empty_lines.main(thisOutfile, thisOutfile005, 2)
         else:
             exitcode = 1
 
         if exitcode == 0:
             if thisOutfile and os.path.exists(thisOutfile):
-                thisFiles['outfile'] = thisOutfile
+                thisFiles004['outfile'] = thisOutfile
             if thisTreefile and os.path.exists(thisTreefile):
-                thisFiles['treefile'] = thisTreefile
+                thisFiles004['treefile'] = thisTreefile
             if thisLogfile and os.path.exists(thisLogfile):
-                thisFiles['logfile'] = thisLogfile
+                thisFiles004['logfile'] = thisLogfile
 
-        if thisFiles:
-            masterdoc_manual_html_004_as_rst[tablesas] = thisFiles
+        if thisFiles004:
+            masterdoc_manual_html_004_as_rst[tablesas] = thisFiles004
+
+        if os.path.exists(thisOutfile005):
+            thisFiles005['outfile'] = thisOutfile005
+
+        if thisFiles005:
+            masterdoc_manual_html_005_as_rst[tablesas] = thisFiles005
 
 
+if exitcode == CONTINUE:
+
+    # postprocess
+    for i, tablesas in enumerate(tabletypes):
+        thisFiles = masterdoc_manual_html_005_as_rst.get(tablesas, {})
+        rstfile = thisFiles.get('outfile')
+        if rstfile:
+            if exitcode == CONTINUE:
+                prepend_sections_with_labels.processRstFile(rstfile)
+
+            if exitcode == CONTINUE:
+                tweak_dllisttables.processRstFile(rstfile)
+
+            if exitcode == CONTINUE:
+                with open(rstfile, 'rb') as f1:
+                    data = f1.read()
+                data = data.replace('.. .. include:: ./FIXME/Includes.txt',
+                                    '.. include:: ../Includes.txt')
+                with open(rstfile, 'wb') as f2:
+                    f2.write(data)
     if 0:
         pass
         # for each of our newly created *.rst provide a Docutils rendering
@@ -171,6 +205,9 @@ if exitcode == CONTINUE:
 
 if masterdoc_manual_html_004_as_rst:
     result['MILESTONES'].append({'masterdoc_manual_html_004_as_rst': masterdoc_manual_html_004_as_rst})
+
+if masterdoc_manual_html_005_as_rst:
+    result['MILESTONES'].append({'masterdoc_manual_html_005_as_rst': masterdoc_manual_html_005_as_rst})
 
 
 # ==================================================
