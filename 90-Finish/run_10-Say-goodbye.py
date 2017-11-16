@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 import os
 import tct
 import sys
+#
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -32,22 +29,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -56,8 +45,6 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 import time
-
-talk = milestones.get('talk', 1)
 
 # This is the time that we really finish
 time_finished_at_2_unixtime = time.time()
@@ -74,65 +61,53 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
-    checksum_ttl_seconds = milestones_get('checksum_ttl_seconds', 1)
-
-    # test
+    checksum_ttl_seconds = lookup(milestones, 'checksum_ttl_seconds', default=1)
     if not (checksum_ttl_seconds):
         exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
 
-checksum_time = milestones_get('checksum_time', 0)
-time_started_at = milestones_get('time_started_at', '')
-time_started_at_unixtime = milestones_get('time_started_at_unixtime', 0)
-rebuild_needed = milestones_get('rebuild_needed')
-achieved = milestones_get('assembled', [])[:]
-if milestones_get('package_file'):
+achieved = milestones.get('assembled', [])[:]
+checksum_time = milestones.get('checksum_time', 0)
+masterdoc = milestones.get('masterdoc')
+masterdoc_candidates = milestones.get('masterdoc_candidates', [])
+masterdoc_selected = milestones.get('masterdoc_selected')
+rebuild_needed = milestones.get('rebuild_needed')
+talk = milestones.get('talk', 1)
+time_started_at = milestones.get('time_started_at', '')
+time_started_at_unixtime = milestones.get('time_started_at_unixtime', 0)
+
+if milestones.get('package_file'):
     achieved.append('package')
-if milestones_get('publish_dir_buildinfo'):
+if milestones.get('publish_dir_buildinfo'):
     achieved.append('buildinfo')
 achieved.sort()
-cmdline_reportlines = milestones_get('cmdline_reportlines', [])
+cmdline_reportlines = milestones.get('cmdline_reportlines', [])
 
 
 if talk:
     indent = '   '
     print()
-    print(tct.deepget(milestones, 'buildsettings', 'project', default='PROJECT'),
-          tct.deepget(milestones, 'buildsettings', 'version', default='VERSION'),
-          os.path.split(milestones_get('makedir', default='MAKEDIR'))[1],
+    print(lookup(milestones, 'buildsettings', 'project', default='PROJECT'),
+          lookup(milestones, 'buildsettings', 'version', default='VERSION'),
+          os.path.split(milestones.get('makedir', 'MAKEDIR'))[1],
           sep = ' : ', end = '\n')
     print(indent,
           'makedir ',
-          milestones_get('makedir', default='MAKEDIR'),
+          milestones.get('makedir', 'MAKEDIR'),
           sep = '', end = '\n')
     print(indent,
           time_started_at,
           ',  took: ', '%4.2f seconds' % (time_finished_at_2_unixtime - time_started_at_unixtime),
-          ',  toolchain: ', facts_get('toolchain_name', 'TOOLCHAIN_NAME'),
+          ',  toolchain: ', toolchain_name,
           sep='')
 
     age_seconds = time_finished_at_2_unixtime - checksum_time
@@ -181,6 +156,23 @@ if talk > 1:
             if time_started_at_unixtime and time_finished_at_2_unixtime:
                 duration = 'duration: %4.2f seconds' % (time_finished_at_2_unixtime - time_started_at_unixtime)
             print(time_finished_at_2, duration)
+
+
+if 1:
+    if not masterdoc:
+        print('ATTENTION:\n'
+              '\n'
+              '   No documentation found! No documentation rendered!\n'  
+              '\n'
+              '   Reason: None of the possible starting files (called \n'
+              '   "masterdoc") could not be found. Please provide at\n'
+              '   least one of the following. They will be taken into\n'
+              '   account in this order of preference:\n')
+        for i, masterdoc_name in enumerate(masterdoc_candidates):
+            print('      %s. %s' % (i+1, masterdoc_name))
+
+        print('\n'
+              '   Find more information at https://docs.typo3.org/typo3cms/HowToDocument/\n')
 
 
 # ==================================================
