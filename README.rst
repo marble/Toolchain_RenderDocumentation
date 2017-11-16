@@ -9,13 +9,15 @@ RenderDocumentation
 A Toolchain To Render TYPO3 Documentation
 -----------------------------------------
 
-:Version:         2.1.2
-:Date:            2017-11-01
+:Version:         2.2.0
+:Date:            2017-11-16
 :Author:          Martin Bless <martin@mbless.de>
 :Repository:      https://github.com/marble/Toolchain_RenderDocumentation
 :Target Folder:   ~/Toolchains/RenderDocumentation
-:Short info:      This version knows how to handle an OpenOffice file
-                  named `./doc/manual.sxw`
+:Short info:
+   This version knows how to handle an OpenOffice file named `./doc/manual.sxw`.
+   It processes both the two versions of table handling: `dl`(as definition
+   lists) and `t3flt` (TYPO3 field list table). Example: `... -c oo_parser t3flt`.
 
 
 Description
@@ -45,7 +47,7 @@ Definition: A toolchain is a folder with its files and subfolders.
 TCT recreates the folder structure of the toolchain for all the
 actual tools it finds in a temporary file space.
 
-((to be continued))
+((more to be written))
 
 
 xxx
@@ -80,5 +82,3 @@ Debugging::
    (venv) python tct.py
 
    # In PyCharm debugging extends to spawned subprocesses automatically!!!
-
-
