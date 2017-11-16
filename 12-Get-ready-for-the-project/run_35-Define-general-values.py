@@ -90,6 +90,7 @@ general_string_options = (
     ('email_user_bcc', ''),
     ('email_user_cc', ''),
     ('email_user_to_instead', ''),
+    ('oo_parser', 'dl'),  # dl | flt
 )
 general_int_options = (
     ('email_admin_send_extra_mail', 0),

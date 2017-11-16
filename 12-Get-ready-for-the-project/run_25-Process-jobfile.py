@@ -51,13 +51,14 @@ def firstNotNone(*args):
         return None
 
 def findRunParameterAgain(key, default, D=None, fconv=None, jobfile_data={}):
+    # Oops, this function is a quick but ugly hack. But working.
     result = firstNotNone(
         deepget(facts, 'run_command', key, default=None),
         deepget(jobfile_data, 'tctconfig', key, default=None),
         deepget(facts, 'tctconfig', configset, key, default=None),
         default)
     # function convert
-    if fconv is not None:
+    if fconv is not None and result is not None:
         result = fconv(result)
     if result != default:
         if type(D) == type({}):
@@ -133,21 +134,29 @@ if exitcode == CONTINUE:
                 buildsettings_changed = True
 
     if jobfile_data:
+
+        # this is one of the rare cases where we UPDATE already existing milestones
+
         # we check these settings again, since we now have jobfile available
-        force_rebuild_needed = frpa('force_rebuild_needed',
-                                   milestones['force_rebuild_needed'], ATNM,
-                                   int, jobfile_data)
-        make_html = frpa('make_html', milestones['make_html'], ATNM, int, jobfile_data)
-        make_latex = frpa('make_latex', milestones['make_latex'], ATNM, int, jobfile_data)
-        make_pdf = frpa('make_pdf', milestones['make_pdf'], ATNM, int, jobfile_data)
+        force_rebuild_needed = frpa(
+            'force_rebuild_needed', milestones.get('force_rebuild_needed'),
+            ATNM, int, jobfile_data)
+        make_html = frpa('make_html', milestones.get('make_html'), ATNM, int,
+                         jobfile_data)
+        make_latex = frpa('make_latex', milestones.get('make_latex'), ATNM,
+                          int, jobfile_data)
+        make_pdf = frpa('make_pdf', milestones.get('make_pdf'), ATNM, int,
+                        jobfile_data)
         make_singlehtml = frpa('make_singlehtml',
-                               milestones['make_singlehtml'], ATNM, int, jobfile_data)
-        rebuild_needed = frpa('rebuild_needed', milestones['rebuild_needed'],
+            milestones.get('make_singlehtml'), ATNM, int, jobfile_data)
+        oo_parser = frpa('oo_parser', milestones.get('oo_parser'), ATNM, str,
+                         jobfile_data)
+        rebuild_needed = frpa('rebuild_needed', milestones.get('rebuild_needed'),
                              ATNM, int, jobfile_data)
         replace_static_in_html = frpa('replace_static_in_html',
-                                     milestones['replace_static_in_html'],
+                                     milestones.get('replace_static_in_html'),
                                      ATNM, int, jobfile_data)
-        talk = frpa('talk', milestones['talk'], ATNM, int, jobfile_data)
+        talk = frpa('talk', milestones.get('talk'), ATNM, int, jobfile_data)
 
 # ==================================================
 # Set MILESTONE
