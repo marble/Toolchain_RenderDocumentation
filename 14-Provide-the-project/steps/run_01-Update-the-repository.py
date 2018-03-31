@@ -123,6 +123,9 @@ if exitcode == CONTINUE:
         if do_clone_or_pull == 'pull':
 
             if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git clean -dfx', cwd=gitdir)
+
+            if exitcode == CONTINUE:
                 exitcode, cmd, out, err = cmdline('git reset --hard', cwd=gitdir)
 
             if exitcode == CONTINUE:
@@ -130,6 +133,11 @@ if exitcode == CONTINUE:
 
             if exitcode == CONTINUE:
                 exitcode, cmd, out, err = cmdline('git pull', cwd=gitdir)
+
+            if exitcode == CONTINUE:
+                exitcode, cmd, out, err = cmdline('git clean -dfx', cwd=gitdir)
+
+
 
 
 # ==================================================
