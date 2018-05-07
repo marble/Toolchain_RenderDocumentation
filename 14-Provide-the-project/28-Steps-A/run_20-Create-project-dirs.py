@@ -6,8 +6,8 @@
 
 from __future__ import print_function
 import os
-import tct
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -16,6 +16,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -30,22 +31,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -64,7 +57,7 @@ TheProjectBuild = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    TheProject = milestones_get('TheProject')
+    TheProject = lookup(milestones, 'TheProject')
 
     if not (TheProject):
         exitcode = 22

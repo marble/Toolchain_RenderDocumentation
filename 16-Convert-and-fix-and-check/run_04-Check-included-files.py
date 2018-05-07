@@ -11,15 +11,15 @@ import sys
 import tct
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -32,22 +32,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -56,6 +48,7 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 included_files_check_is_ok = 0
+included_files_check_logfile = None
 xeq_name_cnt = 0
 
 
@@ -66,11 +59,11 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    documentation_folder = milestones_get('documentation_folder')
-    masterdoc = milestones_get('masterdoc')
-    TheProjectLog = milestones_get('TheProjectLog')
-    toolfolderabspath = params_get('toolfolderabspath')
-    workdir = params_get('workdir')
+    documentation_folder = lookup(milestones, 'documentation_folder')
+    masterdoc = lookup(milestones, 'masterdoc')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    toolfolderabspath = lookup(params, 'toolfolderabspath')
+    workdir = lookup(params, 'workdir')
 
     if not (documentation_folder and masterdoc and TheProjectLog and
             toolfolderabspath and workdir):
@@ -133,13 +126,18 @@ if exitcode == CONTINUE:
     with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
 
+    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' % toolname_pure))
+    with codecs.open(included_files_check_logfile, 'w', 'utf-8') as f2:
+        f2.write(out.decode('utf-8', 'replace'))
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if included_files_check_is_ok:
     result['MILESTONES'].append({'included_files_check_is_ok': included_files_check_is_ok})
-
+if included_files_check_logfile:
+    result['MILESTONES'].append({'included_files_check_logfile': included_files_check_logfile})
 
 # ==================================================
 # save result

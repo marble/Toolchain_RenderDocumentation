@@ -50,6 +50,8 @@ package_file = None
 package_name = 'manual.zip'
 pdf_name = 'manual.pdf'
 xeq_name_cnt = 0
+ospj = os.path.join
+ospe = os.path.exists
 
 
 # ==================================================
@@ -109,18 +111,61 @@ if exitcode == CONTINUE:
 
     language_segment = package_language.lower()
 
+    # we first assemble everything for the package in the workdir temp folder
+    # of this step. Afterwards we run 'zip' to pack everything.
+
     dest_folder = os.path.join(workdir, 'packages', package_key, package_language)
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
     shutil.copytree(build_html_folder, os.path.join(dest_folder, 'html'))
 
+    # Add PDF file if existing
     if pdf_file:
         dest_folder_pdf = os.path.join(dest_folder, 'pdf')
         if not os.path.exists(dest_folder_pdf):
             os.makedirs(dest_folder_pdf)
         shutil.copy(pdf_file, os.path.join(dest_folder_pdf, pdf_name))
 
+    if 0 and "remove all font files":
+        shutil.rmtree(ospj(dest_folder, 'html', '_static', 'fonts'),
+                      ignore_errors=True)
+
+    if 1 and "remove some font files":
+        fonts_folder = os.path.join(dest_folder, 'html', '_static', 'fonts')
+        for f2name in os.listdir(fonts_folder):
+            if not ('fontawesome' in f2name):
+                f2path = ospj(fonts_folder, f2name)
+                if os.path.isfile(f2path):
+                    os.remove(f2path)
+                elif os.path.isdir(f2path):
+                    shutil.rmtree(f2path, ignore_errors=True)
+
+    # use theme without fonts
+    theme_css = ospj(dest_folder, 'html', '_static', 'css', 'theme.css')
+    theme_no_fonts_css = ospj(dest_folder, 'html', '_static', 'css', 'theme-no-fonts.css')
+    if ospe(theme_css) and ospe(theme_no_fonts_css):
+        os.remove(theme_css)
+        os.rename(theme_no_fonts_css, theme_css)
+
+    # remove piwik call
+    # find:  <script type = "text/javascript" id="idPiwikScript" src="/js/piwik.js">
+    # write: <script type = "text/javascript" id="idPiwikScript">
+    needle = 'id="idPiwikScript" src="'
+    for dirpath, dirnames, filenames in os.walk(dest_folder):
+        for filename in filenames:
+            if filename.endswith('.html'):
+                with file(ospj(dirpath, filename), 'r') as f1:
+                    data = f1.read()
+                p1 = data.find(needle)
+                if p1 >= 0:
+                    p2 = data.find('"', p1 + len(needle))
+                    if p2 > p1:
+                        with file(ospj(dirpath, filename), 'w') as f2:
+                            f2.write(data[0: p1 + len(needle) - 6])
+                            f2.write(data[p2 + 1:])
+
+    # packing
     build_packages_folder = os.path.join(TheProjectBuild, 'packages')
     if not os.path.exists(build_packages_folder):
         os.makedirs(build_packages_folder)

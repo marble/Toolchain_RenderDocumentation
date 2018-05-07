@@ -124,7 +124,7 @@ if exitcode == CONTINUE:
         # a makepdf failure should not affect the final_exitcode
         makepdf_exitcode = exitcode
         loglist.append(('makepdf_exitcode', makepdf_exitcode))
-        exitcode = 22
+        exitcode = 2
 
 
     loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])

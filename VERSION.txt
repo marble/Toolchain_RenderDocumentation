@@ -1,12 +1,20 @@
+v2.3-dev
+   2018-05-07
+   work in progress
 
 
 2.2.0
 
+This is version 2.2.0
 
-This is version 2.2.0 Make sure this version number is the same in these
-files:
+# ##################################################
+
+ATTENTION:
+Make sure this version number is the same in these files:
 
 - README.rst
 - 10-Toolchain-actions/run_03-Run-action-and-exit.py
+
+# ##################################################
 
 End.

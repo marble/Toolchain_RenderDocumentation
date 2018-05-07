@@ -7,19 +7,19 @@
 
 from __future__ import print_function
 import os
-import tct
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
-binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
+loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -32,22 +32,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
+deepget = tct.deepget
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -67,31 +59,19 @@ warnings_file_size = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
+    build_html = lookup(milestones, 'build_html')
+    TheProject = lookup(milestones, 'TheProject')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    build_html = milestones_get('build_html')
-    TheProjectLog = milestones_get('TheProjectLog')
-    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
-
-    if not (build_html and TheProjectLog and TheProjectResultBuildinfo):
-        exitcode = 22
+    if not (build_html and TheProject and TheProjectLog
+            and TheProjectResultBuildinfo):
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad params or nothing to do')
 
 
 # ==================================================
@@ -107,16 +87,16 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
+    TheProjectLen = len(TheProject)
     warnings_file = os.path.join(TheProjectResultBuildinfo, 'warnings.txt')
     with codecs.open(src_warnings_file, 'r', 'utf-8', 'replace') as f1:
         with codecs.open(warnings_file, 'w', 'utf-8') as f2:
             for line1 in f1:
-                line2 = line1
-                if line1.startswith('/home/'):
-                    p = line1.find('/TheProject/')
-                    if p > -1:
-                        line2 = line1[p+1:]
-                f2.write(line2)
+                if line1.startswith(TheProject):
+                    f2.write('.')
+                    f2.write(line1[TheProjectLen:])
+                else:
+                    f2.write(line1)
         statinfo = os.stat(warnings_file)
         warnings_file_size = statinfo.st_size
 

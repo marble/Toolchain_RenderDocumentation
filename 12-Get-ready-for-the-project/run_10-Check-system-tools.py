@@ -75,6 +75,7 @@ list_for_which = [
     ]
 
 known_systemtools = {}
+known_versions = {}
 pip_freeze = None
 xeq_name_cnt = 0
 
@@ -126,11 +127,25 @@ if exitcode == CONTINUE:
        else:
            known_systemtools[k] = ''
 
-if known_systemtools.has_key('pip'):
+if exitcode == CONTINUE:
+   if known_systemtools.has_key('pip'):
     cmdlist = ['which freeze']
     xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
     if xcode == 0:
         pip_freeze = v.split('\n')
+
+if exitcode == CONTINUE:
+    imported = False
+    try:
+        import t3SphinxThemeRtd
+        imported = True
+    except ImportError:
+        pass
+    if imported:
+        # t3SphinxThemeRtd.VERSION # (3, 6, 14)
+        # t3SphinxThemeRtd.__version__ # 3.6.14
+        known_versions['t3SphinxThemeRtd.VERSION'] = t3SphinxThemeRtd.VERSION
+        known_versions['t3SphinxThemeRtd.__version__'] = t3SphinxThemeRtd.__version__
 
 # ==================================================
 # Set MILESTONE
@@ -138,6 +153,9 @@ if known_systemtools.has_key('pip'):
 
 if known_systemtools:
     result['MILESTONES'].append({'known_systemtools': known_systemtools})
+
+if known_versions:
+    result['MILESTONES'].append({'known_versions': known_versions})
 
 if pip_freeze is not None:
     result['MILESTONES'].append({'pip_freeze': pip_freeze})

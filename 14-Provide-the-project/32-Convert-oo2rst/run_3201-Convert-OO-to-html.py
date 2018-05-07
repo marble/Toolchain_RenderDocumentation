@@ -65,7 +65,7 @@ if exitcode == CONTINUE:
     tidy = (lookup(milestones, 'known_systemtools', 'tidy') or '').strip()
 
     if not (TheProject and TheProjectBuild and soffice and tidy):
-        exitcode = 22
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

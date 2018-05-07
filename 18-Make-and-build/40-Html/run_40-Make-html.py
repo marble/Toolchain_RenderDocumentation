@@ -150,28 +150,56 @@ if exitcode == CONTINUE:
     builder = 'html'
     sourcedir = documentation_folder_for_sphinx
     outdir = build_builder_folder = os.path.join(TheProjectBuild, builder)
+
+    cachedir = '/RESULT/Cache/html'
+
+
     warnings_file_folder = os.path.join(TheProjectLog, builder)
     warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
-    doctree_folder = os.path.join(TheProjectBuild, 'doctree', builder)
+    # doctree_folder = os.path.join(TheProjectBuild, 'doctree', builder)
+    doctree_folder = '/RESULT/Cache/doctree'
     confpy_folder = TheProjectMakedir
 
     if not os.path.exists(warnings_file_folder):
         os.makedirs(warnings_file_folder)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    if os.path.exists(cachedir):
+        # fetch the cache
+        cmdlist = ['rsync', '-a', '--delete', '"%s/"' % cachedir, '"%s/"' % outdir]
+        exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+    if 1:
+        cmdlist = [
+            'sphinx-build',
+            ]
+    if 0 and '--no-cache or something like that name':
+        cmdlist.extend([
+            '-a',                  # write all files; default is to only write new and changed files
+            ])
+    if 1 and '--no-cache or something like that name':
+        cmdlist.extend([
+            '-E',                  # don't use a saved environment, always read all files
+            ])
+    if 1:
+        cmdlist.extend([
+            '-b ' + builder,       # builder to use; default is html
+            '-c ' + confpy_folder, # path where configuration file(conf.py) is located (default: same as sourcedir)
+            #'-d ' + doctree_folder,# path for the cached environment and doctree files (default: outdir /.doctrees)
+            '-n',                  # nit-picky mode, warn about all missing references
+            '-N',                  # do not emit colored output
+            '-T',                  # show full traceback on exception
+            '-w ' + warnings_file, # write warnings (and errors) to given file
+            sourcedir,
+            outdir
+        ])
 
-    cmdlist = [
-        'sphinx-build',
-        '-a',                  # write all files; default is to only write new and changed files
-        '-b ' + builder,       # builder to use; default is html
-        '-c ' + confpy_folder, # path where configuration file(conf.py) is located (default: same as sourcedir)
-        '-d ' + doctree_folder,# path for the cached environment and doctree files (default: outdir /.doctrees)
-        '-E',                  # don't use a saved environment, always read all files
-        '-n',                  # nit-picky mode, warn about all missing references
-        '-T',                  # show full traceback on exception
-        '-w ' + warnings_file, # write warnings (and errors) to given file
-        sourcedir,
-        outdir
-    ]
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
+if exitcode == CONTINUE:
+    if not os.path.exists(cachedir):
+        os.makedirs(cachedir)
+    # save in cache
+    cmdlist = ['rsync', '-a', '--delete', '"%s/"' % outdir, '"%s/"' % cachedir]
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 # ==================================================
