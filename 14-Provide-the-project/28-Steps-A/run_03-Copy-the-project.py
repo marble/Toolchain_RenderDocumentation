@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 import tct
 import sys
+from os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -43,6 +44,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+TheProject = None
 xeq_name_cnt = 0
 
 # ==================================================
@@ -152,8 +154,10 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if 0 and "SOMETHING CRAZY for debugging":
-        cmdlist = ['rsync', '-a', '--delete', '/usr/local/lib/python2.7/site-packages', '/RESULT/Cache/']
-        exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+        FLAGFILE = '/RESULT/Cache/site-packages/EXPORT'
+        if ospe(FLAGFILE):
+            cmdlist = ['rsync', '-a', '--delete', '/usr/local/lib/python2.7/site-packages', '/RESULT/Cache/']
+            exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 
 # ==================================================

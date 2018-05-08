@@ -6,10 +6,12 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+import codecs
 import os
-import tct
+import subprocess
 import sys
-
+import tct
+from  os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -33,22 +35,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -66,12 +58,12 @@ documentation_folder_for_sphinx = ''
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    ready_for_build = milestones_get('ready_for_build')
-    rebuild_needed = milestones_get('rebuild_needed')
-    included_files_check_is_ok = milestones_get('included_files_check_is_ok')
-    toolname = params_get('toolname')
-    build_html = milestones_get('build_html')
-    make_singlehtml = milestones_get('make_singlehtml')
+    ready_for_build = lookup(milestones, 'ready_for_build')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
+    included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok')
+    toolname = lookup(params, 'toolname')
+    build_html = lookup(milestones, 'build_html')
+    make_singlehtml = lookup(milestones, 'make_singlehtml')
     loglist.append('End of PARAMS')
 
 if exitcode == CONTINUE:
@@ -92,81 +84,127 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    #1
+    build_html = lookup(milestones, 'build_html')
+    has_settingscfg = lookup(milestones, 'has_settingscfg')
+    masterdoc = lookup(milestones, 'masterdoc')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
+    SPHINXBUILD = lookup(milestones, 'SPHINXBUILD')
+    SYMLINK_THE_OUTPUT = lookup(milestones, 'SYMLINK_THE_OUTPUT')
+    SYMLINK_THE_PROJECT = lookup(milestones, 'SYMLINK_THE_PROJECT')
+    TheProject = lookup(milestones, 'TheProject')
+    TheProjectBuild = lookup(milestones, 'TheProjectBuild')
+    TheProjectCacheDir = lookup(milestones, 'TheProjectCacheDir')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
 
-    # first
-    has_settingscfg = milestones.get('has_settingscfg')
-    masterdoc = milestones.get('masterdoc')
-    rebuild_needed = milestones.get('rebuild_needed')
-    SPHINXBUILD = milestones.get('SPHINXBUILD')
-    TheProject = milestones.get('TheProject')
-    TheProjectBuild = milestones.get('TheProjectBuild')
-    TheProjectLog = milestones.get('TheProjectLog')
-    TheProjectMakedir = milestones.get('TheProjectMakedir')
-
-    # second
-    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
+    if not (build_html and masterdoc and SPHINXBUILD and SYMLINK_THE_OUTPUT
+            and SYMLINK_THE_PROJECT and TheProject and TheProjectBuild
+            and TheProjectCacheDir and TheProjectLog and TheProjectMakedir):
+        exitcode = 22
 
 
 if exitcode == CONTINUE:
-
-    import codecs
-    import subprocess
+    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, shell=True, cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
+        return exitcode, cmd, out, err
+
+    def execute_cmdlist(cmdlist, cwd=None):
+        global xeq_name_cnt
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (
+        toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (
+        toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (
+        toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(ospj(workdir, filename_cmd), 'w',
+                         'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+
+        loglist.append(
+            {'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
+        with codecs.open(ospj(workdir, filename_out), 'w',
+                         'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+
+        with codecs.open(ospj(workdir, filename_err), 'w',
+                         'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+
         return exitcode, cmd, out, err
 
 if exitcode == CONTINUE:
     builder = 'singlehtml'
     sourcedir = documentation_folder_for_sphinx
-    outdir = build_builder_folder = os.path.join(TheProjectBuild, builder)
-    warnings_file_folder = os.path.join(TheProjectLog, builder)
-    warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
-    doctree_folder = os.path.join(TheProjectBuild, 'doctree', builder)
+    outdir =  ospj(TheProjectBuild, builder)
+    outdir_in_cache = ospj(TheProjectCacheDir, builder)
+    warnings_file_folder = ospj(TheProjectLog, builder)
+    warnings_file = ospj(warnings_file_folder, 'warnings.txt')
+    # different builder may share the same .doctree
+    doctree_folder = ospj(TheProjectCacheDir, 'html', '.doctrees')
+    loglist.append(('doctree_folder', doctree_folder))
     confpy_folder = TheProjectMakedir
-    workdir = params['workdir']
-    loglist.append(['workdir', workdir])
-
-    if not os.path.exists(warnings_file_folder):
+    if not ospe(warnings_file_folder):
         os.makedirs(warnings_file_folder)
+    if not ospe(outdir_in_cache):
+        os.makedirs(outdir_in_cache)
 
+if exitcode == CONTINUE:
     cmdlist = [
         'sphinx-build',
-        '-a',                  # write all files; default is to only write new and changed files
+      # '-a',                  # write all files; default is to only write new and changed files
         '-b ' + builder,       # builder to use; default is html
         '-c ' + confpy_folder, # path where configuration file(conf.py) is located (default: same as sourcedir)
-        '-d ' + doctree_folder,# path for the cached environment and doctree files (default: outdir /.doctrees)
-        '-E',                  # don't use a saved environment, always read all files
+        ]
+    if doctree_folder and ospe(doctree_folder):
+        cmdlist.extend(['-d ' + doctree_folder]) # path for the cached environment and doctree files (default: outdir /.doctrees)
+    cmdlist.extend([
+      # '-E',                  # don't use a saved environment, always read all files
         '-n',                  # nit-picky mode, warn about all missing references
         '-T',                  # show full traceback on exception
         '-w ' + warnings_file, # write warnings (and errors) to given file
-        sourcedir,
-        outdir
-    ]
-    cmd = ' '.join(cmdlist)
-    cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+        SYMLINK_THE_PROJECT,
+        SYMLINK_THE_OUTPUT
+        ])
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
+    if ospe(SYMLINK_THE_OUTPUT):
+        os.unlink(SYMLINK_THE_OUTPUT)
+    if ospe(SYMLINK_THE_PROJECT):
+        os.unlink(SYMLINK_THE_PROJECT)
+    # let sphinx build directly to the cache
+    os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)
+    loglist.append(('os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)', outdir_in_cache, SYMLINK_THE_OUTPUT))
+    os.symlink(sourcedir, SYMLINK_THE_PROJECT)
+    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir, SYMLINK_THE_PROJECT))
 
-    loglist.append([exitcode, cmd, out, err])
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
-    xeq_name_cnt += 1
-    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+    if ospe(SYMLINK_THE_OUTPUT):
+        os.unlink(SYMLINK_THE_OUTPUT)
+    if ospe(SYMLINK_THE_PROJECT):
+        os.unlink(SYMLINK_THE_PROJECT)
 
-    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-        f2.write(cmd_multiline.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-        f2.write(out.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-        f2.write(err.decode('utf-8', 'replace'))
+if exitcode == CONTINUE:
+    # Now, since Sphinx has written directly to the Cachedir, we fetch that
+    # result since the Toolchain is expecting that and
+    # copy folder 'outdir_in_cache' as 'outdir'
+    cmdlist = ['rsync', '-a', '--delete', '"%s"' % outdir_in_cache, '"%s/"' % TheProjectBuild ]
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 
 # ==================================================
@@ -179,7 +217,7 @@ if exitcode == CONTINUE:
     result['MILESTONES'].append({
         'build_singlehtml': 'success',
         'builds_successful': builds_successful,
-        'build_' + builder + '_folder': build_builder_folder,
+        'build_' + builder + '_folder': outdir,
     })
 
 if documentation_folder_for_sphinx:

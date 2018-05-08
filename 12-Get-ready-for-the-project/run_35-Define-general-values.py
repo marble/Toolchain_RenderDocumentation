@@ -72,9 +72,13 @@ checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
 gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/:/tmp/'
 lockfile_ttl_seconds = 1800
 relative_part_of_builddir = ''
+TheProjectCacheDir = '/RESULT/Cache'
 url_of_webroot = ''
 webroot_abspath = '' # '/ALL/dummy_webroot'
 xeq_name_cnt = 0
+SYMLINK_THE_PROJECT = '/ALL/Makedir/SYMLINK_THE_PROJECT'
+SYMLINK_THE_OUTPUT = '/ALL/Makedir/SYMLINK_THE_OUTPUT'
+
 
 email_user_do_not_send = 0
 email_user_receivers_exlude_list = [
@@ -117,7 +121,6 @@ if exitcode == CONTINUE:
 
     configset = milestones.get('configset')
 
-    # is always on srv123 (?)
     url_of_webroot = lookup(facts, 'tctconfig', configset, 'url_of_webroot', default=url_of_webroot)
     # relative_part_of_builddir = lookup(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
     webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
@@ -190,6 +193,9 @@ if email_user_receivers_exlude_list:
 if lockfile_ttl_seconds:
     result['MILESTONES'].append({'lockfile_ttl_seconds': lockfile_ttl_seconds})
 
+if TheProjectCacheDir:
+    result['MILESTONES'].append({'TheProjectCacheDir': TheProjectCacheDir})
+
 if relative_part_of_builddir:
     result['MILESTONES'].append({'relative_part_of_builddir': relative_part_of_builddir})
 
@@ -201,6 +207,12 @@ if webroot_abspath:
 
 if gitdir_must_start_with:
     result['MILESTONES'].append({'gitdir_must_start_with': gitdir_must_start_with})
+
+if SYMLINK_THE_PROJECT:
+    result['MILESTONES'].append({'SYMLINK_THE_PROJECT': SYMLINK_THE_PROJECT})
+
+if SYMLINK_THE_OUTPUT:
+    result['MILESTONES'].append({'SYMLINK_THE_OUTPUT': SYMLINK_THE_OUTPUT})
 
 
 # ==================================================
