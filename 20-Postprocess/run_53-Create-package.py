@@ -46,6 +46,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+build_package = None
 package_file = None
 package_name = 'manual.zip'
 pdf_name = 'manual.pdf'
@@ -180,6 +181,7 @@ if exitcode == CONTINUE:
     shutil.move(src, dest)
 
     package_file = os.path.join(dest, package_name)
+    build_package = 'success'
 
 
 # ==================================================
@@ -194,6 +196,9 @@ if package_name:
 
 if package_file:
     result['MILESTONES'].append({'package_file': package_file})
+
+if build_package:
+    result['MILESTONES'].append({'build_package': build_package})
 
 
 # ==================================================

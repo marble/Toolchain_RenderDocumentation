@@ -48,6 +48,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+created = {}
 TheProjectResultBuildinfoResultJsonfile = None
 xeq_name_cnt = 0
 
@@ -137,6 +138,20 @@ if exitcode == CONTINUE:
         v = settings_cfg_general.get(k)
         if v:
             R[k] = v
+
+    if milestones.get('build_html'):
+        created['html'] = 1
+    if milestones.get('build_latex'):
+        created['latex'] = 1
+    if milestones.get('build_package'):
+        created['package'] = 1
+    if milestones.get('build_pdf'):
+        created['pdf'] = 1
+    if milestones.get('build_singlehtml'):
+        created['singlehtml'] = 1
+
+    if created:
+        R['created'] = created
 
     tct.writejson(R, TheProjectResultBuildinfoResultJsonfile)
 

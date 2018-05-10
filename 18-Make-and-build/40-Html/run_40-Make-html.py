@@ -197,8 +197,13 @@ if exitcode == CONTINUE:
     # Now, since Sphinx has written directly to the Cachedir, we fetch that
     # result since the Toolchain is expecting that
     # copy folder 'outdir_in_cache' as 'outdir'
-    cmdlist = ['rsync', '-a', '--delete', '"%s"' % outdir_in_cache, '"%s/"' % TheProjectBuild ]
+    cmdlist = [
+        'rsync', '-a', '--delete',
+        '--exclude=".doctrees"',
+        '"%s"' % outdir_in_cache,
+        '"%s/"' % TheProjectBuild ]
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+
 
 # ==================================================
 # Set MILESTONE

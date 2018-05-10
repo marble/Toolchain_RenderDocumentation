@@ -47,8 +47,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+makepdf_exitcode = None
 xeq_name_cnt = 0
-makepdf_exitcode =None
 
 
 # ==================================================
@@ -123,8 +123,8 @@ if exitcode == CONTINUE:
     if exitcode:
         # a makepdf failure should not affect the final_exitcode
         makepdf_exitcode = exitcode
-        loglist.append(('makepdf_exitcode', makepdf_exitcode))
-        exitcode = 2
+        exitcode = 0
+        CONTINUE = -2
 
 
     loglist.append([exitcode, cmd.decode('utf-8', 'replace'), out.decode('utf-8', 'replace'), err.decode('utf-8', 'replace')])
@@ -160,7 +160,7 @@ if exitcode == CONTINUE:
         'builds_successful': builds_successful,
     })
 
-if makepdf_exitcode:
+if makepdf_exitcode is not None:
     result['MILESTONES'].append({'makepdf_exitcode': makepdf_exitcode})
 
 # ==================================================
