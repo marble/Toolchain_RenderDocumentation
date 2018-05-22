@@ -95,6 +95,9 @@ if exitcode == CONTINUE:
                 if line1.startswith(TheProject):
                     f2.write('.')
                     f2.write(line1[TheProjectLen:])
+                elif line1.startswith('/ALL/Makedir/SYMLINK_THE_PROJECT/'):
+                    f2.write('.')
+                    f2.write(line1[32:])
                 else:
                     f2.write(line1)
         statinfo = os.stat(warnings_file)
