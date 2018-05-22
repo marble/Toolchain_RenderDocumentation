@@ -92,6 +92,7 @@ SNIPPETS.define_some_textroles = """\
 .. role:: html(code)
 .. role:: js(code)
 .. role:: php(code)
+.. role:: sep (strong)
 .. role:: typoscript(code)
 
 .. role:: ts(typoscript)
@@ -100,4 +101,3 @@ SNIPPETS.define_some_textroles = """\
 .. default-role:: code
 .. highlight:: php
 """
-
