@@ -6,6 +6,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import tct
 import sys
 #
@@ -13,6 +14,7 @@ import copy
 import cgi
 import os
 import shutil
+import six
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -260,7 +262,7 @@ def do_the_work():
         attrs['href'] = absurl_html_dir
         atag = soup.new_tag('a', **attrs)
         atag.string = 'html'
-        successparts.append(unicode(atag))
+        successparts.append(six.text_type(atag))
     else:
         failparts.append('html')
 
@@ -270,7 +272,7 @@ def do_the_work():
         attrs['href'] = absurl_singlehtml_dir
         atag = soup.new_tag('a', **attrs)
         atag.string = 'singlehtml'
-        successparts.append(unicode(atag))
+        successparts.append(six.text_type(atag))
     else:
         failparts.append('singlehtml')
 
@@ -279,7 +281,7 @@ def do_the_work():
         attrs['href'] = absurl_pdf_file
         atag = soup.new_tag('a', **attrs)
         atag.string = 'pdf'
-        successparts.append(unicode(atag))
+        successparts.append(six.text_type(atag))
     else:
         failparts.append('pdf')
 
@@ -288,7 +290,7 @@ def do_the_work():
         attrs['href'] = absurl_package_file
         atag = soup.new_tag('a', **attrs)
         atag.string = 'package'
-        successparts.append(unicode(atag))
+        successparts.append(six.text_type(atag))
     else:
         failparts.append('package')
 
@@ -297,7 +299,7 @@ def do_the_work():
         attrs['href'] = absurl_buildinfo_dir
         atag = soup.new_tag('a', **attrs)
         atag.string = 'buildinfo'
-        successparts.append(unicode(atag))
+        successparts.append(six.text_type(atag))
     else:
         failparts.append('buildinfo')
 
@@ -353,7 +355,7 @@ def do_the_work():
             attrs['href'] = 'mailto:' + email
             atag = soup.new_tag('a', **attrs)
             atag.string = email
-            temp.append(unicode(atag))
+            temp.append(six.text_type(atag))
         v = u', '.join(temp)
     HKV['receivers_from_settings_cfg'] = v
 
@@ -365,7 +367,7 @@ def do_the_work():
             attrs['href'] = 'mailto:' + email
             atag = soup.new_tag('a', **attrs)
             atag.string = email
-            temp.append(unicode(atag))
+            temp.append(six.text_type(atag))
         v = u', '.join(temp)
     HKV['receivers_from_project'] = v
 
@@ -502,7 +504,7 @@ def do_the_work():
         f2.write(prettified)
 
     with codecs.open('DearProjectOwner.html', 'w', 'utf-8') as f2:
-        prettified = unicode(soup)
+        prettified = six.text_type(soup)
         prettified = prettified.replace('%', '%%').replace('%%(', '%(') % HKV
         f2.write(prettified)
 

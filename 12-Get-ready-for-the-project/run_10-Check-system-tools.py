@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import tct
 import os
 import sys
@@ -128,7 +129,7 @@ if exitcode == CONTINUE:
            known_systemtools[k] = ''
 
 if exitcode == CONTINUE:
-   if known_systemtools.has_key('pip'):
+   if 'pip' in known_systemtools:
     cmdlist = ['which freeze']
     xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
     if xcode == 0:

@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -176,7 +177,7 @@ if exitcode == CONTINUE:
     if do_clone_or_pull == 'clone':
         parent_dir = os.path.split(gitdir)[0]
         if not os.path.exists(parent_dir):
-            os.makedirs(parent_dir, mode=0775)
+            os.makedirs(parent_dir, mode=0o775)
 
         exitcode, cmd, out, err = cmdline('git clone %s %s' % (giturl, gitdir))
 

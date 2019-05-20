@@ -5,13 +5,14 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
 
 # specific
 import codecs
-import ConfigParser
+import six.moves.configparser
 import shutil
 
 params = tct.readjson(sys.argv[1])
@@ -82,7 +83,7 @@ else:
 if exitcode == CONTINUE:
 
     loglist.append('Start with empty config object')
-    override_data_result = ConfigParser.RawConfigParser()
+    override_data_result = six.moves.configparser.RawConfigParser()
 
     destfile = os.path.join(TheProjectMakedir, 'Overrides.cfg')
     if os.path.exists(destfile):

@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -194,7 +195,7 @@ if exitcode == CONTINUE:
         TheProjectTodosMakefolders.append(TheProjectTodosMakefolder)
         os.makedirs(TheProjectTodosMakefolder)
         f2path = TheProjectTodosMakefolderBuildsettingsSh = os.path.join(TheProjectTodosMakefolder, 'buildsettings.sh')
-        with file(f2path, 'w') as f2:
+        with open(f2path, 'w') as f2:
             for k in sorted(buildsettings):
                 v = buildsettings[k]
                 f2.write('%s=%s\n' % (k.upper(), v))
@@ -212,13 +213,13 @@ if exitcode == CONTINUE:
             toolchain_temp_home_todo_file = os.path.join(toolchain_temp_home_todo_folder, locale)
             toolchain_temp_home_todo_file_all = os.path.join(toolchain_temp_home_todo_folder, 'ALL.source-me.sh')
             line = new_cmdline.replace('-c makedir ~~~makedir~~~', '-c makedir ' + TheProjectTodosMakefolder)
-            with file(toolchain_temp_home_todo_file, 'a') as f2:
+            with open(toolchain_temp_home_todo_file, 'a') as f2:
                 f2.write('#!/bin/sh\n\n')
                 f2.write(line + '\n')
             # make executable
             st = os.stat(toolchain_temp_home_todo_file)
             os.chmod(toolchain_temp_home_todo_file, st.st_mode | stat.S_IEXEC)
-            with file(toolchain_temp_home_todo_file_all, 'a') as f2:
+            with open(toolchain_temp_home_todo_file_all, 'a') as f2:
                 f2.write(toolchain_temp_home_todo_file + '\n')
 
 # ==================================================

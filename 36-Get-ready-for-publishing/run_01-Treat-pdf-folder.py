@@ -6,6 +6,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -122,7 +123,7 @@ if exitcode == CONTINUE:
 
     pdf_dest_folder_htaccess = os.path.join(pdf_dest_folder, '.htaccess')
 
-    with file(pdf_dest_folder_htaccess, 'w') as f2:
+    with open(pdf_dest_folder_htaccess, 'w') as f2:
         f2.write(htaccess_contents)
 
 

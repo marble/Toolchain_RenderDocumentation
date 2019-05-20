@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -98,7 +99,7 @@ if exitcode == CONTINUE:
     # email.iterators._structure(msg)
     parts = []
     for part in email.iterators.typed_subpart_iterator(msg):
-        print(part.items())
+        print(list(part.items()))
 
     for part in email.iterators.typed_subpart_iterator(msg, 'text', 'html'):
         parts.append(part)
@@ -107,7 +108,7 @@ if exitcode == CONTINUE:
         parts.append(part)
 
     for part in parts:
-        pprint(part.items())
+        pprint(list(part.items()))
         payload = part.get_payload(decode=True)
         content_type = part.get_content_type()
         print(part.get_content_type(), len(part), repr(payload))

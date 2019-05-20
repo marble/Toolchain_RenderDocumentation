@@ -13,6 +13,7 @@ Description:
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
 import codecs
 import datetime
 import re
@@ -248,6 +249,6 @@ versions3 = versions1.copy()
 versions3.update(versions2)
 
 print(prolog_template % {'unixtime': unixtime, 'datetimestr': datetimestr})
-for k, v in sorted(versions3.items(), cmp=version_cmp):
+for k, v in sorted(list(versions3.items()), cmp=version_cmp):
     print(languagepack % v)
 print(epilog)

@@ -1,6 +1,8 @@
 # tweak_dllisttables.py
 # mb, 2012-05-21, 2013-05-29, 2013-06-11
 
+from __future__ import absolute_import
+from __future__ import print_function
 import codecs
 import os
 import sys
@@ -58,9 +60,9 @@ def tweakTableRow(lines):
     underliner = SECTION_UNDERLINERS[p+1]
 
     if 0:
-        print
+        print()
         for line in lines:
-            print repr(line.rstrip())
+            print(repr(line.rstrip()))
         x = 10
 
     dt = None
@@ -156,7 +158,7 @@ def processRstFile(f1path):
                 hot = hot and (len(lines[1].strip()) != 0)
                 hot = hot and (len(lines[2].strip()) != 0)
                 hot = hot and (len(lines[3].strip()) == 0)
-                hot = hot and (lines[1].rstrip('\r\n') <> (lines[1][0] * len(lines[1].rstrip('\r\n'))))
+                hot = hot and (lines[1].rstrip('\r\n') != (lines[1][0] * len(lines[1].rstrip('\r\n'))))
                 hot = hot and (lines[2].rstrip('\r\n') == (lines[2][0] * len(lines[2].rstrip('\r\n'))))
                 if hot:
                     CURRENT_UNDERLINER = lines[2][0]
@@ -170,7 +172,7 @@ def processRstFile(f1path):
                 indentLen = line.find('.. ### BEGIN~OF~TABLE ###')
                 lines = []
                 if 0:
-                    print f1path
+                    print(f1path)
             f2.write(line)
 
 
@@ -200,4 +202,4 @@ if __name__ == "__main__":
         startDir = r'D:\T3PythonDocBuilder\temp\t3pdb\Documentation'
         main(startDir)
     else:
-        print "Please import and run main(...)"
+        print("Please import and run main(...)")

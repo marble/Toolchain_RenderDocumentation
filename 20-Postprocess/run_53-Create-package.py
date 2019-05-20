@@ -6,6 +6,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -156,13 +157,13 @@ if exitcode == CONTINUE:
     for dirpath, dirnames, filenames in os.walk(dest_folder):
         for filename in filenames:
             if filename.endswith('.html'):
-                with file(ospj(dirpath, filename), 'r') as f1:
+                with open(ospj(dirpath, filename), 'r') as f1:
                     data = f1.read()
                 p1 = data.find(needle)
                 if p1 >= 0:
                     p2 = data.find('"', p1 + len(needle))
                     if p2 > p1:
-                        with file(ospj(dirpath, filename), 'w') as f2:
+                        with open(ospj(dirpath, filename), 'w') as f2:
                             f2.write(data[0: p1 + len(needle) - 6])
                             f2.write(data[p2 + 1:])
 

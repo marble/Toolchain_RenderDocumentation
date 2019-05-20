@@ -6,6 +6,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -123,7 +124,7 @@ if exitcode == CONTINUE:
                 os.makedirs(current_dir)
             try:
                 shutil.copy(srcfile, destfile)
-            except IOError, e:
+            except IOError as e:
                 print('IOError    :', e)
                 print('srcdir     :', srcdir)
                 print('makedir    :', makedir)

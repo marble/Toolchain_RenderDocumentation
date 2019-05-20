@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 # from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -128,7 +129,7 @@ if exitcode == CONTINUE:
     items = []
     for afile in files:
         fpath = os.path.join(publish_package_dir, afile)
-        with file(fpath, 'rb') as f1:
+        with open(fpath, 'rb') as f1:
             md5 = hashfile(f1, hashlib.md5())
         m = re_package_name.match(afile)
         if m:
@@ -151,7 +152,7 @@ if exitcode == CONTINUE:
         '\t</languagePackIndex>\n'
         '</documentationPackIndex>\n')
 
-    with file(publish_packages_xml_file, 'w') as f2:
+    with open(publish_packages_xml_file, 'w') as f2:
         f2.write(leadin)
         for item in items:
             f2.write(

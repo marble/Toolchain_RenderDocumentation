@@ -6,9 +6,11 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
+import six
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -122,7 +124,7 @@ def as_list(v):
         result = []
     elif type(v) == list:
         result = v
-    elif isinstance(v, basestring):
+    elif isinstance(v, six.string_types):
         result = [s.strip() for s in v.replace(',', ' ').split(' ') if s.strip()]
     else:
         result = []

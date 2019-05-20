@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import tct
 import sys
 #
@@ -12,6 +13,7 @@ import codecs
 import os
 import subprocess
 import time
+import six
 
 
 params = tct.readjson(sys.argv[1])
@@ -123,9 +125,9 @@ if exitcode == CONTINUE:
         with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(theCmd)
         with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-            f2.write(unicode(out))
+            f2.write(six.text_type(out))
         with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-            f2.write(unicode(err))
+            f2.write(six.text_type(err))
 
 if exitcode == CONTINUE:
 
@@ -148,7 +150,7 @@ if exitcode == CONTINUE:
 
     if checksum_new:
         if checksum_new != checksum_old or rebuild_needed:
-            with file(checksum_file, 'wb') as f2:
+            with open(checksum_file, 'wb') as f2:
                 f2.write(checksum_new)
 
 

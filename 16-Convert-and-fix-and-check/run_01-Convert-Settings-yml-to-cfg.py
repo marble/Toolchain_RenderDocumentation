@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import tct
 import sys
 
@@ -83,9 +84,9 @@ if exitcode == CONTINUE:
     import codecs
     import copy
     import yaml
-    import ConfigParser
+    import six.moves.configparser
 
-    config = ConfigParser.RawConfigParser()
+    config = six.moves.configparser.RawConfigParser()
 
     settingsyml = None
     settingsyml_file = milestones['settingsyml_file']

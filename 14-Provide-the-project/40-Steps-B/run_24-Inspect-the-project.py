@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -118,7 +119,7 @@ if exitcode == CONTINUE:
     checksum_old = None
     checksum_time = None
     if os.path.exists(checksum_file):
-        with file(checksum_file, 'r') as f1:
+        with open(checksum_file, 'r') as f1:
             checksum_old = f1.read()
         checksum_old = checksum_old.strip()
         checksum_time = int(os.path.getmtime(checksum_file))
@@ -135,7 +136,7 @@ if exitcode == CONTINUE:
     for fname in sorted(['ext_emconf.php', 'Documentation/Index.rst']):
         fpath = os.path.join(TheProject, fname)
         if os.path.exists(fpath):
-            with file(fpath, 'r') as f1:
+            with open(fpath, 'r') as f1:
                 data = f1.read()
 
             # emails

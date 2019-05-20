@@ -32,6 +32,9 @@ Exitcodes::
 
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 __version__ = '0.2.0'
 __history__ = ""
 __copyright__ = """\
@@ -125,11 +128,11 @@ def processRstFile(filepath, parents=None, recurse=1):
     if ok and recurse:
         strdata = None
         if ospe(restfile):
-            f1 = file(restfile)
+            f1 = open(restfile)
             strdata = f1.read()
             f1.close()
         elif ospe(restfile.decode('utf-8', 'replace')):
-            f1 = file(restfile.decode('utf-8', 'replace'))
+            f1 = open(restfile.decode('utf-8', 'replace'))
             strdata = f1.read()
             f1.close()
         else:
@@ -212,37 +215,37 @@ def removestartdir(fname):
     return result
 
 def printresult():
-    print
+    print()
 
-    print 'observed files:'
-    print '==============='
+    print('observed files:')
+    print('===============')
     if checkedfiles:
         for f in checkedfiles:
-            print removestartdir(f)
+            print(removestartdir(f))
     else:
-        print 'None.'
-    print
+        print('None.')
+    print()
 
-    print 'observed include files:'
-    print '======================='
+    print('observed include files:')
+    print('=======================')
     if checkedincludefiles:
         for f in checkedincludefiles:
-            print removestartdir(f)
+            print(removestartdir(f))
     else:
-        print 'None.'
-    print
+        print('None.')
+    print()
 
-    print 'include files that could not be read (= no error):'
-    print '=================================================='
+    print('include files that could not be read (= no error):')
+    print('==================================================')
     if notreadablefiles:
         for f in notreadablefiles:
-            print removestartdir(f)
+            print(removestartdir(f))
     else:
-        print 'None.'
-    print
+        print('None.')
+    print()
 
-    print 'forbidden include files:'
-    print '========================'
+    print('forbidden include files:')
+    print('========================')
     if forbiddenfilesparents:
         for i, parents in enumerate(forbiddenfilesparents):
             j = 0
@@ -252,14 +255,14 @@ def printresult():
                 else:
                     indent = ('    '*(j-1)) + '|-- '
                 fname = removestartdir(parents[j])
-                print '%s%s' % (indent, fname)
+                print('%s%s' % (indent, fname))
             j += 1
             indent = ('    '*(j-1)) + '|-- '
             fname = removestartdir(forbiddenfiles[i])
-            print '%s%s' % (indent, fname)
+            print('%s%s' % (indent, fname))
     else:
-        print 'None.'
-    print
+        print('None.')
+    print()
 
 
 def get_argparse_args():
@@ -267,18 +270,18 @@ def get_argparse_args():
 
     class License(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            print __copyright__
+            print(__copyright__)
             parser.exit()
 
     class History(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            print __history__
+            print(__history__)
             parser.exit()
 
     class Info(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            print
-            print __doc__
+            print()
+            print(__doc__)
             parser.exit()
 
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0], add_help=False)
@@ -325,10 +328,10 @@ if __name__ == "__main__":
                "   needs module 'argparse' (Python >= 2.7) to handle commandline\n"
                "   parameters. It seems that 'argparse' is not available. Provide\n"
                "   module 'argparse' or hardcode parameters in the code instead (exitcode=2).\n" % {'prog': sys.argv[0]} )
-        print msg
+        print(msg)
         sys.exit(2)
     if not os.path.isdir(args.startdir):
-        print "argument is not a directory (exitcode=2)\n"
+        print("argument is not a directory (exitcode=2)\n")
         sys.exit(2)
 
     startdir = normalizepath(args.startdir)
@@ -339,9 +342,9 @@ if __name__ == "__main__":
         printresult()
     if ok:
         if args.verbose:
-            print "exitcode=0"
+            print("exitcode=0")
         sys.exit(0)
     else:
         if args.verbose:
-            print "exitcode=3"
+            print("exitcode=3")
         sys.exit(3)

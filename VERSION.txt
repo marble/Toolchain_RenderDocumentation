@@ -1,5 +1,10 @@
+v2.4.0
+   2019-05-20 start this version
+   Ran through python-modernize
+
+
 v2.3.1
-   2008-05-22
+   2018-05-22
 
 v2.3.0
    2018-05-07

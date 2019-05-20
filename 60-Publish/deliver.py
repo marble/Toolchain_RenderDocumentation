@@ -10,6 +10,7 @@ Usage:
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
 import codecs
 import json
 import os
@@ -46,7 +47,7 @@ if 0:
     }]
 
 def update_xml_file(stock, incoming, result):
-    for line in file(stock):
+    for line in open(stock):
         print(line)
 
 if __name__ == '__main__':

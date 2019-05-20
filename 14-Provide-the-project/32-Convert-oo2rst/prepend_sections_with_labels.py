@@ -1,9 +1,12 @@
 # prepend_sections_with_labels.py
 # mb, 2012-05-21, 2012-05-30, 2013-05-25
 
+from __future__ import absolute_import
+from __future__ import print_function
 import codecs
 import os
 import sys
+from six.moves import range
 
 ospj = os.path.join
 ospe = os.path.exists
@@ -44,7 +47,7 @@ def processRstFile(f1path):
             hot = hot and (len(lines[1].strip()) != 0)
             hot = hot and (len(lines[2].strip()) != 0)
             hot = hot and (len(lines[3].strip()) == 0)
-            hot = hot and (lines[1].rstrip('\r\n') <> (lines[1][0] * len(lines[1].rstrip('\r\n'))))
+            hot = hot and (lines[1].rstrip('\r\n') != (lines[1][0] * len(lines[1].rstrip('\r\n'))))
             hot = hot and (lines[2].rstrip('\r\n') == (lines[2][0] * len(lines[2].rstrip('\r\n'))))
             if hot:
                 label = sectionToLabel(lines[1])
@@ -81,4 +84,4 @@ if __name__ == "__main__":
         startDir = r'D:\T3PythonDocBuilder\temp\t3pdb\Documentation'
         main(startDir)
     else:
-        print "Please import and run main(...)"
+        print("Please import and run main(...)")

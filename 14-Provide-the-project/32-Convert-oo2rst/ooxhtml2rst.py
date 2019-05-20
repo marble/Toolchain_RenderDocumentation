@@ -5,6 +5,11 @@
 Convert an OpenOffice (X)HTML file to reST.
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
+import six
+from six import unichr
+from six.moves import range
 __version__ = '1.2.0'
 
 # leave your name and notes here:
@@ -52,7 +57,7 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE!
 """
 
 import codecs
-import HTMLParser
+import six.moves.html_parser
 from pprint import pprint
 import re
 import sys
@@ -68,9 +73,9 @@ from textwrap import TextWrapper
 
 from constants import *
 
-import htmlentitydefs
-entitydefs = HTMLParser.entitydefs = {'apos':u"'"}
-for k, v in htmlentitydefs.name2codepoint.iteritems():
+import six.moves.html_entities
+entitydefs = six.moves.html_parser.entitydefs = {'apos':u"'"}
+for k, v in six.iteritems(htmlentitydefs.name2codepoint):
     entitydefs[k] = unichr(v)
 
 
@@ -270,7 +275,7 @@ class DataCollector(object):
 
     def dump(self):
         for i, h, b in enumerate(self.stack):
-            print i, h, b
+            print(i, h, b)
 
     def collect(self, data, verbatim=None, src=None):
         # think of: self.datacollector.collect(u, src='entityref')
@@ -358,7 +363,7 @@ class DataCollector(object):
             self.collect('%s\n\n' % CUTTER_MARK_IMAGES, 'verbatim')
 
             if 0:
-                print repr(self.collected_images)
+                print(repr(self.collected_images))
 
             relpath = ''
             # relpath = 'img/'
@@ -368,7 +373,7 @@ class DataCollector(object):
                 name, imgattrs = self.collected_images[src]
                 name_src[name] = src
 
-            keys = name_src.keys()
+            keys = list(name_src.keys())
             keys = [k[:4] + ('%06d' % int(k[4:])) for k in keys]
             keys = sorted(keys)
             for longname in keys:
@@ -384,7 +389,7 @@ class DataCollector(object):
                 tokeep = ['alt', 'height', 'width', 'scale', 'target']
                 tokeep = ['alt', 'scale', 'target']
                 for k in tokeep:
-                    if D.has_key(k):
+                    if k in D:
                         if not '%' in D[k]:
                             self.collect('   :%s: %s\n' % (k, D[k]))
                             del D[k]
@@ -449,7 +454,7 @@ class DataCollector(object):
 
     def datahandler_body(self, data, verbatim=None, src=None):
         if 0 and 'page' in data:
-            print repr(data)
+            print(repr(data))
         self.datahandler_paragraph(data, verbatim)
 
 
@@ -1238,12 +1243,12 @@ class DataCollector(object):
         return result
 
 
-class MyHTMLParser(HTMLParser.HTMLParser):
+class MyHTMLParser(six.moves.html_parser.HTMLParser):
 
     def __init__(self, tagwriter=None, taginfo=0, tablesas='dl'):
         """Initialize and reset this instance."""
 
-        HTMLParser.HTMLParser.__init__(self)
+        six.moves.html_parser.HTMLParser.__init__(self)
         self.tagwriter = tagwriter
         self.taginfo = taginfo
         self.tablesas = tablesas
@@ -1292,7 +1297,7 @@ class MyHTMLParser(HTMLParser.HTMLParser):
             self.tagprinter(NL)
 
         if 0:
-            print tag,
+            print(tag, end=' ')
 
         if tag in ['p']:
             self.datacollector.start_paragraph(tag, attrs)
@@ -1422,12 +1427,12 @@ class MyHTMLParser(HTMLParser.HTMLParser):
         self.taglevel -= 1
         tag0, attrs = self.tagstack.pop()
         if not tag0 == tag:
-            print
-            print 'ERROR at line %s, column %s: unbalanced tags in \'%s\'' % (self.lineno, self.offset, args.infile)
-            print '      %s%s  shall be closed but' % (tag,  ' '*(10-len(tag)))
-            print '      %s%s  found in stack.'     % (tag0, ' '*(10-len(tag0)))
-            print '      %r' % ([t[0] for t in self.tagstack] + [tag0])
-            print
+            print()
+            print('ERROR at line %s, column %s: unbalanced tags in \'%s\'' % (self.lineno, self.offset, args.infile))
+            print('      %s%s  shall be closed but' % (tag,  ' '*(10-len(tag))))
+            print('      %s%s  found in stack.'     % (tag0, ' '*(10-len(tag0))))
+            print('      %r' % ([t[0] for t in self.tagstack] + [tag0]))
+            print()
             sys.exit(1)
             # raise "error"
 
@@ -1435,7 +1440,7 @@ class MyHTMLParser(HTMLParser.HTMLParser):
         # standard docutils text roles: :emphasis:, :literal:, :code:, :math:, :pep-reference:
         # :rfc-reference:, :string:, :subscript:, :superscript:
         if 0:
-            print '/%s' % tag,
+            print('/%s' % tag, end=' ')
 
         if tag in ['p']:
             self.datacollector.stop_paragraph(tag, attrs)
@@ -1517,7 +1522,7 @@ class MyHTMLParser(HTMLParser.HTMLParser):
             pass
 
         if 0:
-            print self.datacollector.debuginfo('sbufs')
+            print(self.datacollector.debuginfo('sbufs'))
 
 
     def handle_startendtag(self, tag, attrs):
@@ -1647,7 +1652,7 @@ class MyHTMLParser(HTMLParser.HTMLParser):
 
     def tags_log_as_string(self, D={}):
         sbuf = StringIO()
-        keys = D.keys()
+        keys = list(D.keys())
         keys = sorted(keys)
         maxlen = 4
         for k in keys:
@@ -1680,7 +1685,7 @@ class MyHTMLParser(HTMLParser.HTMLParser):
 
 def searchFileEncoding(f1name):
     """Check some lines to see if we have an encoding information."""
-    f1 = file(f1name)
+    f1 = open(f1name)
     cnt = 0
     result = None
     xmlDeclarationFound = False
@@ -1731,14 +1736,14 @@ def main(f1name, f2name, f3name=None, f4name=None, appendlog=0, taginfo=0, table
     if f1name == '-':
         f1 = sys.stdin
     elif False and f1 is None and f1name.startswith('http://') or f1name.startswith('https://'):
-        import urllib
-        f1 = urllib.urlopen(f1name)
+        import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+        f1 = six.moves.urllib.request.urlopen(f1name)
     elif f1 is None and f1name.startswith('http://') or f1name.startswith('https://'):
-        import urllib
+        import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
         url = f1name
         f1name = 'temp-urlretrieved.html'
-        urllib.urlretrieve(url, f1name)
-        urllib.urlcleanup()
+        six.moves.urllib.request.urlretrieve(url, f1name)
+        six.moves.urllib.request.urlcleanup()
 
     if f1 is None:
         f1encoding, xmlDeclarationFound = searchFileEncoding(f1name)
@@ -1882,12 +1887,12 @@ def get_argparse_args():
 
     class License(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            print __copyright__
+            print(__copyright__)
             parser.exit()
 
     class History(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            print __history__
+            print(__history__)
             parser.exit()
 
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0], add_help=False)
@@ -1949,7 +1954,7 @@ if __name__=="__main__":
                    "   needs module 'argparse' (Python >= 2.7) to handle commandline\n"
                    "   parameters. It seems that 'argparse' is not available. Provide\n"
                    "   module 'argparse' or hardcode parameters in the code instead.\n" % {'prog': sys.argv[0]} )
-            print msg
+            print(msg)
             sys.exit(2)
 
     main(args.infile, args.outfile, args.treefile, args.logfile, args.appendlog, args.taginfo, args.tablesas)

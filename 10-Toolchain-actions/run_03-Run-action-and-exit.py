@@ -6,11 +6,12 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
 
-VERSION = '2.3.1'
+VERSION = '2.4.0'
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]

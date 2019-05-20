@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import tct
 import sys
 
@@ -86,13 +87,13 @@ else:
 # --------------------------------------------------
 
 import codecs
-import ConfigParser
+import six.moves.configparser
 
 if exitcode == CONTINUE:
-    config = ConfigParser.RawConfigParser()
+    config = six.moves.configparser.RawConfigParser()
     try:
         config.readfp(codecs.open(settingscfg_file, 'r', 'utf-8'))
-    except ConfigParser.ParsingError, e:
+    except six.moves.configparser.ParsingError as e:
         loglist.append(('ConfigParser.ParsingError', (settingscfg_file, repr(e))))
         exitcode = 5
 

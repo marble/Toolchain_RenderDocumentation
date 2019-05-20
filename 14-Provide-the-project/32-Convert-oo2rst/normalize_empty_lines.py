@@ -3,6 +3,8 @@
 # This script has been placed in the public domain.
 # No warrenties whatsoever. Use at your own risk.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import codecs
 import sys
 
@@ -39,9 +41,9 @@ def main(f1name, f2name, maxemptylines=None):
 if __name__ == "__main__":
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print 'usage: python %s <infile.utf8.rst.txt> [<outfile.utf8.rst.txt>]' % sys.argv[0]#
-        print '       Normalize maximum number of empty line following immediately'
-        print '       upon each other. Number is: %s' % MAX_EMPTY_LINES
+        print('usage: python %s <infile.utf8.rst.txt> [<outfile.utf8.rst.txt>]' % sys.argv[0])#
+        print('       Normalize maximum number of empty line following immediately')
+        print('       upon each other. Number is: %s' % MAX_EMPTY_LINES)
         sys.exit(2)
 
     f1name = sys.argv[1]

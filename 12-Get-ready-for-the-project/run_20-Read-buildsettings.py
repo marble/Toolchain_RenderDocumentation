@@ -5,6 +5,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -113,7 +114,7 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
 
     import codecs
-    import ConfigParser
+    import six.moves.configparser
 
     class WithSection:
 
@@ -131,7 +132,7 @@ if exitcode == CONTINUE:
 
     # ConfigParser needs a section. Let's invent one.
     section = 'build'
-    config = ConfigParser.RawConfigParser()
+    config = six.moves.configparser.RawConfigParser()
     f1path = os.path.join(makedir, 'buildsettings.sh')
     if not os.path.exists(f1path):
         loglist.append(('buildsettings.sh not found', f1path))

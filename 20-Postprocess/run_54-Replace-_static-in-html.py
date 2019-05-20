@@ -6,6 +6,7 @@
 # --------------------------------------------------
 
 from __future__ import print_function
+from __future__ import absolute_import
 import os
 import tct
 import sys
@@ -13,6 +14,7 @@ import sys
 import codecs
 import glob
 import re
+import six
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -133,7 +135,7 @@ if exitcode == CONTINUE:
         """,
         re.VERBOSE)
 
-    replacement = unicode(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor +
+    replacement = six.text_type(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor +
                           '/' + '\g<payload>\g<quote>')
 
     build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
