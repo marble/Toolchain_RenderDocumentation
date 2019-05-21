@@ -10,7 +10,8 @@ from __future__ import print_function
 import six
 from six import unichr
 from six.moves import range
-__version__ = '1.2.0'
+import htmlentitydefs
+__version__ = '1.2.1'
 
 # leave your name and notes here:
 __history__ = """\
