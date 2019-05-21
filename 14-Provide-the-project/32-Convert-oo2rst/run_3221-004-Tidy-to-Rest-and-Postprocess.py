@@ -10,10 +10,10 @@ import os
 import tct
 import sys
 #
-import normalize_empty_lines
-import ooxhtml2rst
-import prepend_sections_with_labels
-import tweak_dllisttables
+import .normalize_empty_lines
+import .ooxhtml2rst
+import .prepend_sections_with_labels
+import .tweak_dllisttables
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
