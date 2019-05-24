@@ -70,7 +70,7 @@ if CONTINUE != 0:
     loglist.append('NOTHING to do')
 
 # ==================================================
-# we want to call the shel
+# we want to call the shell
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
@@ -142,9 +142,9 @@ if exitcode == CONTINUE:
     if 1 and "better use rsync":
         # copy files of the top level and ./doc/ and ./Documentation is existing
         # be safe
-        src = gitdir.rstrip('/').rstrip('\\')
-        dest = TheProject.rstrip('/').rstrip('\\')
-        cmdlist=['rsync', '%s/*' % src, '%s/*' % dest]
+        src = gitdir.replace('\\', '/').rstrip('/')
+        dest = TheProject.replace('\\', '/').rstrip('/')
+        cmdlist=['rsync', '%s/*' % src, '%s/' % dest]
         exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
         for adir in ['doc', 'Documentation']:
             srcdir = os.path.join(src, adir)
@@ -152,13 +152,6 @@ if exitcode == CONTINUE:
             if os.path.exists(srcdir):
                 cmdlist = ['rsync', '-a', '--delete', '%s/' % srcdir, '%s/' % destdir]
                 exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
-
-if exitcode == CONTINUE:
-    if 0 and "SOMETHING CRAZY for debugging":
-        FLAGFILE = '/RESULT/Cache/site-packages/EXPORT'
-        if ospe(FLAGFILE):
-            cmdlist = ['rsync', '-a', '--delete', '/usr/local/lib/python2.7/site-packages', '/RESULT/Cache/']
-            exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 
 # ==================================================
