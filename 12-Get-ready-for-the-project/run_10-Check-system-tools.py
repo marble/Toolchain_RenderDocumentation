@@ -65,6 +65,7 @@ list_for_which = [
     'pandoc',
     'pdflatex',
     'pip',
+    'pipenv'
     'python',
     'python2',
     'python3',
@@ -121,7 +122,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
    for k in list_for_which:
-       cmdlist = ['which', k ]
+       cmdlist = ['which', k]
        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
        if xcode == 0:
            known_systemtools[k] = out
