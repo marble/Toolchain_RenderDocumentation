@@ -11,6 +11,8 @@ import os
 import tct
 import sys
 
+ospj = os.path.join
+
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
@@ -73,12 +75,15 @@ checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
 gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/:/tmp/'
 lockfile_ttl_seconds = 1800
 relative_part_of_builddir = ''
-TheProjectCacheDir = '/RESULT/Cache'
+if os.path.isdir('/RESULT'):
+    # in Docker container
+    TheProjectCacheDir = '/RESULT/Cache'
+else:
+    TheProjectCacheDir = ospj(params['workdir_home'], 'Cache')
 url_of_webroot = ''
-webroot_abspath = '' # '/ALL/dummy_webroot'
+# /ALL/dummy_webroot
+webroot_abspath = ''
 xeq_name_cnt = 0
-SYMLINK_THE_PROJECT = '/ALL/Makedir/SYMLINK_THE_PROJECT'
-SYMLINK_THE_OUTPUT = '/ALL/Makedir/SYMLINK_THE_OUTPUT'
 
 
 email_user_do_not_send = 0
@@ -126,12 +131,14 @@ if exitcode == CONTINUE:
     # relative_part_of_builddir = lookup(facts, 'tctconfig', configset, 'relative_part_of_builddir', default=relative_part_of_builddir)
     webroot_abspath = lookup(facts, 'tctconfig', configset, 'webroot_abspath', default=webroot_abspath)
     buildsettings_builddir = lookup(milestones, 'buildsettings', 'builddir', default=buildsettings_builddir)
+    makedir_abspath = lookup(milestones, 'makedir_abspath')
 
 if not (1
         and buildsettings_builddir
         and configset
         and url_of_webroot
         and webroot_abspath
+        and makedir_abspath
     ):
     exitcode = 22
 
@@ -174,6 +181,8 @@ if exitcode == CONTINUE:
 
     relative_part_of_builddir = relative_part_of_builddir.strip('/')
 
+    SYMLINK_THE_PROJECT = ospj(makedir_abspath, 'SYMLINK_THE_PROJECT')
+    SYMLINK_THE_OUTPUT = ospj(makedir_abspath, 'SYMLINK_THE_OUTPUT')
 
 # ==================================================
 # Set MILESTONE
