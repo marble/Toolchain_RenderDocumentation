@@ -57,6 +57,7 @@ list_for_which = [
     'check_include_files.py',
     'dvips',
     'git',
+    'git-restore-mtime',
     'gzip',
     'html2text',
     'latex',
