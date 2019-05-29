@@ -1,6 +1,10 @@
-v2.4.0
-   2019-05-20 start this version
-   Ran through python-modernize
+Release v2.4.0 (May 29, 2019
+============================
+
+
+*  convert markdown files by pandoc
+*  catch all exceptions of Yaml Settings.yml parser
+*  processed by python-modernize
 
 
 v2.3.1
