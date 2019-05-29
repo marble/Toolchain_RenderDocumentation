@@ -91,12 +91,21 @@ if exitcode == CONTINUE:
     settingsyml = None
     settingsyml_file = milestones['settingsyml_file']
     with codecs.open(settingsyml_file, 'r', 'utf-8') as f1:
+        reason = ''
         try:
             settingsyml = yaml.safe_load(f1)
         except yaml.parser.ParserError:
             settingsyml = None
+            reason = 'yaml.parser.ParserError'
+        except yaml.scanner.ScannerError:
+            settingsyml = None
+            reason = 'yaml.scanner.ScannerError'
+        except:
+            settingsyml = None
+            reason = 'unexpected exception'
     if settingsyml is None:
-        loglist.append(('error: cannot parse `settingsyml_file`', settingsyml_file))
+        loglist.append(('error: cannot parse `settingsyml_file`', settingsyml_file,
+                        'reason:', reason))
         exitcode = 22
 
 if exitcode == CONTINUE:
