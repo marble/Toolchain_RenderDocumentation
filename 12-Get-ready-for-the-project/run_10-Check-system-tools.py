@@ -126,7 +126,7 @@ if exitcode == CONTINUE:
        cmdlist = ['which', k]
        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
        if xcode == 0:
-           known_systemtools[k] = out
+           known_systemtools[k] = out.strip()
        else:
            known_systemtools[k] = ''
 
