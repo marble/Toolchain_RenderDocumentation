@@ -154,6 +154,11 @@ if exitcode == CONTINUE:
     if created:
         R['created'] = created
 
+    if milestones.get('neutralized_links_jsonfile'):
+        R['has_neutralized_links'] = 1
+    else:
+        R['has_neutralized_links'] = 0
+
     tct.writejson(R, TheProjectResultBuildinfoResultJsonfile)
 
 # ==================================================
