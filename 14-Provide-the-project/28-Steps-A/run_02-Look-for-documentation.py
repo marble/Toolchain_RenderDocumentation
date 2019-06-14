@@ -6,9 +6,11 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+import glob
 import os
-import tct
+import re
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -56,7 +58,7 @@ masterdoc_candidates = [
     'Documentation/index.md',
     'README.rst',
     'README.md',
-    'doc/manual.sxw',
+    # 'doc/manual.sxw',
     # 'doc/manual.pdf',
 ]
 masterdoc_selected = {}
@@ -86,9 +88,6 @@ else:
 # ==================================================
 # work
 # --------------------------------------------------
-
-import glob
-import re
 
 if exitcode == CONTINUE:
     loglist.append({'masterdoc_candidates': masterdoc_candidates})
