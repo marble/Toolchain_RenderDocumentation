@@ -1,7 +1,16 @@
 Release v2.5.0 (Jun 14 29, 2019)
 ================================
 
-* ...
+*  Add CHANGES.rst
+*  Don't offer docs/manual.sxw as possibility
+*  Solve `issue #64 of t3docs/docker-render-documentation
+   <https://github.com/t3docs/docker-render-documentation/issues/64>`__
+   "Weird appearance of README" rendering
+*  Collect sitemap files `issue #64 of t3docs/docker-render-documentation
+   <https://github.com/t3docs/docker-render-documentation/issues/63>`__
+*  Postprocess html files: prettify, sanitize neutralize javascript links
+   `issue #67 of t3docs/docker-render-documentation
+   <https://github.com/t3docs/docker-render-documentation/issues/67>`__
 
 
 Release v2.4.0 (May 29, 2019)
