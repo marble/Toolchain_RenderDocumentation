@@ -1,3 +1,10 @@
+Release v2.5.1 (Jun 14 29, 2019)
+================================
+
+*  Fix logic error
+*  For speed reasons rewrite html files only if necessary
+
+
 Release v2.5.0 (Jun 14 29, 2019)
 ================================
 
