@@ -110,7 +110,7 @@ def process_html_file(folder, relpath):
 
 if exitcode == CONTINUE:
 
-    if 1:
+    if sitemap_files_html_jsonfile:
         with codecs.open(sitemap_files_html_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_html = json.load(f1)
 
@@ -119,7 +119,7 @@ if exitcode == CONTINUE:
 
         all_html_files_sanitized = 1
 
-    if 1:
+    if sitemap_files_singlehtml_jsonfile:
         with codecs.open(sitemap_files_singlehtml_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_singlehtmlfiles_html = json.load(f1)
 
