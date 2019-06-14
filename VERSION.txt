@@ -1,30 +1,14 @@
-Release v2.4.0 (May 29, 2019
-============================
-
-
-*  convert markdown files by pandoc
-*  catch all exceptions of Yaml Settings.yml parser
-*  processed by python-modernize
-
-
-v2.3.1
-   2018-05-22
-
-v2.3.0
-   2018-05-07
-   work in progress
-
-
-2.2.0
+2.5.0
 
 
 # ##################################################
 
 ATTENTION:
-Make sure this version number is the same in these files:
+   Keep in sync:
 
-- README.rst
-- 10-Toolchain-actions/run_03-Run-action-and-exit.py
+1. First line in this file
+2. README.rst
+3. 10-Toolchain-actions/run_03-Run-action-and-exit.py
 
 # ##################################################
 
