@@ -8,6 +8,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import shutil
 import tct
 import sys
 
@@ -100,6 +101,12 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    all_html_files_sanitized = milestones_get('all_html_files_sanitized')
+    if not all_html_files_sanitized:
+        exitcode = 22
+
+if exitcode == CONTINUE:
+    all_singlehtml_files_sanitized = milestones_get('all_singlehtml_files_sanitized')
     build_singlehtml = milestones_get('build_singlehtml')
     build_singlehtml_folder = milestones_get('build_singlehtml_folder')
     build_latex = milestones_get('build_latex')
@@ -107,9 +114,6 @@ if exitcode == CONTINUE:
     package_file = milestones_get('package_file')
 
 if exitcode == CONTINUE:
-
-    import shutil
-
     assembled = []
     TheProjectResult = TheProject + 'Result'
     loglist.append(TheProjectResult)
@@ -123,7 +127,7 @@ if exitcode == CONTINUE:
     shutil.move(src, TheProjectResultVersion)
     assembled.append('html')
 
-    if build_singlehtml and build_singlehtml_folder:
+    if build_singlehtml and build_singlehtml_folder and all_singlehtml_files_sanitized:
         shutil.move(build_singlehtml_folder, os.path.join(TheProjectResultVersion, 'singlehtml'))
         assembled.append('singlehtml')
 
