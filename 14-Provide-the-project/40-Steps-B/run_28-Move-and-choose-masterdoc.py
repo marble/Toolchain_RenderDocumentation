@@ -54,6 +54,7 @@ documentation_folder_moved = None
 masterdoc = None
 xeq_name_cnt = 0
 
+readme_masterdoc_file = params['toolfolderabspath'] + '/README-masterdoc-Index.rst'
 
 # ==================================================
 # Check params
@@ -187,9 +188,10 @@ if (exitcode == CONTINUE) and masterdoc and candidate:
             documentation_folder = os.path.join(TheProject, 'Documentation')
             os.mkdir(documentation_folder)
             documentation_folder_created = documentation_folder
-        masterdoc = os.path.join(documentation_folder, 'Index' + fext)
-        shutil.copyfile(source, masterdoc)
 
+        masterdoc = os.path.join(documentation_folder, 'Index.rst')
+        shutil.copyfile(readme_masterdoc_file, masterdoc)
+        shutil.copyfile(source, documentation_folder + '/' + candidate)
 
 
     elif masterdoc.lower().startswith('docs/'):
