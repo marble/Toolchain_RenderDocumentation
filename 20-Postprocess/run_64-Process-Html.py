@@ -103,8 +103,9 @@ def process_html_file(folder, relpath):
                 neutralized_links.append((logname, href))
                 link['href'] = '#'
 
-    with codecs.open(abspath, 'w', 'utf-8') as f2:
-        print(soup.prettify(formatter=None), file=f2)
+    if neutralized_links:
+        with codecs.open(abspath, 'w', 'utf-8') as f2:
+            print(soup.prettify(formatter=None), file=f2)
 
 
 
