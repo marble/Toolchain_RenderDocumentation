@@ -50,6 +50,7 @@ def lookup(D, *keys, **kwdargs):
 
 included_files_check_is_ok = 0
 included_files_check_logfile = None
+included_files_check_logfile_dumped_to_stdout = None
 xeq_name_cnt = 0
 
 
@@ -131,6 +132,14 @@ if exitcode == CONTINUE:
     with codecs.open(included_files_check_logfile, 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
 
+
+if (exitcode != 0) and included_files_check_logfile:
+    with codecs.open(included_files_check_logfile, 'r', 'utf-8') as f1:
+        for line in f1:
+            print(line, end='')
+    included_files_check_logfile_dumped_to_stdout = 1
+
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -139,6 +148,10 @@ if included_files_check_is_ok:
     result['MILESTONES'].append({'included_files_check_is_ok': included_files_check_is_ok})
 if included_files_check_logfile:
     result['MILESTONES'].append({'included_files_check_logfile': included_files_check_logfile})
+if included_files_check_logfile_dumped_to_stdout:
+    result['MILESTONES'].append(
+        {'included_files_check_logfile_dumped_to_stdout':
+         included_files_check_logfile_dumped_to_stdout})
 
 # ==================================================
 # save result
