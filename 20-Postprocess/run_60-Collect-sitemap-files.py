@@ -119,7 +119,7 @@ if 1 and sitemap_files_html and 'to txt':
 if 1 and sitemap_files_singlehtml and 'to txt':
     sitemap_files_singlehtml_txtfile = os.path.join(workdir, 'sitemap_files_singlehtml.txt')
     with codecs.open(sitemap_files_singlehtml_txtfile, 'w', 'utf-8') as f2:
-        for line in sitemap_files_html:
+        for line in sitemap_files_singlehtml:
             f2.write('%s\n' % line)
 
 # ==================================================
