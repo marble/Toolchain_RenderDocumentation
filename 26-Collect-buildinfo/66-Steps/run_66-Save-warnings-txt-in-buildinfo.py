@@ -51,7 +51,7 @@ def lookup(D, *keys, **kwdargs):
 xeq_name_cnt = 0
 warnings_file = None
 warnings_file_size = None
-
+warnings_file_dumped_to_console = None
 
 # ==================================================
 # Check params
@@ -60,14 +60,17 @@ warnings_file_size = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    build_html = lookup(milestones, 'build_html')
     TheProject = lookup(milestones, 'TheProject')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
+
+    if not (TheProject and TheProjectLog):
+        CONTINUE = -1
+
+    build_html = lookup(milestones, 'build_html')
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
-    if not (build_html and TheProject and TheProjectLog
-            and TheProjectResultBuildinfo):
-        CONTINUE = -1
+    if not (build_html and TheProjectResultBuildinfo):
+        "check that later!"
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -86,6 +89,26 @@ if exitcode == CONTINUE:
     if not os.path.exists(src_warnings_file):
         loglist.append(('warnings.txt file not found', src_warnings_file))
         CONTINUE = -2
+
+if exitcode == CONTINUE:
+    TheProjectLen = len(TheProject)
+    if not TheProjectResultBuildinfo:
+        # we cannot deliver warnings.txt with _buildinfo
+        # so dump it to the console
+        print('\n########## SPHINX warnings.txt BEGIN ##########')
+        with codecs.open(src_warnings_file, 'r', 'utf-8', 'replace') as f1:
+            for line1 in f1:
+                if line1.startswith(TheProject):
+                    print('.', line1[TheProjectLen:], sep='', end='')
+                elif line1.startswith('/ALL/Makedir/SYMLINK_THE_PROJECT/'):
+                    print('.', line1[32:], sep='', end='')
+                else:
+                    print(line1, end='')
+        print('########## SPHINX warnings.txt END ##########\n')
+        warnings_file_dumped_to_console = 1
+
+if not (build_html and TheProjectResultBuildinfo):
+    CONTINUE = -1
 
 if exitcode == CONTINUE:
     TheProjectLen = len(TheProject)
@@ -113,6 +136,9 @@ if warnings_file:
     result['MILESTONES'].append({'warnings_file': warnings_file,
                                  'warnings_file_size': warnings_file_size,
                                  })
+if warnings_file_dumped_to_console:
+    result['MILESTONES'].append({'warnings_file_dumped_to_console':
+                                 warnings_file_dumped_to_console})
 
 
 # ==================================================
