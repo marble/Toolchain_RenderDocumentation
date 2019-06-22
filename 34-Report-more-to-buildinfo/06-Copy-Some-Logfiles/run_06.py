@@ -54,8 +54,10 @@ included_files_check_logfile = None
 sitemap_files_html_jsonfile = None
 sitemap_files_singlehtml_jsonfile = None
 TheProjectResultBuildinfoCheckIncludesFile = None
-TheProjectResultBuildinfoSitemapFilesHtml = None
-TheProjectResultBuildinfoSitemapFilesSinglehtml = None
+TheProjectResultBuildinfoSitemapFilesHtmlJson = None
+TheProjectResultBuildinfoSitemapFilesHtmlTxt = None
+TheProjectResultBuildinfoSitemapFilesSinglehtmlJson = None
+TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt = None
 xeq_name_cnt = 0
 
 # ==================================================
@@ -88,19 +90,34 @@ if exitcode == CONTINUE:
         TheProjectResultBuildinfoCheckIncludesFile = os.path.join(TheProjectResultBuildinfo, fname)
         shutil.copy(included_files_check_logfile, TheProjectResultBuildinfoCheckIncludesFile)
 
-if exitcode == CONTINUE:
+if 0 and exitcode == CONTINUE:
     sitemap_files_html_jsonfile = lookup(milestones, 'sitemap_files_html_jsonfile')
     if sitemap_files_html_jsonfile:
         dummy, fname = os.path.split(sitemap_files_html_jsonfile)
-        TheProjectResultBuildinfoSitemapFilesHtml = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_html_jsonfile, TheProjectResultBuildinfoSitemapFilesHtml)
+        TheProjectResultBuildinfoSitemapFilesHtmlJson = os.path.join(TheProjectResultBuildinfo, fname)
+        shutil.copy(sitemap_files_html_jsonfile, TheProjectResultBuildinfoSitemapFilesHtmlJson)
 
-if exitcode == CONTINUE:
+if 0 and exitcode == CONTINUE:
     sitemap_files_singlehtml_jsonfile = lookup(milestones, 'sitemap_files_singlehtml_jsonfile')
     if sitemap_files_singlehtml_jsonfile:
         dummy, fname = os.path.split(sitemap_files_singlehtml_jsonfile)
-        TheProjectResultBuildinfoSitemapFilesSinglehtml = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_singlehtml_jsonfile, TheProjectResultBuildinfoSitemapFilesSinglehtml)
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlJson = os.path.join(TheProjectResultBuildinfo, fname)
+        shutil.copy(sitemap_files_singlehtml_jsonfile, TheProjectResultBuildinfoSitemapFilesSinglehtmlJson)
+
+if exitcode == CONTINUE:
+    sitemap_files_html_txtfile = lookup(milestones, 'sitemap_files_html_txtfile')
+    if sitemap_files_html_txtfile:
+        dummy, fname = os.path.split(sitemap_files_html_txtfile)
+        TheProjectResultBuildinfoSitemapFilesHtmlTxt = os.path.join(TheProjectResultBuildinfo, fname)
+        shutil.copy(sitemap_files_html_txtfile, TheProjectResultBuildinfoSitemapFilesHtmlTxt)
+
+if exitcode == CONTINUE:
+    sitemap_files_singlehtml_txtfile = lookup(milestones, 'sitemap_files_singlehtml_txtfile')
+    if sitemap_files_singlehtml_txtfile:
+        dummy, fname = os.path.split(sitemap_files_singlehtml_txtfile)
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt = os.path.join(TheProjectResultBuildinfo, fname)
+        shutil.copy(sitemap_files_singlehtml_txtfile, TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt)
+
 
 # ==================================================
 # Set MILESTONE
@@ -110,15 +127,25 @@ if TheProjectResultBuildinfoCheckIncludesFile:
         'TheProjectResultBuildinfoCheckIncludesFile':
         TheProjectResultBuildinfoCheckIncludesFile})
 
-if TheProjectResultBuildinfoSitemapFilesHtml:
+if TheProjectResultBuildinfoSitemapFilesHtmlJson:
     result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesHtml':
-        TheProjectResultBuildinfoSitemapFilesHtml})
+        'TheProjectResultBuildinfoSitemapFilesHtmlJson':
+        TheProjectResultBuildinfoSitemapFilesHtmlJson})
 
-if TheProjectResultBuildinfoSitemapFilesSinglehtml:
+if TheProjectResultBuildinfoSitemapFilesSinglehtmlJson:
     result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesSinglehtml':
-        TheProjectResultBuildinfoSitemapFilesSinglehtml})
+        'TheProjectResultBuildinfoSitemapFilesSinglehtmlJson':
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlJson})
+
+if TheProjectResultBuildinfoSitemapFilesHtmlTxt:
+    result['MILESTONES'].append({
+        'TheProjectResultBuildinfoSitemapFilesHtmlTxt':
+        TheProjectResultBuildinfoSitemapFilesHtmlTxt})
+
+if TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt:
+    result['MILESTONES'].append({
+        'TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt':
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt})
 
 
 # ==================================================
