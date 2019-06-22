@@ -1,4 +1,4 @@
-2.5.1
+2.6.0
 
 
 # ##################################################
@@ -9,6 +9,7 @@ ATTENTION:
 1. First line in this file
 2. README.rst
 3. 10-Toolchain-actions/run_03-Run-action-and-exit.py
+4. CHANGES.rst
 
 # ##################################################
 

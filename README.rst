@@ -9,15 +9,21 @@ RenderDocumentation
 A Toolchain To Render TYPO3 Documentation
 -----------------------------------------
 
-:Version:         2.5.1
-:Date:            2019-06-14
-:Author:          Martin Bless <martin@mbless.de>
+:Version:         2.6.0
+:Date:            2019-06-22
+:Author:          Martin Bless <martin.bless@mbless.de>
 :Repository:      https://github.com/marble/Toolchain_RenderDocumentation
 :Target Folder:   ~/Toolchains/RenderDocumentation
 :Short info:
    This version knows how to handle an OpenOffice file named `./doc/manual.sxw`.
    It processes both the two versions of table handling: `dl`(as definition
    lists) and `t3flt` (TYPO3 field list table). Example: `... -c oo_parser t3flt`.
+
+Release notes
+=============
+
+What has changed? See `CHANGES <CHANGES.rst>`_.
+
 
 
 Description
