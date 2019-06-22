@@ -13,6 +13,7 @@ import os
 import tct
 import sys
 from bs4 import BeautifulSoup
+from urlparse import urlparse
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -90,6 +91,7 @@ else:
 # --------------------------------------------------
 
 def process_html_file(folder, relpath):
+    soup_modified = False
     builder = os.path.split(folder)[1]
     abspath = folder + '/' + relpath
     with codecs.open(abspath, 'r', 'utf-8') as f1:
@@ -102,8 +104,21 @@ def process_html_file(folder, relpath):
                 logname = builder + '/' + fpath
                 neutralized_links.append((logname, href))
                 link['href'] = '#'
+                soup_modified = True
+            else:
+                o = urlparse(href)
+                if o.hostname:
+                    if o.hostname.split('.')[-2:] not in (['typo3','org'], ['typo3', 'com']):
+                        rel = link.get('rel', '')
+                        parts = rel.split()
+                        if 'nofollow' not in parts:
+                            parts.append('nofollow')
+                        if 'noopener' not in parts:
+                            parts.append('noopener')
+                        link['rel'] = ' '.join(parts)
+                        soup_modified = True
 
-    if neutralized_links:
+    if soup_modified:
         with codecs.open(abspath, 'w', 'utf-8') as f2:
             print(soup.prettify(formatter=None), file=f2)
 
