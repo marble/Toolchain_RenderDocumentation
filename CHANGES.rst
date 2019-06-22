@@ -1,7 +1,7 @@
 Release v2.6.0 (to be released)
 ===============================
 
-*         Dump info to stdout if there are forbidden include files
+* ffbd087 Dump info to stdout if there are forbidden include files
 * f68ebf0 Dump warnings.txt to stdout if not in _buildinfo
 * 4606616 Add rel="nofollow noopener" to external + foreign links
 * ee6533e Return sitemap-files in .txt format and not .json as result
