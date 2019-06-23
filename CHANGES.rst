@@ -1,7 +1,7 @@
 Release v2.6.1 (Jun 23, 2019)
 =============================
 
-*         [BUGFIX] Use the correct formatter="minimal" with BeautifulSoup
+* 75abf03 [BUGFIX] Use the correct formatter="minimal" with BeautifulSoup
 * 6dbb907 [BUGFIX] Dump the right sitemap-files list for singlehtml
 
 
