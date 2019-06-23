@@ -1,5 +1,12 @@
-Release v2.6.0 (to be released)
-===============================
+Release v2.6.1 (Jun 23, 2019)
+=============================
+
+*         [BUGFIX] Use the correct formatter="minimal" with BeautifulSoup
+* 6dbb907 [BUGFIX] Dump the right sitemap-files list for singlehtml
+
+
+Release v2.6.0 (Jun 22, 2019)
+=============================
 
 * ffbd087 Dump info to stdout if there are forbidden include files
 * f68ebf0 Dump warnings.txt to stdout if not in _buildinfo

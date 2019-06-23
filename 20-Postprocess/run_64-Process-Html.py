@@ -120,7 +120,7 @@ def process_html_file(folder, relpath):
 
     if soup_modified:
         with codecs.open(abspath, 'w', 'utf-8') as f2:
-            print(soup.prettify(formatter=None), file=f2)
+            print(soup.prettify(), file=f2)
 
 
 
