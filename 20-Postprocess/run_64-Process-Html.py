@@ -100,7 +100,8 @@ def process_html_file(folder, relpath):
     for link in soup.find_all('a'):
         href = link.get('href')
         if href is not None:
-            if href.lower().startswith('javascript:'):
+            if (href.lower().startswith('javascript:') or
+                    href.lower().startswith('data:')):
                 logname = builder + '/' + fpath
                 neutralized_links.append((logname, href))
                 link['href'] = '#'
