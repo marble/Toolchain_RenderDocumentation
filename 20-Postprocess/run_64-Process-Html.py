@@ -119,8 +119,8 @@ def process_html_file(folder, relpath):
                         soup_modified = True
 
     if soup_modified:
-        with codecs.open(abspath, 'w', 'utf-8') as f2:
-            print(soup.prettify(), file=f2)
+        with open(abspath, 'wb') as f2:
+            print(soup, file=f2)
 
 
 
