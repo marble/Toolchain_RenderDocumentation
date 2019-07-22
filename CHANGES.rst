@@ -1,6 +1,10 @@
 Release v2.6.2 (to be released)
 ===============================
 
+* 70ef40f Neutralize images with src scheme 'javascript:' or 'data:'
+* 80f62b3 Neutralize hyperlinks that would start like 'data:'
+* 74f469e [BUGFIX] Do not pretty print postprocessed html code
+
 
 Release v2.6.1 (Jun 23, 2019)
 =============================
