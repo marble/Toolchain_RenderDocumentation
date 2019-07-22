@@ -54,6 +54,7 @@ def lookup(D, *keys, **kwdargs):
 all_html_files_sanitized = None
 all_singlehtml_files_sanitized = None
 neutralized_links = []
+neutralized_images = []
 neutralized_links_jsonfile = None
 sitemap_files_html = []
 sitemap_files_singlehtml = []
@@ -118,6 +119,16 @@ def process_html_file(folder, relpath):
                             parts.append('noopener')
                         link['rel'] = ' '.join(parts)
                         soup_modified = True
+
+    for img in soup.find_all('img'):
+        src = img.get('src')
+        if src is not None:
+            if (src.lower().startswith('javascript:') or
+                    src.lower().startswith('data:')):
+                logname = builder + '/' + fpath
+                neutralized_images.append((logname, src))
+                img['src'] = ''
+                soup_modified = True
 
     if soup_modified:
         with open(abspath, 'wb') as f2:
