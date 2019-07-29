@@ -31,22 +31,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -73,7 +63,7 @@ if exitcode == CONTINUE:
     ]
 
     for requirement in requirements:
-        v = milestones_get(requirement)
+        v = lookup(milestones, requirement)
         if v is None:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
