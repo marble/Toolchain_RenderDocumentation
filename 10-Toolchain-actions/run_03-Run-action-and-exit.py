@@ -61,32 +61,16 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # fetch #1
-    configset = lookup(milestones, 'configset')
-    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    lockfile_name = lookup(milestones, 'lockfile_name')
     run_id = lookup(facts, 'run_id')
-
-    # test #1
-    if not (configset and toolchain_temp_home and run_id):
-        exitcode = 22
-
-if exitcode == CONTINUE:
-
-    # fetch #2
-    lockfile_name = lookup(facts, 'tctconfig', configset, 'lockfile_name')
-
-    # text #2
-    if not (lockfile_name):
+    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    if not (lockfile_name and run_id and toolchain_temp_home):
         exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
 
 
 # =========================================================
@@ -201,6 +185,7 @@ if exitcode == 90:
 
 if lockfiles_removed:
     result['MILESTONES'].append({'lockfiles_removed': lockfiles_removed})
+
 
 
 # ==================================================
