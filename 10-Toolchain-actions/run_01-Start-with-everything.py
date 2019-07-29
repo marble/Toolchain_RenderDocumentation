@@ -101,7 +101,7 @@ makedir = findRunParameter('makedir', None, ATNM)
 rebuild_needed = findRunParameter('rebuild_needed', 1, ATNM, int)
 replace_static_in_html = findRunParameter('replace_static_in_html', 0, ATNM, int)
 smtp_host = findRunParameter('smtp_host', 'None', ATNM)
-talk = findRunParameter('talk', 0, ATNM, int)
+talk = findRunParameter('talk', 1, ATNM, int)
 
 
 # ==================================================
