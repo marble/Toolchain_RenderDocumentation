@@ -53,8 +53,9 @@ def lookup(D, *keys, **kwdargs):
 
 all_html_files_sanitized = None
 all_singlehtml_files_sanitized = None
-neutralized_links = []
 neutralized_images = []
+neutralized_images_jsonfile = None
+neutralized_links = []
 neutralized_links_jsonfile = None
 sitemap_files_html = []
 sitemap_files_singlehtml = []
@@ -157,19 +158,21 @@ if exitcode == CONTINUE:
         all_singlehtml_files_sanitized = 1
 
 if exitcode == CONTINUE:
+
     if neutralized_links:
         neutralized_links_jsonfile = os.path.join(workdir, 'neutralized_links.json')
         with codecs.open(neutralized_links_jsonfile, 'w', 'utf-8') as f2:
             json.dump(neutralized_links, f2)
 
+    if neutralized_images:
+        neutralized_images_jsonfile = os.path.join(workdir, 'neutralized_images.json')
+        with codecs.open(neutralized_images_jsonfile, 'w', 'utf-8') as f2:
+            json.dump(neutralized_images, f2)
+
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
-
-if neutralized_links_jsonfile:
-    result['MILESTONES'].append(
-        {'neutralized_links_jsonfile': neutralized_links_jsonfile})
 
 if all_html_files_sanitized:
     result['MILESTONES'].append(
@@ -178,6 +181,14 @@ if all_html_files_sanitized:
 if all_singlehtml_files_sanitized:
     result['MILESTONES'].append(
         {'all_singlehtml_files_sanitized': all_singlehtml_files_sanitized})
+
+if neutralized_images_jsonfile:
+    result['MILESTONES'].append(
+        {'neutralized_images_jsonfile': neutralized_images_jsonfile})
+
+if neutralized_links_jsonfile:
+    result['MILESTONES'].append(
+        {'neutralized_links_jsonfile': neutralized_links_jsonfile})
 
 
 # ==================================================
