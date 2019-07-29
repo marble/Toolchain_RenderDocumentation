@@ -49,8 +49,8 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 lockfiles_removed = []
-toolchain_actions = lookup(params, 'toolchain_actions', default=[])
 removed_dirs = []
+toolchain_actions = lookup(params, 'toolchain_actions', default=[])
 xeq_name_cnt = 0
 
 
