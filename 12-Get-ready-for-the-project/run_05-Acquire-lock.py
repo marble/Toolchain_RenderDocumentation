@@ -7,6 +7,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import tct
+import time
 import os
 import sys
 
@@ -31,23 +32,14 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
 
 # ==================================================
 # define
@@ -70,21 +62,10 @@ unixtime = None
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    configset = milestones_get('configset')
-    toolchain_temp_home = params_get('toolchain_temp_home')
-    if not (configset and toolchain_temp_home):
+    lockfile_name = lookup(milestones, 'lockfile_name')
+    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    if not (lockfile_name and toolchain_temp_home):
         exitcode = 22
-
-if exitcode == CONTINUE:
-    lockfile_ttl_seconds = milestones.get('lockfile_ttl_seconds', 3600)
-    lockfile_name = tct.deepget(facts, 'tctconfig', configset, 'lockfile_name')
-    loglist.append(('lockfile_name', lockfile_name))
-    if not lockfile_name:
-        exitcode = 22
-
-if exitcode == CONTINUE:
-    lockfile_planned = os.path.join(toolchain_temp_home, lockfile_name)
-    loglist.append(('lockfile_planned', lockfile_planned))
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -96,9 +77,9 @@ else:
 # work
 # --------------------------------------------------
 
-import time
-
 if exitcode == CONTINUE:
+    lockfile_ttl_seconds = milestones.get('lockfile_ttl_seconds', 3600)
+    lockfile_planned = os.path.join(toolchain_temp_home, lockfile_name)
 
     if os.path.exists(lockfile_planned):
         loglist.append('lockfile_planned exists')
