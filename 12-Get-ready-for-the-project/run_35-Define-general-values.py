@@ -38,10 +38,8 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
+    result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -54,12 +52,15 @@ def firstNotNone(*args):
 
 def findRunParameter(key, default=None, D=None):
     result = firstNotNone(
-        deepget(milestones, key, default=None),
-        deepget(facts, 'run_command', key, default=None),
-        deepget(facts, 'tctconfig', configset, key, default=None),
+        tct.deepget(milestones, key, default=None),
+        tct.deepget(facts, 'run_command', key, default=None),
+        # is 'jobfile_data' available at this point?
+        tct.deepget(milestones, 'jobfile_data', 'tctconfig', key, default=None),
+        tct.deepget(facts, 'tctconfig', configset, key, default=None),
         default,
         None)
-    if type(D) == type({}):
+    # deliberate side effect
+    if isinstance(D, dict):
         D[key] = result
     return result
 
@@ -70,6 +71,7 @@ ATNM = all_the_new_milestones = {}
 # define
 # --------------------------------------------------
 
+#buildsettings_builddir_root = /ALL/dummy_webroot
 buildsettings_builddir = ''
 checksum_ttl_seconds = 86400 * 7 # render if last checksum calculation is older
 gitdir_must_start_with = '/home/mbless/HTDOCS/:/home/marble/Repositories/:/tmp/'
@@ -80,9 +82,8 @@ if os.path.isdir('/RESULT'):
     TheProjectCacheDir = '/RESULT/Cache'
 else:
     TheProjectCacheDir = ospj(params['workdir_home'], 'Cache')
-url_of_webroot = ''
-# /ALL/dummy_webroot
-webroot_abspath = ''
+url_of_webroot = 'https://docs.typo3.org/'
+webroot_abspath = '/ALL/dummy_webroot'
 xeq_name_cnt = 0
 
 
@@ -237,3 +238,44 @@ tct.writejson(result, resultfile)
 
 sys.exit(exitcode)
 
+"""
+[general]
+temp_home = /tmp
+toolchains_home = /ALL/Toolchains/
+
+[default]
+buildsettings_builddir_root = /ALL/dummy_webroot
+webroot_part_of_builddir = /ALL/dummy_webroot
+webroot_abspath = /ALL/dummy_webroot
+htaccess_template_show_latest = /ALL/Makedir/_htaccess
+conf_py_masterfile = /ALL/Makedir/conf.py
+repositories_rootfolder = /tmp/T3REPOS
+extensions_rootfolder = /tmp/T3EXTENSIONS
+extensions_builddir_relpath = typo3cms/extensions
+drafts_builddir_relpath = typo3cms/drafts
+
+# override these on the commandline
+force_rebuild_needed = 1
+make_latex = 0
+make_package = 0
+make_pdf = 0
+make_singlehtml = 0
+rebuild_needed = 1
+replace_static_in_html = 0
+talk = 1
+
+
+# others
+email_admin =
+email_user_cc =
+email_user_bcc =
+lockfile_name = lockfile.json
+url_of_webroot = https://docs.typo3.org/
+latex_contrib_typo3_folder = /ALL/Downloads/latex.typo3
+email_user_send_to_admin_too = 0
+email_user_to =
+email_user_do_not_send = 0
+email_user_receivers_exlude_list = ,
+smtp_host=
+
+"""
