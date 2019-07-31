@@ -8,8 +8,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import codecs
+import json
 import os
 import subprocess
+import shutil
 import sys
 import tct
 from  os.path import join as ospj, exists as ospe
@@ -49,7 +51,9 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+conf_py_settings = None
 documentation_folder_for_sphinx = ''
+settings_dump_json_file = None
 xeq_name_cnt = 0
 
 
@@ -205,6 +209,17 @@ if exitcode == CONTINUE:
         '"%s/"' % TheProjectBuild ]
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
+if exitcode == CONTINUE:
+    fname = 'Settings.dump.json'
+    src = ospj(TheProjectMakedir, fname)
+    if ospe(src):
+        settings_dump_json_file = ospj(workdir, fname)
+        shutil.copy(src, settings_dump_json_file)
+
+if exitcode == CONTINUE:
+    if settings_dump_json_file:
+        with codecs.open(settings_dump_json_file, 'r', 'utf-8') as f1:
+            conf_py_settings = json.load(f1)
 
 # ==================================================
 # Set MILESTONE
@@ -221,7 +236,16 @@ if exitcode == CONTINUE:
     })
 
 if documentation_folder_for_sphinx:
-    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
+    result['MILESTONES'].append({'documentation_folder_for_sphinx':
+                                 documentation_folder_for_sphinx})
+
+if settings_dump_json_file:
+    result['MILESTONES'].append({'settings_dump_json_file':
+                                 settings_dump_json_file})
+
+if conf_py_settings:
+    result['MILESTONES'].append({'conf_py_settings':
+                                 conf_py_settings})
 
 
 # ==================================================
