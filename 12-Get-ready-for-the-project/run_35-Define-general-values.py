@@ -118,6 +118,9 @@ general_csvlist_options = (
     ('email_user_receivers_exlude_list', ''),
 )
 
+SYMLINK_THE_PROJECT = None
+SYMLINK_THE_OUTPUT = None
+
 
 # ==================================================
 # Check params
