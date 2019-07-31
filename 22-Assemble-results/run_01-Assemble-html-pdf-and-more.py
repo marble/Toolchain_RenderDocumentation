@@ -34,31 +34,20 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
-    return result
-
 
 # ==================================================
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
 package_file_new_value = None
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -68,24 +57,10 @@ package_file_new_value = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    buildsettings = milestones_get('buildsettings', {})
-    if not buildsettings:
-        exitcode = 22
-
-    build_html = milestones_get('build_html')
-    build_html_folder = milestones_get('build_html_folder')
-    TheProject = milestones_get('TheProject')
-    version = buildsettings.get('version')
+    build_html = lookup(milestones, 'build_html')
+    build_html_folder = lookup(milestones, 'build_html_folder')
+    TheProject = lookup(milestones, 'TheProject')
+    version = lookup(milestones, 'buildsettings', 'version')
 
     if not (build_html and build_html_folder and TheProject and version):
         exitcode = 22
@@ -101,22 +76,24 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    all_html_files_sanitized = milestones_get('all_html_files_sanitized')
-    if not all_html_files_sanitized:
-        exitcode = 22
-
-if exitcode == CONTINUE:
-    all_singlehtml_files_sanitized = milestones_get('all_singlehtml_files_sanitized')
-    build_singlehtml = milestones_get('build_singlehtml')
-    build_singlehtml_folder = milestones_get('build_singlehtml_folder')
-    build_latex = milestones_get('build_latex')
-    build_pdf = milestones_get('build_pdf')
-    package_file = milestones_get('package_file')
+    all_html_files_sanitized = lookup(milestones, 'all_html_files_sanitized')
+    all_singlehtml_files_sanitized = lookup(milestones, 'all_singlehtml_files_sanitized')
+    build_latex = lookup(milestones, 'build_latex')
+    build_pdf = lookup(milestones, 'build_pdf')
+    build_singlehtml = lookup(milestones, 'build_singlehtml')
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
+    package_file = lookup(milestones, 'package_file')
+    postprocessing_is_required = lookup(milestones, 'postprocessing_is_required')
+    if postprocessing_is_required:
+        if not all_html_files_sanitized:
+            exitcode = 22
+        if not all_singlehtml_files_sanitized and build_singlehtml:
+            exitcode = 22
 
 if exitcode == CONTINUE:
     assembled = []
     TheProjectResult = TheProject + 'Result'
-    loglist.append(TheProjectResult)
+    loglist.append(('TheProjectResult', TheProjectResult))
     if os.path.exists(TheProjectResult):
         loglist.append("'TheProjectResult' already exists.")
         exitcode = 22
