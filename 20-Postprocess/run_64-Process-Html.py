@@ -57,8 +57,8 @@ neutralized_images = []
 neutralized_images_jsonfile = None
 neutralized_links = []
 neutralized_links_jsonfile = None
-sitemap_files_html = []
-sitemap_files_singlehtml = []
+sitemap_files_html = None
+sitemap_files_singlehtml = None
 xeq_name_cnt = 0
 
 
@@ -150,7 +150,7 @@ if exitcode == CONTINUE:
 
     if sitemap_files_singlehtml_jsonfile:
         with codecs.open(sitemap_files_singlehtml_jsonfile, 'r', 'utf-8') as f1:
-            sitemap_files_singlehtmlfiles_html = json.load(f1)
+            sitemap_files_singlehtml = json.load(f1)
 
         for fpath in sitemap_files_singlehtml:
             process_html_file(build_singlehtml_folder.rstrip('/'), fpath)
