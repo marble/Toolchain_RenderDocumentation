@@ -52,11 +52,14 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 all_html_files_sanitized = None
+all_html_files_sanitized_count = 0
 all_singlehtml_files_sanitized = None
+all_singlehtml_files_sanitized_count = 0
 neutralized_images = []
 neutralized_images_jsonfile = None
 neutralized_links = []
 neutralized_links_jsonfile = None
+postprocessing_is_required = None
 sitemap_files_html = None
 sitemap_files_singlehtml = None
 xeq_name_cnt = 0
@@ -91,6 +94,21 @@ else:
 # ==================================================
 # work
 # --------------------------------------------------
+
+if exitcode == CONTINUE:
+
+    html_theme_options = lookup(milestones, "conf_py_settings",
+                                "html_theme_options")
+    if html_theme_options and not html_theme_options.get("docstypo3org"):
+        loglist.append(
+            "We don't do postprocessing, since we do have the\n"
+            "Settings.dump.json of the Sphinx html build,\n"
+            "but 'docstypo3org' (rendering for server) is not\n"
+            "set in there.\n")
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    postprocessing_is_required = 1
 
 def process_html_file(folder, relpath):
     soup_modified = False
@@ -142,20 +160,21 @@ if exitcode == CONTINUE:
     if sitemap_files_html_jsonfile:
         with codecs.open(sitemap_files_html_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_html = json.load(f1)
-
         for fpath in sitemap_files_html:
             process_html_file(build_html_folder.rstrip('/'), fpath)
-
-        all_html_files_sanitized = 1
+            all_html_files_sanitized_count += 1
+        if all_html_files_sanitized_count > 0:
+            all_html_files_sanitized = 1
 
     if sitemap_files_singlehtml_jsonfile:
         with codecs.open(sitemap_files_singlehtml_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_singlehtml = json.load(f1)
-
         for fpath in sitemap_files_singlehtml:
             process_html_file(build_singlehtml_folder.rstrip('/'), fpath)
+            all_singlehtml_files_sanitized_count += 1
 
-        all_singlehtml_files_sanitized = 1
+        if all_html_files_sanitized_count > 0:
+            all_singlehtml_files_sanitized = 1
 
 if exitcode == CONTINUE:
 
@@ -178,9 +197,17 @@ if all_html_files_sanitized:
     result['MILESTONES'].append(
         {'all_html_files_sanitized': all_html_files_sanitized})
 
+if all_html_files_sanitized_count:
+    result['MILESTONES'].append(
+        {'all_html_files_sanitized_count': all_html_files_sanitized_count})
+
 if all_singlehtml_files_sanitized:
     result['MILESTONES'].append(
         {'all_singlehtml_files_sanitized': all_singlehtml_files_sanitized})
+
+if all_singlehtml_files_sanitized_count:
+    result['MILESTONES'].append(
+        {'all_singlehtml_files_sanitized_count': all_singlehtml_files_sanitized_count})
 
 if neutralized_images_jsonfile:
     result['MILESTONES'].append(
@@ -189,6 +216,10 @@ if neutralized_images_jsonfile:
 if neutralized_links_jsonfile:
     result['MILESTONES'].append(
         {'neutralized_links_jsonfile': neutralized_links_jsonfile})
+
+if postprocessing_is_required:
+    result['MILESTONES'].append(
+        {'postprocessing_is_required': postprocessing_is_required})
 
 
 # ==================================================
