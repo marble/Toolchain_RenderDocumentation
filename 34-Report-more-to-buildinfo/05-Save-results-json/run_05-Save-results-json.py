@@ -164,6 +164,10 @@ if exitcode == CONTINUE:
     else:
         R['has_neutralized_images'] = 0
 
+    R['postprocessed_html_files'] = milestones.get(
+        'all_html_files_sanitized_count', 0)
+
+
     tct.writejson(R, TheProjectResultBuildinfoResultJsonfile)
 
 # ==================================================
