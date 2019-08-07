@@ -7,14 +7,16 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import tct
-import sys
-#
+
 import codecs
 import glob
+import os
 import re
 import six
+import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -41,8 +43,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
@@ -63,11 +63,15 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    build_html_folder = lookup(milestones, 'build_html_folder')
-    replace_static_in_html = lookup(milestones, 'replace_static_in_html', default=None)
-    url_of_webroot = lookup(milestones, 'url_of_webroot')
+    build_html_folder = lookup(milestones, 'build_html_folder', default=None)
+    replace_static_in_html = lookup(milestones, 'replace_static_in_html',
+                                    default=None)
+    url_of_webroot = lookup(milestones, 'url_of_webroot', default=None)
 
-    if not (build_html_folder and replace_static_in_html and url_of_webroot):
+    if not (1
+            and build_html_folder
+            and replace_static_in_html
+            and url_of_webroot):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -93,15 +97,19 @@ else:
 
 if exitcode == CONTINUE:
 
-    # Find the version. Look for a file like '_static/t3SphinxThemeRtd-3.6.0.txt'
+    # Find the version. Look for a file like
+    # '_static/t3SphinxThemeRtd-3.6.0.txt'
 
     # should become something like '3.6.0'
     version = None
     version_major_minor = None
-    pattern = os.path.join(build_html_folder, '_static') + '/t3SphinxThemeRtd*.txt'
+    pattern = (os.path.join(build_html_folder, '_static')
+               + '/t3SphinxThemeRtd*.txt')
     files = sorted( glob.glob(pattern), reverse=1)
     loglist.append(['files', files])
-    re_searcher = re.compile('t3SphinxThemeRtd-(?P<version>(?P<version_major_minor>\d+\.\d+)(\.\d+)*)\.txt')
+    re_searcher = re.compile(
+        't3SphinxThemeRtd-(?P<version>(?P<version_major_minor>'
+        '\d+\.\d+)(\.\d+)*)\.txt')
     for fname in files:
         if version:
             break
@@ -117,7 +125,6 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-
     regexpattern = re.compile(
         u"""
             (?P<intro>
@@ -128,15 +135,16 @@ if exitcode == CONTINUE:
             )
             (?P<quote>"|')         # group "quote" is either ' or "
             \s*                    # unlikely whitespace
-            (?P<relpart>[\./]*_static/)   # the relative part we want to replace
+            (?P<relpart>[\./]*_static/) # the relative part we want to replace
             (?P<payload>[\S]*)     # the payload
             \s*                    # unlikely whitespace
             (?P=quote)             # the quote again
         """,
         re.VERBOSE)
 
-    replacement = six.text_type(r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor +
-                          '/' + '\g<payload>\g<quote>')
+    replacement = six.text_type(
+        r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version_major_minor
+        + '/' + '\g<payload>\g<quote>')
 
     build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
     for build_folder in [build_html_folder, build_singlehtml_folder]:
@@ -160,7 +168,8 @@ if exitcode == CONTINUE:
                     replace_static_in_html_happened = 1
                     with codecs.open(fpath, 'w', 'utf-8') as f2:
                         f2.write(data)
-                loglist.append('%s, %s, %s' % (cnt, builder_logname, file_logname))
+                loglist.append('%s, %s, %s' % (cnt, builder_logname,
+                                               file_logname))
     replace_static_in_html_done = 1
 
 # ==================================================
