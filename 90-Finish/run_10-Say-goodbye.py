@@ -3,10 +3,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
 import tct
 import sys
-#
+
+from tct import deepget, logstamp_finegrained
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -33,8 +35,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
@@ -49,7 +49,8 @@ import time
 
 # This is the time that we really finish
 time_finished_at_2_unixtime = time.time()
-time_finished_at_2 = tct.logstamp_finegrained(unixtime=time_finished_at_2_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+time_finished_at_2 = logstamp_finegrained(
+    unixtime=time_finished_at_2_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 
 age_message = ''
 xeq_name_cnt = 0
@@ -62,8 +63,9 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    checksum_ttl_seconds = lookup(milestones, 'checksum_ttl_seconds', default=1)
-    if not (checksum_ttl_seconds):
+    checksum_ttl_seconds = lookup(milestones, 'checksum_ttl_seconds',
+                                  default=1)
+    if not checksum_ttl_seconds:
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -100,20 +102,22 @@ if talk:
     print(lookup(milestones, 'buildsettings', 'project', default='PROJECT'),
           lookup(milestones, 'buildsettings', 'version', default='VERSION'),
           os.path.split(milestones.get('makedir', 'MAKEDIR'))[1],
-          sep = ' : ', end = '\n')
+          sep=' : ', end='\n')
     print(indent,
           'makedir ',
-          milestones.get('makedir', 'MAKEDIR'),
-          sep = '', end = '\n')
+          milestones.get('makedir', 'MAKEDIR'), sep='', end='\n')
     print(indent,
           time_started_at,
-          ',  took: ', '%4.2f seconds' % (time_finished_at_2_unixtime - time_started_at_unixtime),
-          ',  toolchain: ', toolchain_name,
-          sep='')
+          ',  took: ', '%4.2f seconds' % (time_finished_at_2_unixtime
+                                          - time_started_at_unixtime),
+          ',  toolchain: ', toolchain_name, sep='')
 
     age_seconds = time_finished_at_2_unixtime - checksum_time
-    age_message = "age %3.1f of %3.1f hours" % (age_seconds / 3600., checksum_ttl_seconds / 3600.)
-    age_message += ",  %3.1f of %3.1f days" % (age_seconds / 3600. / 24., checksum_ttl_seconds / 3600. / 24.)
+    age_message = "age %3.1f of %3.1f hours" % (age_seconds / 3600.,
+                                                checksum_ttl_seconds / 3600.)
+    age_message += ",  %3.1f of %3.1f days" % (age_seconds / 3600. / 24.,
+                                               checksum_ttl_seconds / 3600.
+                                               / 24.)
 
     if rebuild_needed:
         cause = 'because of '
@@ -155,9 +159,9 @@ if talk > 1:
         if talk > 1:
             duration = ''
             if time_started_at_unixtime and time_finished_at_2_unixtime:
-                duration = 'duration: %4.2f seconds' % (time_finished_at_2_unixtime - time_started_at_unixtime)
+                duration = 'duration: %4.2f seconds' % (
+                        time_finished_at_2_unixtime - time_started_at_unixtime)
             print(time_finished_at_2, duration)
-
 
 if 1:
     if not masterdoc:
@@ -173,7 +177,8 @@ if 1:
             print('      %s. %s' % (i+1, masterdoc_name))
 
         print('\n'
-              '   Find more information at https://docs.typo3.org/typo3cms/HowToDocument/\n')
+              '   Find more information at '
+              'https://docs.typo3.org/typo3cms/HowToDocument/\n')
 
 
 # ==================================================
@@ -184,7 +189,8 @@ if time_finished_at_2:
     result['MILESTONES'].append({'time_finished_at_2': time_finished_at_2})
 
 if time_finished_at_2_unixtime:
-    result['MILESTONES'].append({'time_finished_at_2_unixtime': time_finished_at_2_unixtime})
+    result['MILESTONES'].append({
+        'time_finished_at_2_unixtime': time_finished_at_2_unixtime})
 
 
 # ==================================================
