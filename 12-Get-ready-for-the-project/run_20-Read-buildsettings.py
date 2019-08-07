@@ -34,8 +34,15 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Helper functions
+# Helper functions (1)
 # --------------------------------------------------
+
+def firstNotNone(*args):
+    for arg in args:
+        if arg is not None:
+            return arg
+    else:
+        return None
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -74,6 +81,7 @@ buildsettings_default = {
     "version": ""
   }
 buildsettings_from_run_command = {}
+buildsettings_from_jobfile = {}
 buildsettings_initial = {}
 xeq_name_cnt = 0
 
@@ -87,16 +95,12 @@ if exitcode == CONTINUE:
 
     makedir = lookup(milestones, 'makedir')
     if not makedir:
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -104,6 +108,11 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    buildsettings_from_jobfile = lookup(milestones, 'jobfile_data',
+                                        'buildsettings_sh', default={})
+
+if exitcode == CONTINUE:
+    # read Makedir/buildsettings.sh
 
     class WithSection:
 
@@ -124,10 +133,7 @@ if exitcode == CONTINUE:
     config = six.moves.configparser.RawConfigParser()
     f1path = os.path.join(makedir, 'buildsettings.sh')
     if not os.path.exists(f1path):
-        loglist.append(('buildsettings.sh not found', f1path))
         f1path = None
-
-if exitcode == CONTINUE:
     if f1path:
         with codecs.open(f1path, 'r', 'utf-8') as f1:
             config.readfp(WithSection(f1, section))
@@ -135,17 +141,34 @@ if exitcode == CONTINUE:
         for option in config.options(section):
             buildsettings_initial[option] = config.get(section, option)
 
-    for k in buildsettings_initial.keys():
-        # copy what we have found in the file buildsettings.sh
-        buildsettings[k] = buildsettings_initial[k]
+if exitcode == CONTINUE:
 
-    # all keys
-    for k in buildsettings_default.keys():
-        # set on the commandline?
-        if not params.get(k) is None:
-            buildsettings[k] = params[k]
-        elif buildsettings.get(k) is None:
-            buildsettings[k] = buildsettings_default[k]
+    allkeys = set()
+    allkeys = allkeys.union(set(buildsettings_default.keys()))
+    allkeys = allkeys.union(set(buildsettings_from_jobfile.keys()))
+    allkeys = allkeys.union(set(buildsettings_from_run_command.keys()))
+    allkeys = allkeys.union(set(buildsettings_initial.keys()))
+
+    for k in allkeys:
+        # if we have already agreed on something
+        a = lookup(milestones, 'buildsettings', k, default=None)
+        # if given on the commandline - preferred method
+        b = lookup(facts, 'run_command', k, default=None)
+        # if given on the commandline - deprecated method
+        c = params.get(k, None)
+        # jobfile_data
+        d = lookup(milestones, 'jobfile_data', 'buildsettings_sh', k,
+                   default=None)
+        # from Makedir/buildsettings.sh
+        e = buildsettings_initial[k]
+        # defaults defined above
+        f = buildsettings_default[k]
+        # desperation default
+        g = None
+
+        buildsettings[k] = firstNotNone(a, b, c, d, e, f, g)
+
+if exitcode == CONTINUE:
 
     # A fix: do some interpolation
 
@@ -161,33 +184,32 @@ if exitcode == CONTINUE:
     if needle in builddir:
         buildsettings['builddir'] = builddir.replace(needle, version)
 
-    for k in buildsettings.keys():
-        v = lookup(facts, 'run_command', k, default=None)
-        if v is not None:
-            buildsettings[k] = v
-            buildsettings_from_run_command[k] = v
-
-
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
 if buildsettings:
-    # we modifiy the values of 'buildsettings' in the course of the process
+    # this is the final merge of all buildsettings
     result['MILESTONES'].append({'buildsettings': buildsettings})
 
-if buildsettings_default:
-    # defaults we may have supplemented
-    result['MILESTONES'].append({'buildsettings_default': buildsettings_default})
-
 if buildsettings_from_run_command:
-    # defaults we may have supplemented
-    result['MILESTONES'].append({'buildsettings_from_run_command': buildsettings_from_run_command})
+    # from the commandline
+    result['MILESTONES'].append({'buildsettings_from_run_command':
+                                 buildsettings_from_run_command})
+
+if buildsettings_from_jobfile:
+    # from milestones/jobfile_data/buildsettings_sh
+    pass
 
 if buildsettings_initial:
-    # what we have read
+    # from $MAKEDIR/buildsettings.sh
     result['MILESTONES'].append({'buildsettings_initial': buildsettings_initial})
+
+if buildsettings_default:
+    # hardcoded above
+    result['MILESTONES'].append({'buildsettings_default':
+                                 buildsettings_default})
 
 
 # ==================================================
