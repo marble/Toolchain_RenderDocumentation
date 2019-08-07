@@ -92,7 +92,8 @@ if exitcode == CONTINUE:
         for afile in files:
             srcfile = os.path.join(top, afile)
             destfile = destdir + srcfile[len(srcdir):]
-            shutil.copy(srcfile, destfile)
+            if not os.path.islink(srcfile):
+                shutil.copy2(srcfile, destfile)
 
 
 # ==================================================
