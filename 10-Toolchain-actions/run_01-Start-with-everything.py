@@ -49,14 +49,13 @@ def firstNotNone(*args):
         return None
 
 def findRunParameter(key, default=None, D=None, fconv=None):
-    result = firstNotNone(
-        deepget(milestones, key, default=None),
-        deepget(facts, 'run_command', key, default=None),
-        # too bad that 'jobfile_data' isn't available at this point
-        deepget(milestones, 'jobfile_data', 'tctconfig', key, default=None),
-        deepget(facts, 'tctconfig', configset, key, default=None),
-        default,
-        None)
+    a = deepget(milestones, key, default=None)
+    b = deepget(facts, 'run_command', key, default=None)
+    c = deepget(jobfile_data, 'tctconfig', key, default=None)
+    d = deepget(facts, 'tctconfig', configset, key, default=None)
+    e = default
+    f = None
+    result = firstNotNone(a, b, c, d, e, f)
     # function convert
     if fconv is not None:
         result = fconv(result)
