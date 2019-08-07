@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
+
 import tct
 import sys
 
@@ -35,10 +35,8 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
+    result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -56,8 +54,8 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    build_html = lookup(milestones, 'build_html')
-    build_singlehtml = lookup(milestones, 'build_singlehtml')
+    build_html = lookup(milestones, 'build_html', default='html')
+    build_singlehtml = lookup(milestones, 'build_singlehtml', default='html')
 
     if not (build_html or build_singlehtml):
         exitcode = 22
@@ -65,11 +63,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS')
 
 
 # ==================================================
