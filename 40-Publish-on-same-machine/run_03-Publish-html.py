@@ -6,10 +6,13 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
-import sys
 import shutil
+import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -33,22 +36,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -73,32 +66,28 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
+    publish_dir_planned = lookup(milestones, 'publish_dir_planned',
+                                 default=None)
+    publish_language_dir_planned = lookup(milestones,
+                                          'publish_language_dir_planned',
+                                          default=None)
+    publish_project_dir_planned = lookup(milestones,
+                                         'publish_project_dir_planned',
+                                         default=None)
+    publish_project_parent_dir_planned = lookup(milestones,
+                                                'publish_project_parent_dir_planned',
+                                                default=None)
+    TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
+    TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion',
+                                     default=None)
 
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
-    publish_dir_planned = milestones_get('publish_dir_planned')
-    publish_language_dir_planned = milestones_get('publish_language_dir_planned')
-    publish_project_dir_planned = milestones_get('publish_project_dir_planned')
-    publish_project_parent_dir_planned = milestones_get('publish_project_parent_dir_planned')
-    TheProjectResult = milestones_get('TheProjectResult')
-    TheProjectResultVersion = milestones_get('TheProjectResultVersion')
-
-    # test
     if not (
-        publish_dir_planned and
-        publish_language_dir_planned and
-        publish_project_dir_planned and
-        publish_project_parent_dir_planned and
-        TheProjectResult and
-        TheProjectResultVersion):
+            publish_dir_planned and
+            publish_language_dir_planned and
+            publish_project_dir_planned and
+            publish_project_parent_dir_planned and
+            TheProjectResult and
+            TheProjectResultVersion):
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -130,7 +119,8 @@ if exitcode == CONTINUE:
         os.remove(publish_dir_planned)
 
     if os.path.exists(publish_dir_planned):
-        loglist.append(('cannot remove `publish_dir_planned`', publish_dir_planned))
+        loglist.append(('cannot remove `publish_dir_planned`',
+                        publish_dir_planned))
         publish_removed_old = 0
         exitcode = 22
 
@@ -147,8 +137,10 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     publish_html_done = 1
-    publish_dir_buildinfo_planned = milestones_get('publish_dir_buildinfo_planned')
-    if publish_dir_buildinfo_planned and os.path.isdir(publish_dir_buildinfo_planned):
+    publish_dir_buildinfo_planned = lookup(
+        milestones, 'publish_dir_buildinfo_planned', default=None)
+    if (publish_dir_buildinfo_planned
+            and os.path.isdir(publish_dir_buildinfo_planned)):
         publish_dir_buildinfo = publish_dir_buildinfo_planned
 
 
