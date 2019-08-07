@@ -127,7 +127,13 @@ if exitcode == CONTINUE:
         with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
 
-        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+        if 0 and 'activateLocalSphinxDebugging':
+            if cmdlist[0] == 'sphinx-build':
+                from sphinx.cmd.build import main as sphinx_cmd_build_main
+                sphinx_cmd_build_main(cmdlist[1:])
+                exitcode, cmd, out, err = 99, cmd, b'', b''
+        else:
+            exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
 
         loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
 
