@@ -7,12 +7,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import codecs
 import os
 import subprocess
 import sys
 import tct
-from  os.path import join as ospj, exists as ospe
+
+from os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -39,10 +41,8 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
+    result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
