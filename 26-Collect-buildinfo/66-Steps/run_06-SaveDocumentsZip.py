@@ -7,9 +7,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
-import tct
+import subprocess
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -37,8 +42,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
@@ -61,39 +64,41 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    TheProject = lookup(milestones, 'TheProject')
-    TheProjectDocumentation = lookup(milestones, 'TheProjectDocumentation')
-    TheProjectBuildOpenOffice2Rest = lookup(milestones, 'TheProjectBuildOpenOffice2Rest')
-    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
-    zip_systemtool = (lookup(milestones, 'known_systemtools', 'zip') or '').strip()
+    TheProject = lookup(milestones, 'TheProject', default=None)
+    TheProjectBuildOpenOffice2Rest = lookup(milestones,
+                                            'TheProjectBuildOpenOffice2Rest',
+                                            default=None)
+    TheProjectDocumentation = lookup(milestones, 'TheProjectDocumentation',
+                                     default=None)
+    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo',
+                                       default=None)
+    zip_systemtool = lookup(milestones, 'known_systemtools', 'zip',
+                            default='').strip()
 
-    if not (TheProject and TheProjectResultBuildinfo and
-            TheProjectBuildOpenOffice2Rest and TheProjectDocumentation
+    if not (1
+            and TheProject
+            and TheProjectResultBuildinfo
+            and TheProjectBuildOpenOffice2Rest
+            and TheProjectDocumentation
             and zip_systemtool):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Nothing to do for these params')
-
+    loglist.append('Bad PARAMS or nothing to do')
 
 # =========================================================
 # how to start a subprocess with perfect logging
 # ---------------------------------------------------------
 
-### ATTENTION: Is specific here
-
 if exitcode == CONTINUE:
-
-    import codecs
-    import os
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, shell=True, cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
@@ -104,20 +109,27 @@ if exitcode == CONTINUE:
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
 
         xeq_name_cnt += 1
-        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt,
+                                             'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt,
+                                             'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt,
+                                             'out')
 
-        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
+        with codecs.open(
+                os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
 
         exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out,
+                        'err': err})
 
-        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
+        with codecs.open(
+                os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
             f2.write(out.decode('utf-8', 'replace'))
 
-        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
+        with codecs.open(
+                os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
             f2.write(err.decode('utf-8', 'replace'))
 
         return exitcode, cmd, out, err
@@ -128,7 +140,8 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     DocumentationGeneratedZipFile = 'Documentation.zip.GENERATED.zip'
-    TheProjectResultBuildinfoDocumentationGenerated = os.path.join(TheProjectResultBuildinfo, DocumentationGeneratedZipFile)
+    TheProjectResultBuildinfoDocumentationGenerated = os.path.join(
+        TheProjectResultBuildinfo, DocumentationGeneratedZipFile)
 
     exitcode_, cmd, out, err = execute_cmdlist(
         [
@@ -136,7 +149,7 @@ if exitcode == CONTINUE:
             TheProjectResultBuildinfoDocumentationGenerated,
             TheProjectDocumentation[len(TheProject):].lstrip('/')
         ],
-        cwd = TheProject)
+        cwd=TheProject)
 
 # ==================================================
 # Set MILESTONE
@@ -148,8 +161,8 @@ if TheProjectResultBuildinfoDocumentationGenerated:
         TheProjectDocumentation})
 
 if DocumentationGeneratedZipFile:
-    result['MILESTONES'].append({'DocumentationGeneratedZipFile':DocumentationGeneratedZipFile})
-
+    result['MILESTONES'].append({'DocumentationGeneratedZipFile':
+                                 DocumentationGeneratedZipFile})
 
 
 # ==================================================
