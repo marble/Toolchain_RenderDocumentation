@@ -1,4 +1,4 @@
-Release v2.6.2 (to be released)
+Release v2.7.0 (to be released)
 ===============================
 
 * 70ef40f Neutralize images with src scheme 'javascript:' or 'data:'

@@ -11,7 +11,7 @@ import os
 import tct
 import sys
 
-VERSION = '2.6.2'
+VERSION = '2.7.0'
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
