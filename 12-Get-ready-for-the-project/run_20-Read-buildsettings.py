@@ -6,9 +6,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
-import tct
+import six.moves.configparser
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -33,7 +38,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -68,9 +73,9 @@ buildsettings_default = {
     "ter_extversion": "",
     "version": ""
   }
+buildsettings_from_run_command = {}
 buildsettings_initial = {}
 xeq_name_cnt = 0
-buildsettings_from_run_command = {}
 
 
 # ==================================================
@@ -80,20 +85,7 @@ buildsettings_from_run_command = {}
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     makedir = lookup(milestones, 'makedir')
-
-    # test
     if not makedir:
         exitcode = 22
 
@@ -112,9 +104,6 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    import codecs
-    import six.moves.configparser
 
     class WithSection:
 
@@ -172,8 +161,6 @@ if exitcode == CONTINUE:
     if needle in builddir:
         buildsettings['builddir'] = builddir.replace(needle, version)
 
-
-
     for k in buildsettings.keys():
         v = lookup(facts, 'run_command', k, default=None)
         if v is not None:
@@ -190,10 +177,6 @@ if buildsettings:
     # we modifiy the values of 'buildsettings' in the course of the process
     result['MILESTONES'].append({'buildsettings': buildsettings})
 
-if buildsettings_initial:
-    # what we have read
-    result['MILESTONES'].append({'buildsettings_initial': buildsettings_initial})
-
 if buildsettings_default:
     # defaults we may have supplemented
     result['MILESTONES'].append({'buildsettings_default': buildsettings_default})
@@ -201,6 +184,10 @@ if buildsettings_default:
 if buildsettings_from_run_command:
     # defaults we may have supplemented
     result['MILESTONES'].append({'buildsettings_from_run_command': buildsettings_from_run_command})
+
+if buildsettings_initial:
+    # what we have read
+    result['MILESTONES'].append({'buildsettings_initial': buildsettings_initial})
 
 
 # ==================================================
