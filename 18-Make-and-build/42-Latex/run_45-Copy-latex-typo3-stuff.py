@@ -7,9 +7,11 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
+import shutil
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -33,22 +35,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -56,8 +48,8 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
 copied_latex_resources = []
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -67,19 +59,25 @@ copied_latex_resources = []
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    configset = milestones_get('configset')
+    make_latex = lookup(milestones, 'make_latex', default=None)
+    if not make_latex:
+        CONTINUE == -2
 
-    if not configset:
-        exitcode = 22
+if exitcode == CONTINUE:
+    build_latex = lookup(milestones, 'build_latex', default=None)
+    build_latex_folder = lookup(milestones, 'build_latex_folder', default=None)
+    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', 'configset', 
+                                             'latex_contrib_typo3_folder', default=None)
+    if not (1
+            and build_latex
+            and build_latex_folder
+            and latex_contrib_typo3_folder):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -87,29 +85,11 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    make_latex = params_get('make_latex')
-    if not make_latex:
-        CONTINUE == -2
-
-if exitcode == CONTINUE:
-    build_latex = milestones_get('build_latex')
-    build_latex_folder = milestones_get('build_latex_folder')
-    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', configset, 'latex_contrib_typo3_folder')
-    loglist.append(('latex_contrib_typo3_folder', latex_contrib_typo3_folder))
-    if not (build_latex and build_latex_folder and latex_contrib_typo3_folder):
-        CONTINUE = -1
-
-    if CONTINUE != 0:
-        loglist.append('not enough info to start')
-
-if exitcode == CONTINUE:
     if not os.path.isdir(latex_contrib_typo3_folder):
         loglist.append(('is not a directory', latex_contrib_typo3_folder))
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-
-    import shutil
 
     for thing in os.listdir(latex_contrib_typo3_folder):
         if thing in ['.', '..', 'Makefile']:
@@ -128,9 +108,8 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if copied_latex_resources:
-    result['MILESTONES'].append({
-        'copied_latex_resources': copied_latex_resources,
-    })
+    result['MILESTONES'].append({'copied_latex_resources':
+                                 copied_latex_resources})
 
 
 # ==================================================
