@@ -6,8 +6,16 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import tct
+
+import codecs
+import json
+import os
 import sys
+import tct
+import time
+
+from tct import deepget, logstamp_finegrained
+from os.path import join as ospj
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -20,6 +28,7 @@ toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
+initial_working_dir = facts['initial_working_dir']
 
 
 # ==================================================
@@ -31,15 +40,18 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Helper functions
+# Set pre-initial values (0)
 # --------------------------------------------------
 
-deepget = tct.deepget
+jobfile_data = {}
+jobfile_json = None
+jobfile_json_abspath = None
+xeq_name_cnt = 0
 
-def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
-    loglist.append((keys, result))
-    return result
+
+# ==================================================
+# Helper functions (1)
+# --------------------------------------------------
 
 def firstNotNone(*args):
     for arg in args:
@@ -47,6 +59,30 @@ def firstNotNone(*args):
             return arg
     else:
         return None
+
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
+    return result
+
+# ==================================================
+# Process possible jobfile.json
+# --------------------------------------------------
+
+jobfile_json = lookup(facts, 'run_command', 'jobfile', default=None)
+if jobfile_json:
+    if os.path.isabs(jobfile_json):
+        jobfile_json_abspath = jobfile_json
+    else:
+        jobfile_json_abspath = ospj(initial_working_dir, jobfile_json)
+
+    jobfile_json_abspath = os.path.normpath(jobfile_json_abspath)
+    with codecs.open(jobfile_json_abspath, 'r', 'utf-8') as f1:
+        jobfile_data = json.load(f1)
+
+# ==================================================
+# Helper functions (2)
+# --------------------------------------------------
 
 def findRunParameter(key, default=None, D=None, fconv=None):
     a = deepget(milestones, key, default=None)
@@ -67,13 +103,13 @@ ATNM = all_the_new_milestones = {}
 
 
 # ==================================================
-# Set initial values (1)
+# Set initial values (1) and store in milestones
 # --------------------------------------------------
-import time
 
 # configset = deepget(facts, 'run_command', 'configset', default='default')
-ATNM['active_section'] = (milestones.get('active_section')
-                  or deepget(facts, 'active_section', default='default'))
+ATNM['active_section'] = (0
+        or milestones.get('active_section')
+        or deepget(facts, 'active_section', default='default'))
 
 # too bad we used both names:
 configset = ATNM['active_section']
@@ -81,12 +117,13 @@ ATNM['configset'] = configset
 
 time_started_at_unixtime = time.time()
 ATNM['time_started_at_unixtime'] = time_started_at_unixtime
-time_started_at = tct.logstamp_finegrained(unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
+time_started_at = logstamp_finegrained(
+    unixtime=time_started_at_unixtime, fmt='%Y-%m-%d %H:%M:%S %f')
 ATNM['time_started_at'] = time_started_at
 
 
 # ==================================================
-# Set initial values (2)
+# Set initial values (2) and store in milestones
 # --------------------------------------------------
 
 debug_always_make_milestones_snapshot = findRunParameter('debug_always_make_milestones_snapshot', 1, ATNM, int)
@@ -99,7 +136,8 @@ lockfile_name = findRunParameter('lockfile_name', 'lockfile.json', ATNM)
 makedir = findRunParameter('makedir', None, ATNM)
 rebuild_needed = findRunParameter('rebuild_needed', 1, ATNM, int)
 replace_static_in_html = findRunParameter('replace_static_in_html', 0, ATNM, int)
-smtp_host = findRunParameter('smtp_host', 'None', ATNM)
+resultdir = findRunParameter('resultdir', None, ATNM)
+smtp_host = findRunParameter('smtp_host', None, ATNM)
 talk = findRunParameter('talk', 1, ATNM, int)
 
 
@@ -132,6 +170,12 @@ if talk > 1:
 
 if 'ATNM - All The New Milestones':
     result['MILESTONES'].append(ATNM)
+
+if jobfile_json_abspath is not None:
+    result['MILESTONES'].append({'jobfile_json_abspath': jobfile_json_abspath})
+
+if jobfile_data is not None:
+    result['MILESTONES'].append({'jobfile_data': jobfile_data})
 
 
 # ==================================================
