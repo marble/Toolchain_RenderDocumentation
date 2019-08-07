@@ -49,6 +49,7 @@ def lookup(D, *keys, **kwdargs):
 
 TheProjectLog = None
 TheProjectBuild = None
+TheProjectWebroot = None
 
 
 # ==================================================
@@ -87,6 +88,10 @@ if exitcode == CONTINUE:
     if not os.path.exists(TheProjectBuild):
         os.makedirs(TheProjectBuild)
 
+    TheProjectWebroot = TheProject + 'Webroot'
+    if not os.path.exists(TheProjectWebroot):
+        os.makedirs(TheProjectWebroot)
+
 
 # ==================================================
 # Set MILESTONE
@@ -97,6 +102,9 @@ if TheProjectBuild:
 
 if TheProjectLog:
     result['MILESTONES'].append({'TheProjectLog': TheProjectLog})
+
+if TheProjectWebroot:
+    result['MILESTONES'].append({'TheProjectWebroot': TheProjectWebroot})
 
 
 # ==================================================
