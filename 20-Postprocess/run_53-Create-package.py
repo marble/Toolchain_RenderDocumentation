@@ -60,6 +60,15 @@ xeq_name_cnt = 0
 
 
 # ==================================================
+# Disable for now
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+    loglist.append('Disabled in tool (run_53-Create-package.py '
+                   'because its functionality may not be complete.')
+    CONTINUE = -2
+
+# ==================================================
 # Check params
 # --------------------------------------------------
 
