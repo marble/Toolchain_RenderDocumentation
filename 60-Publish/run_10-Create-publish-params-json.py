@@ -7,10 +7,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import tct
-import sys
 
+import os
+import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -36,8 +38,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # ==================================================
 # Helper functions
 # --------------------------------------------------
-
-deepget = tct.deepget
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -93,20 +93,32 @@ if exitcode == CONTINUE:
     if not publish_html_done:
         exitcode = 22
 
-    publish_dir = lookup(milestones, "publish_dir")
-    publish_language_dir = lookup(milestones, "publish_language_dir")
-    publish_project_dir = lookup(milestones, "publish_project_dir")
-    publish_project_parent_dir = lookup(milestones, "publish_project_parent_dir")
-    webroot_abspath = lookup(milestones, "webroot_abspath")
+    publish_dir = lookup(milestones, "publish_dir", default=None)
+    publish_language_dir = lookup(milestones, "publish_language_dir",
+                                  default=None)
+    publish_project_dir = lookup(milestones, "publish_project_dir",
+                                 default=None)
+    publish_project_parent_dir = lookup(milestones,
+                                        "publish_project_parent_dir",
+                                        default=None)
+    TheProjectWebroot = lookup(milestones, "TheProjectWebroot", default=None)
+    #webroot_abspath = lookup(milestones, "webroot_abspath")
 
-    if not (publish_dir and publish_language_dir and publish_project_dir and
-            publish_project_parent_dir and webroot_abspath):
-        exitcode = 22
+    if not (1
+            and publish_dir
+            and publish_language_dir
+            and publish_project_dir
+            and publish_project_parent_dir
+            and TheProjectWebroot):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    publish_dir_buildinfo = lookup(milestones, "publish_dir_buildinfo", default='')
-    publish_package_file = lookup(milestones, "publish_package_file", default='')
-    publish_packages_xml_file = lookup(milestones, "publish_packages_xml_file", default='')
+    publish_dir_buildinfo = lookup(milestones, "publish_dir_buildinfo",
+                                   default='')
+    publish_package_file = lookup(milestones, "publish_package_file",
+                                  default='')
+    publish_packages_xml_file = lookup(milestones, "publish_packages_xml_file",
+                                       default='')
     ter_extension = lookup(milestones, 'buildsettings', 'ter_extension')
 
 if exitcode == CONTINUE:
@@ -119,13 +131,14 @@ else:
 # work
 # --------------------------------------------------
 
-len_webroot_abspath = len(webroot_abspath)
+if exitcode == CONTINUE:
+    len_TheProjectWebroot = len(TheProjectWebroot)
 
-def fixparm(fpath):
-    result = fpath
-    if fpath.startswith(webroot_abspath):
-        result = fpath[len_webroot_abspath:]
-    return result.strip('/')
+    def fixparm(fpath):
+        result = fpath
+        if fpath.startswith(TheProjectWebroot):
+            result = fpath[len_TheProjectWebroot:]
+        return result.strip('/')
 
 if exitcode == CONTINUE:
     publish_params_data['publish_dir'] = fixparm(publish_dir)
@@ -137,7 +150,7 @@ if exitcode == CONTINUE:
     publish_params_data['publish_project_parent_dir'] = fixparm(publish_project_parent_dir)
     publish_params_data['todo_update_stable_symlink'] = 1 if ter_extension else 0
 
-    publish_params_json_file = os.path.join(webroot_abspath, 'publish-params.json')
+    publish_params_json_file = os.path.join(TheProjectWebroot, 'publish-params.json')
 
     if os.path.exists(publish_params_json_file):
         publish_params_existing_data = tct.readjson(publish_params_json_file)
@@ -153,10 +166,12 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if publish_params_json_file:
-    result['MILESTONES'].append({'publish_params_json_file': publish_params_json_file})
+    result['MILESTONES'].append({'publish_params_json_file':
+                                 publish_params_json_file})
 
 if publish_params_data:
-    result['MILESTONES'].append({'publish_params_data': publish_params_data})
+    result['MILESTONES'].append({'publish_params_data':
+                                 publish_params_data})
 
 
 # ==================================================
