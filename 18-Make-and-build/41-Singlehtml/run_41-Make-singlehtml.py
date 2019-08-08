@@ -60,21 +60,32 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
     make_singlehtml = lookup(milestones, 'make_singlehtml')
     if not make_singlehtml:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
+    disable_included_files_check = lookup(milestones,
+                                          'disable_included_files_check')
+    included_files_check_is_ok = lookup(milestones,
+                                        'included_files_check_is_ok')
+    if not (0
+            or disable_included_files_check
+            or included_files_check_is_ok
+    ):
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     build_html = lookup(milestones, 'build_html')
-    included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok', default=None)
     ready_for_build = lookup(milestones, 'ready_for_build', default=None)
     rebuild_needed = lookup(milestones, 'rebuild_needed', default=None)
 
     if not (1
             and build_html
-            and included_files_check_is_ok
             and ready_for_build
-            and rebuild_needed):
+            and rebuild_needed
+    ):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -97,7 +108,8 @@ if exitcode == CONTINUE:
             and TheProject
             and TheProjectBuild
             and TheProjectLog
-            and TheProjectMakedir):
+            and TheProjectMakedir
+    ):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
