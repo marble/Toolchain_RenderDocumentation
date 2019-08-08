@@ -7,8 +7,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-import tct
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -36,7 +38,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -59,18 +61,19 @@ if exitcode == CONTINUE:
     rebuild_needed = lookup(milestones, 'rebuild_needed')
 
     if not(1
-        and ready_for_build
-        and rebuild_needed
+            and ready_for_build
+            and rebuild_needed
     ):
         exitcode = 22
 
 if exitcode == CONTINUE:
-    disable_includefilescheck = lookup(milestones, 'disable_includefilescheck',
-                                       default=0)
-    included_files_check_is_ok = lookup(milestones, '')
+    disable_include_files_check = lookup(milestones,
+                                         'disable_include_files_check')
+    included_files_check_is_ok = lookup(milestones,
+                                        'included_files_check_is_ok')
 
     if not (0
-            or disable_includefilescheck
+            or disable_include_files_check
             or included_files_check_is_ok
     ):
         exitcode = 22
