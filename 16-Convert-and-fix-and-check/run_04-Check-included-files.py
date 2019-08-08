@@ -7,9 +7,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
+import subprocess
 import sys
 import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -35,8 +40,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # ==================================================
 # Helper functions
 # --------------------------------------------------
-
-deepget = tct.deepget
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -69,16 +72,12 @@ if exitcode == CONTINUE:
 
     if not (documentation_folder and masterdoc and TheProjectLog and
             toolfolderabspath and workdir):
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -86,9 +85,6 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    import codecs
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
@@ -145,13 +141,15 @@ if (exitcode != 0) and included_files_check_logfile:
 # --------------------------------------------------
 
 if included_files_check_is_ok:
-    result['MILESTONES'].append({'included_files_check_is_ok': included_files_check_is_ok})
+    result['MILESTONES'].append({'included_files_check_is_ok':
+                                 included_files_check_is_ok})
 if included_files_check_logfile:
-    result['MILESTONES'].append({'included_files_check_logfile': included_files_check_logfile})
+    result['MILESTONES'].append({'included_files_check_logfile':
+                                 included_files_check_logfile})
 if included_files_check_logfile_dumped_to_stdout:
-    result['MILESTONES'].append(
-        {'included_files_check_logfile_dumped_to_stdout':
-         included_files_check_logfile_dumped_to_stdout})
+    result['MILESTONES'].append({
+        'included_files_check_logfile_dumped_to_stdout':
+        included_files_check_logfile_dumped_to_stdout})
 
 # ==================================================
 # save result
