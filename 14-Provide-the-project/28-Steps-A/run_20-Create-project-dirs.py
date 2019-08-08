@@ -59,19 +59,15 @@ TheProjectWebroot = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    TheProject = lookup(milestones, 'TheProject')
+    TheProject = lookup(milestones, 'TheProject', default=None)
 
-    if not (TheProject):
+    if not TheProject:
         exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
