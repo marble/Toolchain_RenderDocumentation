@@ -76,6 +76,8 @@ else:
 
 if exitcode == CONTINUE:
 
+    resultdir = lookup(milestones, 'resultdir', default=None)
+
     TheProjectLog = TheProject + 'Log'
     if not os.path.exists(TheProjectLog):
         os.makedirs(TheProjectLog)
@@ -84,7 +86,11 @@ if exitcode == CONTINUE:
     if not os.path.exists(TheProjectBuild):
         os.makedirs(TheProjectBuild)
 
-    TheProjectWebroot = TheProject + 'Webroot'
+    if resultdir:
+        TheProjectWebroot = os.path.join(resultdir, 'Result')
+    else:
+        TheProjectWebroot = TheProject + 'Webroot'
+
     if not os.path.exists(TheProjectWebroot):
         os.makedirs(TheProjectWebroot)
 
