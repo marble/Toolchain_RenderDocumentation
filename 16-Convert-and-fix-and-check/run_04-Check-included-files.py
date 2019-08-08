@@ -64,6 +64,13 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    disable_includefilescheck = lookup(milestones, 'disable_includefilescheck',
+                                       default=0)
+
+    if disable_includefilescheck:
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     documentation_folder = lookup(milestones, 'documentation_folder')
     masterdoc = lookup(milestones, 'masterdoc')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
