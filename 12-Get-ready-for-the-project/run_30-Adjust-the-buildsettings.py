@@ -241,8 +241,10 @@ if exitcode == CONTINUE:
         if not gitdir_slugified:
             gitdir_slugified = 'project'
 
-        if buildsettings['builddir'] in ['', 'typo3cms/project/0.0.0']:
-            buildsettings['builddir'] = os.path.join(drafts_builddir_relpath, gitdir_slugified, '0.0.0')
+        # ['', 'typo3cms/project/0.0.0']
+        if not buildsettings['builddir']:
+            buildsettings['builddir'] = os.path.join(
+                drafts_builddir_relpath, gitdir_slugified, '0.0.0')
 
 
 # ==================================================
