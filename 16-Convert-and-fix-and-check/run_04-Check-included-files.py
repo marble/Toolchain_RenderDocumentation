@@ -64,10 +64,11 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    disable_includefilescheck = lookup(milestones, 'disable_includefilescheck',
-                                       default=0)
+    disable_include_files_check = lookup(milestones,
+                                         'disable_include_files_check',
+                                         default=0)
 
-    if disable_includefilescheck:
+    if disable_include_files_check:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -96,7 +97,9 @@ if exitcode == CONTINUE:
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+            cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
@@ -131,7 +134,8 @@ if exitcode == CONTINUE:
     with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
 
-    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' % toolname_pure))
+    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' %
+                                                                toolname_pure))
     with codecs.open(included_files_check_logfile, 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
 
