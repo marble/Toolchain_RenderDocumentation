@@ -119,8 +119,12 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    TheProjectResultVersionLen = len(TheProjectResultVersion)
+    # 'typo3cms/project/0.0.0'
     relative_part_of_builddir_stripped = relative_part_of_builddir.strip('/')
+    # /abspath/to/Documentation-GENERATED-temp
+    resultdir = lookup(milestones, 'resultdir', default=None)
+    # /tmp/.../TheProjectResultVersion
+    TheProjectResultVersionLen = len(TheProjectResultVersion)
 
     if buildsettings_localization in ['', 'default']:
         localized = 0
@@ -131,28 +135,40 @@ if exitcode == CONTINUE:
 
     # project/[language/]0.0.0
     if len(relative_part_of_builddir_stripped.split('/')) < required_parts:
+        loglist.append("'%s' is shorter than the '%s' required parts"
+                       % (relative_part_of_builddir_stripped, required_parts))
         exitcode = 22
 
 if exitcode == CONTINUE:
 
     if localized:
+        # a='.../typo3cms', b='project', c='en_us', d='0.0.0'
         a, d = os.path.split(relative_part_of_builddir_stripped)
         a, c = os.path.split(a)
         a, b = os.path.split(a)
     else:
+        # a='.../typo3cms', b='project', c='', d='0.0.0'
         a, d = os.path.split(relative_part_of_builddir_stripped)
         a, b = os.path.split(a)
         c = ''
 
+    # TheProjectWebroot/typo3cms
     publish_project_parent_dir_planned = os.path.join(TheProjectWebroot, a)
+    # TheProjectWebroot/typo3cms/project
     publish_project_dir_planned = os.path.join(TheProjectWebroot, a, b)
+    # TheProjectWebroot/typo3cms/project/
+    # TheProjectWebroot/typo3cms/project/en-us
     publish_language_dir_planned = os.path.join(TheProjectWebroot, a, b, c)
+    # TheProjectWebroot/typo3cms/project/0.0.0
+    # TheProjectWebroot/typo3cms/project/en-us/0.0.0
     publish_dir_planned = os.path.join(TheProjectWebroot, a, b, c, d)
-    loglist.append(('abcd', (a,b,c,d)))
 
     # eliminate this one!
+    # TheProjectWebroot/typo3cms/project/0.0.0
+    # TheProjectWebroot/typo3cms/project/en-us/0.0.0
     publish_parent_dir_planned = os.path.split(publish_dir_planned)[0]
 
+    # TheProjectWebroot/typo3cms/project/packages
     publish_package_dir_planned = os.path.join(publish_project_dir_planned,
                                                'packages')
 
