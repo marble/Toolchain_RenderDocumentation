@@ -55,18 +55,24 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    requirements = [
-        'ready_for_build',
-        'rebuild_needed',
-        'included_files_check_is_ok',
-    ]
+    ready_for_build = lookup(milestones, 'ready_for_build')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
 
-    cnt_missing = 0
-    for requirement in requirements:
-        v = lookup(milestones, requirement, default=None)
-        if v is None:
-            cnt_missing += 1
-    if cnt_missing:
+    if not(1
+        and ready_for_build
+        and rebuild_needed
+    ):
+        exitcode = 22
+
+if exitcode == CONTINUE:
+    disable_includefilescheck = lookup(milestones, 'disable_includefilescheck',
+                                       default=0)
+    included_files_check_is_ok = lookup(milestones, '')
+
+    if not (0
+            or disable_includefilescheck
+            or included_files_check_is_ok
+    ):
         exitcode = 22
 
 if exitcode == CONTINUE:
