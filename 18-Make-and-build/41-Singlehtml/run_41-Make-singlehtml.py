@@ -7,11 +7,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import codecs
 import os
 import subprocess
 import sys
 import tct
+
+from tct import deepget
 
 from os.path import join as ospj, exists as ospe
 
@@ -41,7 +44,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -201,19 +204,24 @@ if exitcode == CONTINUE:
             os.unlink(k)
 
     os.symlink(TheProjectMakedir, SYMLINK_THE_MAKEDIR)
-    loglist.append(('os.symlink(TheProjectMakedir, SYMLINK_THE_MAKEDIR)', TheProjectMakedir, SYMLINK_THE_MAKEDIR))
+    loglist.append(('os.symlink(TheProjectMakedir, SYMLINK_THE_MAKEDIR)',
+                    TheProjectMakedir, SYMLINK_THE_MAKEDIR))
 
     # If there is cache build there
     if outdir_in_cache:
         os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)
-        loglist.append(('os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)', outdir_in_cache, SYMLINK_THE_OUTPUT))
+        loglist.append(('os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)',
+                        outdir_in_cache, SYMLINK_THE_OUTPUT))
+
     # Else if there is no cache build in TheProjectBuild
     else:
         os.symlink(outdir, SYMLINK_THE_OUTPUT)
-        loglist.append(('os.symlink(outdir, SYMLINK_THE_OUTPUT)', outdir, SYMLINK_THE_OUTPUT))
+        loglist.append(('os.symlink(outdir, SYMLINK_THE_OUTPUT)', outdir,
+                        SYMLINK_THE_OUTPUT))
 
     os.symlink(sourcedir, SYMLINK_THE_PROJECT)
-    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir, SYMLINK_THE_PROJECT))
+    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir,
+                    SYMLINK_THE_PROJECT))
 
 
 if exitcode == CONTINUE:
@@ -278,7 +286,8 @@ if exitcode == CONTINUE:
     })
 
 if documentation_folder_for_sphinx:
-    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
+    result['MILESTONES'].append({'documentation_folder_for_sphinx':
+                                 documentation_folder_for_sphinx})
 
 
 # ==================================================
