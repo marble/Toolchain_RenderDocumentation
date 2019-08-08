@@ -7,11 +7,13 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import codecs
 import os
-import shutil
+import subprocess
 import sys
 import tct
 
+from os.path import join as ospj
 from tct import deepget
 
 params = tct.readjson(sys.argv[1])
@@ -119,6 +121,48 @@ else:
 
 if exitcode == CONTINUE:
 
+    def cmdline(cmd, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        bstdout, bstderr = process.communicate()
+        exitcode2 = process.returncode
+        return exitcode2, cmd, bstdout, bstderr
+
+    def execute_cmdlist(cmdlist, cwd=None):
+        global xeq_name_cnt
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        if 0 and 'activateLocalSphinxDebugging':
+            if cmdlist[0] == 'sphinx-build':
+                from sphinx.cmd.build import main as sphinx_cmd_build_main
+                sphinx_cmd_build_main(cmdlist[1:])
+                exitcode, cmd, out, err = 99, cmd, b'', b''
+        else:
+            exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+
+        with codecs.open(ospj(workdir, filename_out), 'w', 'utf-8') as f2:
+            f2.write(out.decode('utf-8', 'replace'))
+
+        with codecs.open(ospj(workdir, filename_err), 'w', 'utf-8') as f2:
+            f2.write(err.decode('utf-8', 'replace'))
+
+        return exitcode, cmd, out, err
+
+
+if exitcode == CONTINUE:
+
     if not os.path.exists(publish_project_parent_dir_planned):
         os.makedirs(publish_project_parent_dir_planned)
     publish_project_parent_dir = publish_project_parent_dir_planned
@@ -127,30 +171,20 @@ if exitcode == CONTINUE:
         os.mkdir(publish_project_dir_planned)
     publish_project_dir = publish_project_dir_planned
 
-    if os.path.isdir(publish_dir_planned):
-        shutil.rmtree(publish_dir_planned)
-        publish_removed_old = 1
-
-    # should not happen
-    if os.path.exists(publish_dir_planned):
-        os.remove(publish_dir_planned)
-
-    if os.path.exists(publish_dir_planned):
-        loglist.append(('cannot remove `publish_dir_planned`',
-                        publish_dir_planned))
-        publish_removed_old = 0
-        exitcode = 22
 
 if exitcode == CONTINUE:
-    # move our new build in place
-    # shutil.move(TheProjectResultVersion, publish_dir_planned)
-    shutil.copytree(TheProjectResultVersion, publish_dir_planned)
+    cmdlist = [
+        'rsync', '-a', '--delete',
+        '--exclude', '.doctrees',
+        '"%s/"' % TheProjectResultVersion.rstrip('/'),
+        '"%s/"' % publish_dir_planned.rstrip('/'),
+    ]
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+
+if exitcode == CONTINUE:
     publish_dir = publish_dir_planned
     publish_project_dir = publish_project_dir_planned
     publish_language_dir = publish_project_dir_planned
-    if not os.path.isdir(publish_dir):
-        loglist.append(('cannot move or copy to `publish_dir`', publish_dir))
-        exitcode = 22
 
 if exitcode == CONTINUE:
     publish_html_done = 1
