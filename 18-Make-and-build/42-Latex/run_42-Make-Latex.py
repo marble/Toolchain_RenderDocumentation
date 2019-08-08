@@ -61,24 +61,38 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+
     make_latex = lookup(milestones, 'make_latex')
     if not make_latex:
-        loglist.append('Nothing to do - make_latex is not requested.')
         CONTINUE = -2
 
 if exitcode == CONTINUE:
+    disable_includefilescheck = lookup(milestones, 'disable_includefilescheck')
+    included_files_check_is_ok = lookup(milestones,
+                                        'included_files_check_is_ok')
+    if not (0
+            or disable_includefilescheck
+            or included_files_check_is_ok
+    ):
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    build_html = lookup(milestones, 'build_html')
     ready_for_build = lookup(milestones, 'ready_for_build')
     rebuild_needed = lookup(milestones, 'rebuild_needed')
-    included_files_check_is_ok = lookup(milestones, 'included_files_check_is_ok')
-    toolname = lookup(params, 'toolname')
-    build_html = lookup(milestones, 'build_html')
-    loglist.append('End of PARAMS')
+
+    if not (1
+            and build_html
+            and included_files_check_is_ok
+            and ready_for_build
+            and rebuild_needed
+    ):
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if not (ready_for_build and rebuild_needed and toolname
-            and included_files_check_is_ok and build_html):
-        loglist.append('parameters are not sufficient')
-        CONTINUE = -2
+    loglist.append('PARAMS are ok')
+else:
+    loglist.append('Bad PARAMS or nothing to do')
 
 # ==================================================
 # work
@@ -98,9 +112,18 @@ if exitcode == CONTINUE:
     TheProjectCacheDir = lookup(milestones, 'TheProjectCacheDir')
     TheProjectLog = milestones.get('TheProjectLog')
     TheProjectMakedir = milestones.get('TheProjectMakedir')
-    if not (masterdoc and rebuild_needed and SPHINXBUILD and SYMLINK_THE_OUTPUT
-            and SYMLINK_THE_PROJECT and TheProject and TheProjectBuild
-            and TheProjectCacheDir and TheProjectLog and TheProjectMakedir):
+    if not (1
+            and masterdoc
+            and rebuild_needed
+            and SPHINXBUILD
+            and SYMLINK_THE_OUTPUT
+            and SYMLINK_THE_PROJECT
+            and TheProject
+            and TheProjectBuild
+            and TheProjectCacheDir
+            and TheProjectLog
+            and TheProjectMakedir
+    ):
         exitcode = 22
 
 
