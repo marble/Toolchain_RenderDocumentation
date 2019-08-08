@@ -66,6 +66,21 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    build_html = lookup(milestones, 'build_html', default=None)
+    TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
+    TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion', default=None)
+
+    if not(1
+            and build_html
+            and TheProjectResult
+            and TheProjectResultVersion
+    ):
+        # stop this folder
+        exitcode = 22
+
+if exitcode == CONTINUE:
+    loglist.append('CHECK PARAMS')
+
     publish_dir_planned = lookup(milestones, 'publish_dir_planned',
                                  default=None)
     publish_language_dir_planned = lookup(milestones,
@@ -87,7 +102,9 @@ if exitcode == CONTINUE:
             publish_project_dir_planned and
             publish_project_parent_dir_planned and
             TheProjectResult and
-            TheProjectResultVersion):
+            TheProjectResultVersion
+    ):
+        # stop processing of rest of folder
         exitcode = 22
 
 if exitcode == CONTINUE:
