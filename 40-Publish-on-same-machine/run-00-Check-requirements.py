@@ -57,16 +57,16 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    build_html = lookup(milestones, '', default=None)
-    TheProjectResult = lookup(milestones, '', default=None)
-    TheProjectResultVersion = lookup(milestones, '', default=None)
+    build_html = lookup(milestones, 'build_html', default=None)
+    TheProjectResult = lookup(milestones, 'TheProjectResult', default=None)
+    TheProjectResultVersion = lookup(milestones, 'TheProjectResultVersion', default=None)
 
     if not(1
             and build_html
             and TheProjectResult
             and TheProjectResultVersion
     ):
-        # stop current tool folder
+        # stop this folder
         exitcode = 22
 
 if exitcode == CONTINUE:
