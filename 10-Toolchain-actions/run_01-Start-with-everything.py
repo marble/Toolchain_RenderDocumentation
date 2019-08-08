@@ -127,6 +127,7 @@ ATNM['time_started_at'] = time_started_at
 # --------------------------------------------------
 
 debug_always_make_milestones_snapshot = findRunParameter('debug_always_make_milestones_snapshot', 1, ATNM, int)
+disable_include_files_check = findRunParameter('disable_include_files_check', 0, ATNM, int)
 force_rebuild_needed = findRunParameter('force_rebuild_needed', 1, ATNM, int)
 make_html = findRunParameter('make_html', 1, ATNM, int)
 make_latex = findRunParameter('make_latex', 1, ATNM, int)
