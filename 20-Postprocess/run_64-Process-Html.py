@@ -167,15 +167,20 @@ def process_html_file(folder, relpath):
 if exitcode == CONTINUE:
 
     if sitemap_files_html_jsonfile:
+        all_html_files_sanitized_count = 0
+        sitemap_files_html_count = milestones.get('sitemap_files_html_count')
         with codecs.open(sitemap_files_html_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_html = json.load(f1)
         for fpath in sitemap_files_html:
             process_html_file(build_html_folder.rstrip('/'), fpath)
             all_html_files_sanitized_count += 1
-        if all_html_files_sanitized_count > 0:
+        if all_html_files_sanitized_count == sitemap_files_html_count:
             all_html_files_sanitized = 1
 
     if sitemap_files_singlehtml_jsonfile:
+        all_singlehtml_files_sanitized_count = 0
+        sitemap_files_singlehtml_count = milestones.get('sitemap_files_'
+                                                        'singlehtml_count')
         with codecs.open(
                 sitemap_files_singlehtml_jsonfile, 'r', 'utf-8') as f1:
             sitemap_files_singlehtml = json.load(f1)
@@ -183,7 +188,7 @@ if exitcode == CONTINUE:
             process_html_file(build_singlehtml_folder.rstrip('/'), fpath)
             all_singlehtml_files_sanitized_count += 1
 
-        if all_html_files_sanitized_count > 0:
+        if all_singlehtml_files_sanitized_count == sitemap_files_singlehtml_count:
             all_singlehtml_files_sanitized = 1
 
 if exitcode == CONTINUE:
