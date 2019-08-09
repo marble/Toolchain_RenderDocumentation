@@ -53,9 +53,9 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 all_html_files_sanitized = None
-all_html_files_sanitized_count = 0
+all_html_files_sanitized_count = None
 all_singlehtml_files_sanitized = None
-all_singlehtml_files_sanitized_count = 0
+all_singlehtml_files_sanitized_count = None
 neutralized_images = []
 neutralized_images_jsonfile = None
 neutralized_links = []
@@ -209,7 +209,7 @@ if all_html_files_sanitized:
     result['MILESTONES'].append({
         'all_html_files_sanitized': all_html_files_sanitized})
 
-if all_html_files_sanitized_count:
+if all_html_files_sanitized_count is not None:
     result['MILESTONES'].append({
         'all_html_files_sanitized_count': all_html_files_sanitized_count})
 
@@ -217,7 +217,7 @@ if all_singlehtml_files_sanitized:
     result['MILESTONES'].append({
         'all_singlehtml_files_sanitized': all_singlehtml_files_sanitized})
 
-if all_singlehtml_files_sanitized_count:
+if all_singlehtml_files_sanitized_count is not None:
     result['MILESTONES'].append({
         'all_singlehtml_files_sanitized_count':
         all_singlehtml_files_sanitized_count})
