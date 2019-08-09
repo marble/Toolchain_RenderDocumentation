@@ -167,6 +167,15 @@ if exitcode == CONTINUE:
     else:
         R['has_neutralized_images'] = 0
 
+    sitemap_files_html_count = milestones.get('sitemap_files_html_count')
+    if sitemap_files_html_count is not None:
+        R['sitemap_files_html_count'] = sitemap_files_html_count
+
+    sitemap_files_singlehtml_count = milestones.get('sitemap_files_singlehtml_'
+                                                    'count')
+    if sitemap_files_singlehtml_count is not None:
+        R['sitemap_files_singlehtml_count'] = sitemap_files_singlehtml_count
+
     R['postprocessed_html_files'] = milestones.get(
         'all_html_files_sanitized_count', 0)
 
