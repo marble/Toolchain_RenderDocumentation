@@ -109,7 +109,7 @@ if masterdoc_manual_html_copy_cleaned:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

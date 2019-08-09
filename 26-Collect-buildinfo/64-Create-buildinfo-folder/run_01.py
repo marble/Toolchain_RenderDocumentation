@@ -99,7 +99,7 @@ if exitcode == CONTINUE:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

@@ -135,7 +135,7 @@ if buildsettings_file_fixed:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode
