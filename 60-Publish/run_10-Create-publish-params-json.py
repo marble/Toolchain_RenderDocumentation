@@ -91,7 +91,7 @@ if exitcode == CONTINUE:
 
     publish_html_done = lookup(milestones, "publish_html_done")
     if not publish_html_done:
-        exitcode = 22
+        CONTINUE = -2
 
     publish_dir = lookup(milestones, "publish_dir", default=None)
     publish_language_dir = lookup(milestones, "publish_language_dir",
