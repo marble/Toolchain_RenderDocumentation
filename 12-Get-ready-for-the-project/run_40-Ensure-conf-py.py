@@ -84,7 +84,7 @@ else:
 if exitcode == CONTINUE:
     conf_py_file = os.path.join(makedir_abspath, 'conf.py')
     if os.path.exists(conf_py_file):
-        CONTINUE = -1
+        CONTINUE = -0
     else:
         conf_py_file = ''
 
@@ -102,7 +102,7 @@ if exitcode == CONTINUE:
         loglist.append(('conf.py not found in makedir', makedir_abspath))
         printerror = print
         printerror('conf.py is missing in makedir ' + makedir_abspath)
-        exitcode = 22
+        CONTINUE = -2
 
 
 # ==================================================
