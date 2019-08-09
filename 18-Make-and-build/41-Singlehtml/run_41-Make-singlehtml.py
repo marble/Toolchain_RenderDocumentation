@@ -69,12 +69,12 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    disable_included_files_check = lookup(milestones,
-                                          'disable_included_files_check')
+    disable_include_files_check = lookup(milestones,
+                                          'disable_include_files_check')
     included_files_check_is_ok = lookup(milestones,
                                         'included_files_check_is_ok')
     if not (0
-            or disable_included_files_check
+            or disable_include_files_check
             or included_files_check_is_ok
     ):
         CONTINUE = -2
