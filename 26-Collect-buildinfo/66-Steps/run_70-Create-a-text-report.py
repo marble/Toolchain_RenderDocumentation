@@ -540,7 +540,7 @@ if exitcode == CONTINUE:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 
 # ==================================================

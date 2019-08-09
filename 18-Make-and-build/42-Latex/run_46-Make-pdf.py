@@ -175,7 +175,7 @@ if exitcode == CONTINUE:
     with codecs.open(resultfile + '.pprinted.txt', 'w', 'utf-8', 'replace') as f2:
         pprint.pprint(result, f2)
 
-    tct.writejson(result, resultfile)
+    tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 
 # ==================================================

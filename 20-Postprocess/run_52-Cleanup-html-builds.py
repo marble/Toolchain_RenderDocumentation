@@ -68,7 +68,7 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     build_html_folder = lookup(milestones, 'build_html_folder', default=None)
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder', 
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
                                      default=None)
     if not (build_html_folder or build_singlehtml_folder):
         CONTINUE = -1
@@ -132,7 +132,7 @@ if postprocess_cleanup_files is not None:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 
 # ==================================================

@@ -118,7 +118,7 @@ if time_finished_at_unixtime:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

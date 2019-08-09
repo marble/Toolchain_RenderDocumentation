@@ -245,7 +245,7 @@ if toolchain_temp_home_todo_file_all:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

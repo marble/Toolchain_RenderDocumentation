@@ -66,7 +66,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     build_latex = lookup(milestones, 'build_latex', default=None)
     build_latex_folder = lookup(milestones, 'build_latex_folder', default=None)
-    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', 'configset', 
+    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', 'configset',
                                              'latex_contrib_typo3_folder', default=None)
     if not (1
             and build_latex
@@ -116,7 +116,7 @@ if copied_latex_resources:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 
 # ==================================================

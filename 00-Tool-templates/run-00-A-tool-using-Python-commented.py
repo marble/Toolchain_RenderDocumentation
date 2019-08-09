@@ -274,7 +274,7 @@ if time_started_at_unixtime:
 
 # always write the resultfile at the end
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, exitcode=exitcode, CONTINUE=CONTINUE)
 
 
 # ==================================================
