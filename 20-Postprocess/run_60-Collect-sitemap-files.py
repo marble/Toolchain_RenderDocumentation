@@ -51,9 +51,11 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 sitemap_files_html = []
+sitemap_files_html_count = None
 sitemap_files_html_jsonfile = None
 sitemap_files_html_txtfile = None
 sitemap_files_singlehtml = []
+sitemap_files_singlehtml_count = None
 sitemap_files_singlehtml_jsonfile = None
 sitemap_files_singlehtml_txtfile = None
 xeq_name_cnt = 0
@@ -133,9 +135,17 @@ if 1 and sitemap_files_singlehtml and 'to txt':
 # Set MILESTONE
 # --------------------------------------------------
 
+if sitemap_files_html_count is not None:
+    result['MILESTONES'].append(
+        {'sitemap_files_html_count': sitemap_files_html_count})
+
 if sitemap_files_html_jsonfile:
     result['MILESTONES'].append(
         {'sitemap_files_html_jsonfile': sitemap_files_html_jsonfile})
+
+if sitemap_files_singlehtml_count is not None:
+    result['MILESTONES'].append(
+        {'sitemap_files_singlehtml_count': sitemap_files_singlehtml_count})
 
 if sitemap_files_singlehtml_jsonfile:
     result['MILESTONES'].append({
