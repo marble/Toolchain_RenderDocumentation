@@ -117,18 +117,21 @@ if 1 and sitemap_files_singlehtml and 'to json':
     tct.writejson(sitemap_files_singlehtml, sitemap_files_singlehtml_jsonfile)
 
 if 1 and sitemap_files_html and 'to txt':
+    sitemap_files_html_count = 0
     sitemap_files_html_txtfile = os.path.join(
         workdir, 'sitemap_files_html.txt')
     with codecs.open(sitemap_files_html_txtfile, 'w', 'utf-8') as f2:
         for line in sitemap_files_html:
+            sitemap_files_html_count += 1
             f2.write('%s\n' % line)
 
-
 if 1 and sitemap_files_singlehtml and 'to txt':
+    sitemap_files_singlehtml_count = 0
     sitemap_files_singlehtml_txtfile = os.path.join(
         workdir, 'sitemap_files_singlehtml.txt')
     with codecs.open(sitemap_files_singlehtml_txtfile, 'w', 'utf-8') as f2:
         for line in sitemap_files_singlehtml:
+            sitemap_files_singlehtml_count += 1
             f2.write('%s\n' % line)
 
 # ==================================================
@@ -139,18 +142,20 @@ if sitemap_files_html_count is not None:
     result['MILESTONES'].append(
         {'sitemap_files_html_count': sitemap_files_html_count})
 
-if sitemap_files_html_jsonfile:
-    result['MILESTONES'].append(
-        {'sitemap_files_html_jsonfile': sitemap_files_html_jsonfile})
-
 if sitemap_files_singlehtml_count is not None:
     result['MILESTONES'].append(
         {'sitemap_files_singlehtml_count': sitemap_files_singlehtml_count})
+
+
+if sitemap_files_html_jsonfile:
+    result['MILESTONES'].append(
+        {'sitemap_files_html_jsonfile': sitemap_files_html_jsonfile})
 
 if sitemap_files_singlehtml_jsonfile:
     result['MILESTONES'].append({
         'sitemap_files_singlehtml_jsonfile':
         sitemap_files_singlehtml_jsonfile})
+
 
 if sitemap_files_html_txtfile:
     result['MILESTONES'].append({
