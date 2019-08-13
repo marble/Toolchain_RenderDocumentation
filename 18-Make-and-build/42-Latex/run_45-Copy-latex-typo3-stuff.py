@@ -10,8 +10,12 @@ from __future__ import absolute_import
 
 import os
 import shutil
+import stat
 import sys
 import tct
+
+from os.path import exists as ospe, join as ospj
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -39,7 +43,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -49,6 +53,7 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 copied_latex_resources = []
+run_latex_make_sh_file = None
 xeq_name_cnt = 0
 
 
@@ -66,8 +71,9 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     build_latex = lookup(milestones, 'build_latex', default=None)
     build_latex_folder = lookup(milestones, 'build_latex_folder', default=None)
-    latex_contrib_typo3_folder = tct.deepget(facts, 'tctconfig', 'configset',
-                                             'latex_contrib_typo3_folder', default=None)
+    latex_contrib_typo3_folder = lookup(milestones,
+                                        'latex_contrib_typo3_folder',
+                                        default=None)
     if not (1
             and build_latex
             and build_latex_folder
@@ -86,21 +92,30 @@ else:
 
 if exitcode == CONTINUE:
     if not os.path.isdir(latex_contrib_typo3_folder):
-        loglist.append(('is not a directory', latex_contrib_typo3_folder))
         CONTINUE = -2
 
 if exitcode == CONTINUE:
+    foldername = os.path.split(latex_contrib_typo3_folder)[1]
+    destpath = ospj(build_latex_folder, foldername)
+    shutil.copytree(latex_contrib_typo3_folder, destpath)
 
-    for thing in os.listdir(latex_contrib_typo3_folder):
-        if thing in ['.', '..', 'Makefile']:
-            continue
-        srcpath = os.path.join(latex_contrib_typo3_folder, thing)
-        destpath = os.path.join(build_latex_folder, thing)
-        if os.path.isdir(srcpath):
-            shutil.copytree(srcpath, destpath)
-        else:
-            shutil.copy(srcpath, destpath)
-        copied_latex_resources.append(thing)
+if exitcode == CONTINUE:
+    run_latex_make_sh_file = ospj(build_latex_folder, 'run-make.sh')
+    f2text = (
+        "#!/bin/sh\n"
+        "\n"
+        "# This is run-make.sh\n"
+        "\n"
+        "# set environment var pointing to the folder and run make\n"
+        "TEXINPUTS=::texmf_typo3   make\n"
+        "\n")
+    with open(run_latex_make_sh_file, 'w') as f2:
+        f2.write(f2text)
+
+    file_permissions = (os.stat(run_latex_make_sh_file).st_mode | stat.S_IXUSR
+                                                          | stat.S_IXGRP
+                                                          | stat.S_IXOTH)
+    os.chmod(run_latex_make_sh_file, file_permissions)
 
 
 # ==================================================
@@ -110,6 +125,10 @@ if exitcode == CONTINUE:
 if copied_latex_resources:
     result['MILESTONES'].append({'copied_latex_resources':
                                  copied_latex_resources})
+
+if run_latex_make_sh_file:
+    result['MILESTONES'].append({'run_latex_make_sh_file':
+                                 run_latex_make_sh_file})
 
 
 # ==================================================
