@@ -142,6 +142,7 @@ replace_static_in_html = findRunParameter('replace_static_in_html', 0, ATNM, int
 resultdir = findRunParameter('resultdir', None, ATNM)
 smtp_host = findRunParameter('smtp_host', None, ATNM)
 talk = findRunParameter('talk', 1, ATNM, int)
+try_pdf_build_from_published_latex = findRunParameter('try_pdf_build_from_published_latex', 0, ATNM, int)
 
 
 # ==================================================
