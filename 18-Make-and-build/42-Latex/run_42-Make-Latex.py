@@ -51,7 +51,10 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-documentation_folder_for_sphinx = ''
+build_latex = None
+build_latex_file = None
+build_latex_folder = None
+builder_latex_folder = None
 xeq_name_cnt = 0
 
 
@@ -84,7 +87,6 @@ if exitcode == CONTINUE:
 
     if not (1
             and build_html
-            and included_files_check_is_ok
             and ready_for_build
             and rebuild_needed
     ):
@@ -101,8 +103,6 @@ else:
 
 if exitcode == CONTINUE:
     #1
-    build_latex_folder = ''
-    has_settingscfg = milestones.get('has_settingscfg')
     masterdoc = milestones.get('masterdoc')
     rebuild_needed = milestones.get('rebuild_needed')
     SPHINXBUILD = milestones.get('SPHINXBUILD')
@@ -129,12 +129,12 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, shell=True, cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
@@ -167,46 +167,62 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     builder = 'latex'
-    sourcedir = documentation_folder_for_sphinx
-    outdir = os.path.join(TheProjectBuild, builder)
-    build_latex_folder = outdir
-    outdir_in_cache = os.path.join(TheProjectCacheDir, builder)
+
     warnings_file_folder = os.path.join(TheProjectLog, builder)
     warnings_file = os.path.join(warnings_file_folder, 'warnings.txt')
-    # different builder may share the same .doctree
-    doctree_folder = os.path.join(TheProjectCacheDir, 'html', '.doctrees')
-    loglist.append(('doctree_folder', doctree_folder))
+
+    html_doctrees_folder = lookup(milestones, 'html_doctrees_folder')
     confpy_folder = TheProjectMakedir
     if not ospe(warnings_file_folder):
         os.makedirs(warnings_file_folder)
-    if not ospe(outdir_in_cache):
-        os.makedirs(outdir_in_cache)
+
+    # Here we decide where the inital build goes
+    usingTheProjectCacheDir = None
+    if 0:
+        # can be external
+        builder_latex_folder = os.path.join(TheProjectCacheDir, builder)
+        usingTheProjectCacheDir = True
+    if 1:
+        # always within the /tmp area
+        builder_latex_folder = os.path.join(TheProjectBuild, builder)
+        usingTheProjectCacheDir = False
+
+    if builder_latex_folder and not ospe(builder_latex_folder):
+        os.makedirs(builder_latex_folder)
 
     cmdlist = [
         'sphinx-build',
-      # '-a',                  # write all files; default is to only write new and changed files
-        '-b ' + builder,       # builder to use; default is html
-        '-c ' + confpy_folder, # path where configuration file(conf.py) is located (default: same as sourcedir)
+      # '-a',                # always write all files
+        '-b', builder,
+        '-c', confpy_folder,
         ]
-    if doctree_folder and ospe(doctree_folder):
-        cmdlist.extend(['-d ' + doctree_folder]) # path for the cached environment and doctree files (default: outdir /.doctrees)
+
+    if html_doctrees_folder:
+        cmdlist.extend([
+            '-d', html_doctrees_folder])
+
     cmdlist.extend([
-      # '-E',                  # don't use a saved environment, always read all files
-        '-n',                  # nit-picky mode, warn about all missing references
-        '-T',                  # show full traceback on exception
-        '-w ' + warnings_file, # write warnings (and errors) to given file
+      # '-E',
+        '-n',
+        '-T',
+        '-w', warnings_file,
         SYMLINK_THE_PROJECT,
         SYMLINK_THE_OUTPUT
         ])
+
     if ospe(SYMLINK_THE_OUTPUT):
         os.unlink(SYMLINK_THE_OUTPUT)
     if ospe(SYMLINK_THE_PROJECT):
         os.unlink(SYMLINK_THE_PROJECT)
-    # let sphinx build directly to the cache
-    os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)
-    loglist.append(('os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)', outdir_in_cache, SYMLINK_THE_OUTPUT))
+
+    sourcedir = os.path.split(masterdoc)[0]
     os.symlink(sourcedir, SYMLINK_THE_PROJECT)
-    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir, SYMLINK_THE_PROJECT))
+    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)',
+                    sourcedir, SYMLINK_THE_PROJECT))
+
+    os.symlink(builder_latex_folder, SYMLINK_THE_OUTPUT)
+    loglist.append(('os.symlink(builder_latex_folder, SYMLINK_THE_OUTPUT)',
+                    builder_latex_folder, SYMLINK_THE_OUTPUT))
 
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
@@ -214,32 +230,45 @@ if exitcode == CONTINUE:
         os.unlink(SYMLINK_THE_OUTPUT)
     if ospe(SYMLINK_THE_PROJECT):
         os.unlink(SYMLINK_THE_PROJECT)
-
-    # by definition:
-    latex_file = os.path.join(build_latex_folder, 'PROJECT.tex')
+    if not ospe(builder_latex_folder):
+        builder_latex_folder = None
 
 if exitcode == CONTINUE:
-    # Now, since Sphinx has written directly to the Cachedir, we fetch that
-    # result since the Toolchain is expecting that and
-    # copy folder 'outdir_in_cache' as 'outdir'
-    cmdlist = ['rsync', '-a', '--delete', '"%s"' % outdir_in_cache, '"%s/"' % TheProjectBuild ]
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+    build_latex = 'success'
+    if usingTheProjectCacheDir:
+        cmdlist = ['rsync', '-a', '--delete',
+                   '"%s"' % builder_latex_folder,
+                   '"%s/"' % TheProjectBuild ]
+        exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
+if exitcode == CONTINUE:
+    build_latex_folder = ospj(TheProjectBuild, builder)
+    if not ospe(build_latex_folder):
+        build_latex_folder = None
+    if build_latex_folder:
+        build_latex_file = ospj(build_latex_folder, 'PROJECT.tex')
+        if not ospe(build_latex_file):
+            build_latex_file = None
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
-    result['MILESTONES'].append({
-        'build_latex': 'success',
-        'build_latex_folder': build_latex_folder,
-        'latex_file': latex_file,
-    })
+if build_latex:
+    result['MILESTONES'].append({'build_latex': 'success'})
 
-if documentation_folder_for_sphinx:
-    result['MILESTONES'].append({'documentation_folder_for_sphinx': documentation_folder_for_sphinx})
+# within TheProjectBuild
+if build_latex_folder:
+    result['MILESTONES'].append({'build_latex_folder': build_latex_folder})
+
+# where the Sphinx builder initially builds
+if builder_latex_folder:
+    result['MILESTONES'].append({'builder_latex_folder': builder_latex_folder})
+
+if build_latex_file:
+    result['MILESTONES'].append({'build_latex_file': build_latex_file})
+
 
 # ==================================================
 # save result
