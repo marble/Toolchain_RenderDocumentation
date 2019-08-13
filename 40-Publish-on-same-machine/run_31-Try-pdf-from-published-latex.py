@@ -9,7 +9,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import codecs
-import json
 import os
 import subprocess
 import shutil
@@ -53,7 +52,9 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-script_to_xeq = None
+pdf_files_from_published_latex = []
+publish_dir_pdf = None
+make_pdf_script_to_execute = None
 xeq_name_cnt = 0
 
 
@@ -64,6 +65,7 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    make_pdf = lookup(milestones, 'make_pdf')
     publish_dir_latex = lookup(milestones, 'publish_dir_latex')
     run_latex_make_sh_file = lookup(milestones, 'run_latex_make_sh_file')
     try_pdf_build_from_published_latex = lookup(milestones,
@@ -71,6 +73,7 @@ if exitcode == CONTINUE:
                                                 'latex')
 
     if not (1
+            and make_pdf
             and publish_dir_latex
             and try_pdf_build_from_published_latex
             and run_latex_make_sh_file
@@ -132,24 +135,38 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
 
-    # 1
-    script_to_xeq = os.path.join(publish_dir_latex, os.path.basename(run_latex_make_sh_file))
+    make_pdf_script_to_execute = os.path.join(publish_dir_latex,
+                                              os.path.basename(run_latex_make_sh_file))
     workdir = publish_dir_latex
 
-if exitcode == CONTINUE:
-    exitcode, cmd, out, err = execute_cmdlist([script_to_xeq], cwd=workdir)
+    exitcode, cmd, out, err = execute_cmdlist([make_pdf_script_to_execute],
+                                              cwd=workdir)
 
+if exitcode == CONTINUE:
+   publish_dir_pdf = os.path.normpath(os.path.join(publish_dir_latex, '..', 'pdf'))
+   if not ospe(publish_dir_pdf):
+       os.makedirs(publish_dir_pdf)
+   for fname in os.listdir(publish_dir_latex):
+       if fname.endswith('.pdf'):
+           destfile = os.path.join(publish_dir_pdf, fname)
+           shutil.copy2(os.path.join(publish_dir_latex, fname),
+                        destfile)
+           pdf_files_from_published_latex.append(destfile)
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-# script_to_xeq
+if make_pdf_script_to_execute:
+    result['MILESTONES'].append({'make_pdf_script_to_execute':
+                                 make_pdf_script_to_execute})
+if pdf_files_from_published_latex:
+    result['MILESTONES'].append({'pdf_files_from_published_latex':
+                                 pdf_files_from_published_latex})
 
-if 0 and  documentation_folder_for_sphinx:
-    result['MILESTONES'].append({'documentation_folder_for_sphinx':
-                                 documentation_folder_for_sphinx})
-
+if publish_dir_pdf:
+    result['MILESTONES'].append({'publish_dir_pdf':
+                                 publish_dir_pdf})
 
 # ==================================================
 # save result
