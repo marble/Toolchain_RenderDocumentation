@@ -55,6 +55,7 @@ def lookup(D, *keys, **kwdargs):
 
 conf_py_settings = None
 documentation_folder_for_sphinx = ''
+html_doctrees_folder = None
 settings_dump_json_file = None
 xeq_name_cnt = 0
 
@@ -202,11 +203,13 @@ if exitcode == CONTINUE:
         os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)
         loglist.append(('os.symlink(outdir_in_cache, SYMLINK_THE_OUTPUT)',
                         outdir_in_cache, SYMLINK_THE_OUTPUT))
+        html_doctrees_folder = ospj(outdir_in_cache, '.doctrees')
     # Else if there is no cache build in TheProjectBuild
     else:
         os.symlink(outdir, SYMLINK_THE_OUTPUT)
         loglist.append(('os.symlink(outdir, SYMLINK_THE_OUTPUT)', outdir,
                         SYMLINK_THE_OUTPUT))
+        html_doctrees_folder = ospj(outdir, '.doctrees')
 
     os.symlink(sourcedir, SYMLINK_THE_PROJECT)
     loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir,
@@ -272,6 +275,9 @@ if exitcode == CONTINUE:
         with codecs.open(settings_dump_json_file, 'r', 'utf-8') as f1:
             conf_py_settings = json.load(f1)
 
+if html_doctrees_folder and not ospe(html_doctrees_folder):
+    html_doctrees_folder = None
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -289,6 +295,10 @@ if exitcode == CONTINUE:
 if documentation_folder_for_sphinx:
     result['MILESTONES'].append({'documentation_folder_for_sphinx':
                                  documentation_folder_for_sphinx})
+
+if html_doctrees_folder:
+    result['MILESTONES'].append({'html_doctrees_folder':
+                                 html_doctrees_folder})
 
 if settings_dump_json_file:
     result['MILESTONES'].append({'settings_dump_json_file':
