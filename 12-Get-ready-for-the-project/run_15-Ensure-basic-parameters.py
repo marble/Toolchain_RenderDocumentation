@@ -6,9 +6,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import tct
 import os
 import sys
+
+from tct import deepget
 
 ospabsp = os.path.abspath
 ospe = os.path.exists
@@ -44,7 +47,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -53,6 +56,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+latex_contrib_typo3_folder = None
 makedir = ''
 makedir_abspath = ''
 makedir_missing = ''
@@ -118,10 +122,20 @@ if exitcode == CONTINUE:
             print(msg)
             exitcode = 90
 
+if exitcode == CONTINUE:
+    temp = lookup(milestones, 'latex_contrib_typo3_folder')
+    if temp and not os.path.isabs(temp):
+        temp = ospj(initial_working_dir, temp)
+        latex_contrib_typo3_folder = os.path.normpath(os.path.abspath(temp))
+
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
+
+if latex_contrib_typo3_folder:
+    result['MILESTONES'].append({'latex_contrib_typo3_folder':
+                                 latex_contrib_typo3_folder})
 
 if makedir:
     result['MILESTONES'].append({'makedir': makedir})
