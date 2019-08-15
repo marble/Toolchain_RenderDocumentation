@@ -102,13 +102,21 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     run_latex_make_sh_file = ospj(build_latex_folder, 'run-make.sh')
     f2text = (
-        "#!/bin/sh\n"
+        "#!/bin/bash\n"
         "\n"
         "# This is run-make.sh\n"
         "\n"
+        'scriptdir=$( cd $(dirname "$0") ; pwd -P )'
+        "\n"
+        "# cd to this dir
+        "pushd \"$scriptdir\" >/dev/null\n"
+        "\n"
         "# set environment var pointing to the folder and run make\n"
         "TEXINPUTS=::texmf_typo3   make\n"
-        "\n")
+        "\n"
+        "popd >/dev/null\n"
+        "\n"
+    )
     with open(run_latex_make_sh_file, 'w') as f2:
         f2.write(f2text)
 
