@@ -1,9 +1,15 @@
-Release v2.7.0 (to be released)
-===============================
+Release v2.7.0 (Aug 15, 2019)
+=============================
 
+Lots of changes!
+See the few commits in the 'master' branch or all the ugly little changes
+done back and forth in the 'develop' branch that both lead to this v2.7.1
+
+Some from 'develop':
 * 70ef40f Neutralize images with src scheme 'javascript:' or 'data:'
 * 80f62b3 Neutralize hyperlinks that would start like 'data:'
 * 74f469e [BUGFIX] Do not pretty print postprocessed html code
+
 
 
 Release v2.6.1 (Jun 23, 2019)
