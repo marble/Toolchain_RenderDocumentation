@@ -7,9 +7,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -36,8 +39,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # ==================================================
 # Helper functions
 # --------------------------------------------------
-
-deepget = tct.deepget
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -77,7 +78,8 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    TheProjectResultBuildinfoResultJsonfile = os.path.join(TheProjectResultBuildinfo, 'results.json')
+    TheProjectResultBuildinfoResultJsonfile = os.path.join(
+        TheProjectResultBuildinfo, 'results.json')
 
     mapping = {
         'checksum_new': 'checksum',
@@ -128,7 +130,8 @@ if exitcode == CONTINUE:
         if v:
             R[k] = v
 
-    settings_cfg_general = milestones.get('settings_cfg', {}).get('general', {})
+    settings_cfg_general = lookup(milestones, 'settings_cfg', 'general',
+                                  default={})
     for k in [
         'copyright',
         'description',
@@ -159,6 +162,33 @@ if exitcode == CONTINUE:
     else:
         R['has_neutralized_links'] = 0
 
+    if milestones.get('neutralized_images_jsonfile'):
+        R['has_neutralized_images'] = 1
+    else:
+        R['has_neutralized_images'] = 0
+
+    sitemap_files_html_count = milestones.get('sitemap_files_html_count')
+    if sitemap_files_html_count is not None:
+        R['sitemap_files_html_count'] = sitemap_files_html_count
+
+    sitemap_files_singlehtml_count = milestones.get('sitemap_files_singlehtml_'
+                                                    'count')
+    if sitemap_files_singlehtml_count is not None:
+        R['sitemap_files_singlehtml_count'] = sitemap_files_singlehtml_count
+
+    R['postprocessed_html_files'] = milestones.get(
+        'all_html_files_sanitized_count', 0)
+
+
+if exitcode == CONTINUE:
+    # Defined in Dockerfile:
+    interesting = [
+        'TOOLCHAIN_VERSION', 'TYPOSCRIPT_PY_VERSION', 'OUR_IMAGE',
+        'OUR_IMAGE_SHORT', 'OUR_IMAGE_VERSION', 'THEME_VERSION', 'THEME_MTIME']
+    R['environ'] = {k: os.environ[k] for k in interesting if k in os.environ}
+
+
+if exitcode == CONTINUE:
     tct.writejson(R, TheProjectResultBuildinfoResultJsonfile)
 
 # ==================================================
@@ -175,7 +205,7 @@ if TheProjectResultBuildinfoResultJsonfile:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

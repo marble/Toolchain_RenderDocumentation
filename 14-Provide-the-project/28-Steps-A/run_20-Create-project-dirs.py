@@ -49,6 +49,7 @@ def lookup(D, *keys, **kwdargs):
 
 TheProjectLog = None
 TheProjectBuild = None
+TheProjectWebroot = None
 
 
 # ==================================================
@@ -58,19 +59,15 @@ TheProjectBuild = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    TheProject = lookup(milestones, 'TheProject')
+    TheProject = lookup(milestones, 'TheProject', default=None)
 
-    if not (TheProject):
+    if not TheProject:
         exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -79,6 +76,8 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
+    resultdir = lookup(milestones, 'resultdir', default=None)
+
     TheProjectLog = TheProject + 'Log'
     if not os.path.exists(TheProjectLog):
         os.makedirs(TheProjectLog)
@@ -86,6 +85,14 @@ if exitcode == CONTINUE:
     TheProjectBuild = TheProject + 'Build'
     if not os.path.exists(TheProjectBuild):
         os.makedirs(TheProjectBuild)
+
+    if resultdir:
+        TheProjectWebroot = os.path.join(resultdir, 'Result')
+    else:
+        TheProjectWebroot = TheProject + 'Webroot'
+
+    if not os.path.exists(TheProjectWebroot):
+        os.makedirs(TheProjectWebroot)
 
 
 # ==================================================
@@ -98,12 +105,15 @@ if TheProjectBuild:
 if TheProjectLog:
     result['MILESTONES'].append({'TheProjectLog': TheProjectLog})
 
+if TheProjectWebroot:
+    result['MILESTONES'].append({'TheProjectWebroot': TheProjectWebroot})
+
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

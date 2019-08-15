@@ -67,31 +67,14 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     makedir_abspath = milestones_get('makedir_abspath')
-
-    # test
     if not makedir_abspath:
-        CONTINUE = -1
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
 
 
 # ==================================================
@@ -101,7 +84,7 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     conf_py_file = os.path.join(makedir_abspath, 'conf.py')
     if os.path.exists(conf_py_file):
-        CONTINUE = -1
+        CONTINUE = -0
     else:
         conf_py_file = ''
 
@@ -119,7 +102,7 @@ if exitcode == CONTINUE:
         loglist.append(('conf.py not found in makedir', makedir_abspath))
         printerror = print
         printerror('conf.py is missing in makedir ' + makedir_abspath)
-        exitcode = 22
+        CONTINUE = -2
 
 
 # ==================================================
@@ -137,7 +120,7 @@ if conf_py_symlink_created:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

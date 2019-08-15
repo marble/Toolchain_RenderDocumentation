@@ -221,7 +221,7 @@ if settingscfg_file is not None:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

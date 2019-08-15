@@ -7,11 +7,13 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import tct
-import sys
 
-VERSION = '2.6.1'
+import os
+import shutil
+import sys
+import tct
+
+VERSION = '2.7.0'
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -49,8 +51,8 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 lockfiles_removed = []
-toolchain_actions = lookup(params, 'toolchain_actions', default=[])
 removed_dirs = []
+toolchain_actions = lookup(params, 'toolchain_actions', default=[])
 xeq_name_cnt = 0
 
 
@@ -61,32 +63,16 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # fetch #1
-    configset = lookup(milestones, 'configset')
-    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    lockfile_name = lookup(milestones, 'lockfile_name')
     run_id = lookup(facts, 'run_id')
-
-    # test #1
-    if not (configset and toolchain_temp_home and run_id):
-        exitcode = 22
-
-if exitcode == CONTINUE:
-
-    # fetch #2
-    lockfile_name = lookup(facts, 'tctconfig', configset, 'lockfile_name')
-
-    # text #2
-    if not (lockfile_name):
+    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    if not (lockfile_name and run_id and toolchain_temp_home):
         exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
     loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
 
 
 # =========================================================
@@ -137,59 +123,33 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 
-
-if 0 and exitcode == CONTINUE and 'This clause is experimental research':
-    import os
-
-    cmdlist = ['find /proc',
-               '-maxdepth 1',
-               '-user marble',
-               '-type d',
-               # '-mmin +$AGE',
-               ]
-    exitcode_temp, cmd, out, err = execute_cmdlist(cmdlist)
-
-
-    for one in out.split('\n'):
-        one = one.strip().strip('/proc/')
-        pid = None
-        try:
-            pid = int(one)
-        except ValueError:
-            pass
-        if one is not None:
-            exitcode_temp, cmd, out, err = execute_cmdlist(['ps', str(one)])
+if exitcode == CONTINUE:
+    if 'version' in toolchain_actions:
+        print(VERSION)
+        exitcode = 90
 
 if exitcode == CONTINUE:
-    import shutil
+    if 'unlock' in toolchain_actions:
+        for top, dirs, files in os.walk(toolchain_temp_home):
+            dirs[:] = [] # stop recursion
+            for fname in files:
+                if fname == lockfile_name:
+                    lockfile = os.path.join(top, fname)
+                    os.remove(lockfile)
+                    lockfiles_removed.append(lockfile)
+        exitcode = 90
 
-if 'help' in toolchain_actions and exitcode == CONTINUE:
-    'Should not occur'
-
-if 'version' in toolchain_actions and exitcode == CONTINUE:
-    print(VERSION)
-    exitcode = 90
-
-if 'unlock' in toolchain_actions and exitcode == CONTINUE:
-    for top, dirs, files in os.walk(toolchain_temp_home):
-        dirs[:] = [] # stop recursion
-        for fname in files:
-            if fname == lockfile_name:
-                lockfile = os.path.join(top, fname)
-                os.remove(lockfile)
-                lockfiles_removed.append(lockfile)
-    exitcode = 90
-
-if 'clean' in toolchain_actions and exitcode == CONTINUE:
-    for top, dirs, files in os.walk(toolchain_temp_home):
-        dirs.sort()
-        for adir in dirs:
-            fpath = os.path.join(top, adir)
-            if not run_id in adir:
-                if os.path.isdir(fpath):
-                    shutil.rmtree(fpath)
-        dirs[:] = [] # stop recursion
-    exitcode = 90
+if exitcode == CONTINUE:
+    if 'clean' in toolchain_actions:
+        for top, dirs, files in os.walk(toolchain_temp_home):
+            dirs.sort()
+            for adir in dirs:
+                fpath = os.path.join(top, adir)
+                if not run_id in adir:
+                    if os.path.isdir(fpath):
+                        shutil.rmtree(fpath)
+            dirs[:] = [] # stop recursion
+        exitcode = 90
 
 
 # ==================================================
@@ -203,11 +163,12 @@ if lockfiles_removed:
     result['MILESTONES'].append({'lockfiles_removed': lockfiles_removed})
 
 
+
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

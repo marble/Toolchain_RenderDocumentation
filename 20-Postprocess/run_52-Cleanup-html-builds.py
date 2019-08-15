@@ -7,9 +7,11 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import glob
 import os
-import tct
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -36,10 +38,8 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
+    result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -47,8 +47,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
 postprocess_cleanup_files = None
+xeq_name_cnt = 0
 
 # ==================================================
 # Check params
@@ -57,21 +57,26 @@ postprocess_cleanup_files = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    build_html = lookup(milestones, 'build_html')
-    build_singlehtml = lookup(milestones, 'build_singlehtml')
-    TheProject = lookup(milestones, 'TheProject')
+    build_html = lookup(milestones, 'build_html', default=None)
+    build_singlehtml = lookup(milestones, 'build_singlehtml', default=None)
+    TheProject = lookup(milestones, 'TheProject', default=None)
 
-    if not (TheProject and (build_html or build_singlehtml)):
-        exitcode = 22
+    if not (1
+            and TheProject
+            and (build_html or build_singlehtml)):
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
+    build_html_folder = lookup(milestones, 'build_html_folder', default=None)
+    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
+                                     default=None)
+    if not (build_html_folder or build_singlehtml_folder):
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -79,17 +84,10 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    build_html_folder = lookup(milestones, 'build_html_folder')
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder')
-
-if exitcode == CONTINUE:
     loglist.append('Here we remove files that are - unfortunately - '
                    'still in the theme but are not needed.')
 
 if exitcode == CONTINUE:
-
-    import glob
-
     file_patterns = [
         '.buildinfo',
         '_static/*.map',
@@ -102,15 +100,16 @@ if exitcode == CONTINUE:
     ]
 
 if exitcode == CONTINUE:
-    todolist = [item for item in [build_html_folder, build_singlehtml_folder] if item]
+    todolist = [item for item in [build_html_folder, build_singlehtml_folder]
+                if item]
 
     for folder in todolist:
         for pattern in file_patterns:
             files = glob.glob(folder + '/' + pattern)
             if files:
                 loglist.append(files)
-                for file in files:
-                    os.remove(file)
+                for fpath in files:
+                    os.remove(fpath)
     if build_singlehtml_folder:
         fpath = os.path.join(build_singlehtml_folder, 'objects.inv')
         if os.path.exists(fpath):
@@ -133,7 +132,7 @@ if postprocess_cleanup_files is not None:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

@@ -145,7 +145,7 @@ if warnings_file_dumped_to_console:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

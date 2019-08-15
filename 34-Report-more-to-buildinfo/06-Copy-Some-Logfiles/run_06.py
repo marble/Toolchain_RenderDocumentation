@@ -7,10 +7,13 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
 import shutil
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -37,8 +40,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # ==================================================
 # Helper functions
 # --------------------------------------------------
-
-deepget = tct.deepget
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -69,7 +70,7 @@ if exitcode == CONTINUE:
 
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
-    if not (TheProjectResultBuildinfo):
+    if not TheProjectResultBuildinfo:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -152,7 +153,7 @@ if TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

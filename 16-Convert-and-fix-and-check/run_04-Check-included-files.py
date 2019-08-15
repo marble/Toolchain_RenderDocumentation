@@ -7,9 +7,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
+import subprocess
 import sys
 import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
@@ -36,8 +41,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
@@ -61,6 +64,14 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    disable_include_files_check = lookup(milestones,
+                                         'disable_include_files_check',
+                                         default=0)
+
+    if disable_include_files_check:
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     documentation_folder = lookup(milestones, 'documentation_folder')
     masterdoc = lookup(milestones, 'masterdoc')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
@@ -69,16 +80,12 @@ if exitcode == CONTINUE:
 
     if not (documentation_folder and masterdoc and TheProjectLog and
             toolfolderabspath and workdir):
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -87,13 +94,12 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
-    import codecs
-    import subprocess
-
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+            cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
@@ -128,7 +134,8 @@ if exitcode == CONTINUE:
     with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
         f2.write(err.decode('utf-8', 'replace'))
 
-    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' % toolname_pure))
+    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' %
+                                                                toolname_pure))
     with codecs.open(included_files_check_logfile, 'w', 'utf-8') as f2:
         f2.write(out.decode('utf-8', 'replace'))
 
@@ -145,19 +152,21 @@ if (exitcode != 0) and included_files_check_logfile:
 # --------------------------------------------------
 
 if included_files_check_is_ok:
-    result['MILESTONES'].append({'included_files_check_is_ok': included_files_check_is_ok})
+    result['MILESTONES'].append({'included_files_check_is_ok':
+                                 included_files_check_is_ok})
 if included_files_check_logfile:
-    result['MILESTONES'].append({'included_files_check_logfile': included_files_check_logfile})
+    result['MILESTONES'].append({'included_files_check_logfile':
+                                 included_files_check_logfile})
 if included_files_check_logfile_dumped_to_stdout:
-    result['MILESTONES'].append(
-        {'included_files_check_logfile_dumped_to_stdout':
-         included_files_check_logfile_dumped_to_stdout})
+    result['MILESTONES'].append({
+        'included_files_check_logfile_dumped_to_stdout':
+        included_files_check_logfile_dumped_to_stdout})
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

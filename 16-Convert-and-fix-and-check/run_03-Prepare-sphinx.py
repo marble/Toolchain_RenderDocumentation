@@ -32,22 +32,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -66,12 +56,12 @@ SPHINXBUILD = None
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    buildsettings_file_fixed = milestones_get('buildsettings_file_fixed')
-    makedir = milestones_get('makedir')
-    masterdoc = milestones_get('masterdoc')
-    TheProject = milestones_get('TheProject')
-    TheProjectBuild = milestones_get('TheProjectBuild')
-    TheProjectLog = milestones_get('TheProjectLog')
+    buildsettings_file_fixed = lookup(milestones, 'buildsettings_file_fixed')
+    makedir = lookup(milestones, 'makedir')
+    masterdoc = lookup(milestones, 'masterdoc')
+    TheProject = lookup(milestones, 'TheProject')
+    TheProjectBuild = lookup(milestones, 'TheProjectBuild')
+    TheProjectLog = lookup(milestones, 'TheProjectLog')
 
     if not (buildsettings_file_fixed and makedir and masterdoc and TheProject
             and TheProjectBuild and TheProjectLog):
@@ -89,8 +79,8 @@ else:
 import subprocess
 
 if exitcode == CONTINUE:
-    has_settingscfg = milestones_get('has_settingscfg')
-    rebuild_needed = milestones_get('rebuild_needed')
+    has_settingscfg = lookup(milestones, 'has_settingscfg')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
 
 def cmdline(cmd, cwd=None):
     if cwd is None:
@@ -135,7 +125,7 @@ if ready_for_build:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

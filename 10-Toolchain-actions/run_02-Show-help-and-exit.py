@@ -17,6 +17,7 @@ resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
+toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
@@ -31,22 +32,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = tct.deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -54,7 +45,7 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-toolchain_usage = False
+show_toolchain_usage_and_exit = None
 
 
 # ==================================================
@@ -63,9 +54,6 @@ toolchain_usage = False
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
-    toolchain_name = params_get('toolchain_name')
-    if not toolchain_name:
-        exitcode = 99
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -83,43 +71,48 @@ Usage: tct run [OPTIONS] %(toolchain_name)s
   Run the toolchain '%(toolchain_name)s'.
 
 Options:
-  -c, --config KEY VALUE         Define or override config key-value pair
-                                 (repeatable)
-  -n, --dry-run                  Perform a trial run with no changes made.
-  --toolchain-help               Tell the toolchain to display its help text.
-                                 The toolchain should do that and then exit.
-  -T, --toolchain-action ACTION  Tell the toolchain to execute the action.
-                                 (repeatable)
-  --help                         Show this message and exit.
+  -c, --config KEY VALUE          Define or override config key-value pair
+                                  (repeatable)
+  -n, --dry-run                   Perform a trial run with no changes made.
+  --toolchain-help                Tell the toolchain to display its help text.
+                                  The toolchain should do that and then exit.
+  -T, --toolchain-action ACTION   Tell the toolchain to execute the action.
+                                  (repeatable)
+  --help                          Show this message and exit.
 
 Toolchain options:
-  -T clean                       Let the toolchain delete prior builds, then exit.
-  -T help                        Show toolchain help and e exit.
-  -T unlock                      Remove possible lock and exit.
-  -T version                     Show toolchain version and exit.
+  -T clean                        Let the toolchain delete prior builds, then exit.
+  -T help                         Show toolchain help and e exit.
+  -T unlock                       Remove possible lock and exit.
+  -T version                      Show toolchain version and exit.
 
-  -c makedir PATH/TO/MAKEDIR     Required! The path to the 'make' folder.
+  -c makedir PATH/TO/MAKEDIR      Required! The path to the 'make' folder.
+  -c resultdir PATH/TO/MAKEDIR    Optional. The path to the 
+                                  'Documentation-GENERATED-temp' folder. Must
+                                  exist if specified.
 
-  -c buildsettings PATH/TO/FILE  If specified, this file overrides the normal
-                                 makedir/buildsettings.sh
+  -c buildsettings PATH/TO/FILE   If specified, this file overrides the normal
+                                  makedir/buildsettings.sh
 
-  -c overrides PATH/TO/FILE      If specified, this file is used instead of the
-                                 normal makedir/Overrides.cfg
+  -c overrides PATH/TO/FILE       If specified, this file is used instead of the
+                                  normal makedir/Overrides.cfg
 
-  -c rebuild_needed 1            Force rebuild regardless of checksum
+  -c rebuild_needed 1             Force rebuild regardless of checksum
 
-  -c make_singlehtml 1           yes (default)
-  -c make_singlehtml 0           no
+  -c make_singlehtml 1            yes (default)
+  -c make_singlehtml 0            no
 
-  -c make_latex 1                yes! Make LaTeX and PDF(default)
-  -c make_latex 0                no
+  -c make_latex 1                 yes! Make LaTeX and PDF(default)
+  -c make_latex 0                 no
 
-  -c make_package 1              yes (default)
-  -c make_package 0              no
+  -c make_package 1               yes (default)
+  -c make_package 0               no
 
-  -c talk 0                      run quietly
-  -c talk 1                      talk just the minimum (default)
-  -c talk 2                      talk more
+  -c talk 0                       run quietly
+  -c talk 1                       talk just the minimum (default)
+  -c talk 2                       talk more
+
+  -c jobfile PATH/TO/JOBFILE.JSON  pass in all kind of settings
 
   -c email_user_to_instead  "email1,email2,..."  instead of real user
   -c email_user_cc  "email1,email2,..."  additionally, publicly
@@ -130,22 +123,25 @@ Toolchain options:
 
 if exitcode == CONTINUE:
     if params.get('toolchain_help') or ('help' in params.get('toolchain_actions', [])):
-        print(toolchain_usage)
-        exitcode = 90
+        show_toolchain_usage_and_exit = 1
+        if show_toolchain_usage_and_exit:
+            print(toolchain_usage)
+            exitcode = 90
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if toolchain_usage:
-    result['MILESTONES'].append({'toolchain_usage': toolchain_usage})
+if show_toolchain_usage_and_exit:
+    result['MILESTONES'].append({'show_toolchain_usage_and_exit':
+                                     show_toolchain_usage_and_exit})
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 # ==================================================
 # Return with proper exitcode

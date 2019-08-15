@@ -7,9 +7,15 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
+import shutil
+import subprocess
 import sys
+import tct
+
+ospj = os.path.join
+ospe = os.path.exists
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -36,12 +42,11 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
-    result = deepget(D, *keys, **kwdargs)
+    result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
+
 
 # ==================================================
 # define
@@ -52,9 +57,16 @@ package_file = None
 package_name = 'manual.zip'
 pdf_name = 'manual.pdf'
 xeq_name_cnt = 0
-ospj = os.path.join
-ospe = os.path.exists
 
+
+# ==================================================
+# Disable for now
+# --------------------------------------------------
+
+if exitcode == CONTINUE:
+    loglist.append('Disabled in tool (run_53-Create-package.py '
+                   'because its functionality may not be complete.')
+    CONTINUE = -2
 
 # ==================================================
 # Check params
@@ -63,35 +75,32 @@ ospe = os.path.exists
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    buildsettings = lookup(milestones, 'buildsettings')
-    make_package = lookup(milestones, 'make_package')
-    package_language = lookup(milestones, 'buildsettings', 'package_language', default=None)
-    package_key = lookup(milestones, 'buildsettings', 'package_key', default=None)
-
-    # build_html = milestones_get('build_html')
     build_html_folder = lookup(milestones, 'build_html_folder')
-    # build_singlehtml = milestones_get('build_singlehtml')
-    # build_singlehtml_folder = milestones_get('build_singlehtml_folder')
-    # build_latex = milestones_get('build_latex')
-    # build_pdf = milestones_get('build_pdf')
-    pdf_file = lookup(milestones, 'pdf_file')
-    # TheProject = milestones_get('TheProject')
-    pdf_name = lookup(milestones, 'NAMING', 'pdf_name', default=pdf_name)
-    package_name = lookup(milestones, 'NAMING', 'package_name', default=package_name)
+    make_package = lookup(milestones, 'make_package')
+    package_key = lookup(milestones, 'buildsettings', 'package_key',
+                         default=None)
+    package_language = lookup(milestones, 'buildsettings', 'package_language',
+                              default=None)
     TheProjectBuild = lookup(milestones, 'TheProjectBuild')
-
-    if not (make_package and package_key and package_language
-            and build_html_folder and TheProjectBuild):
+    if not (1
+            and build_html_folder
+            and make_package
+            and package_key
+            and package_language
+            and TheProjectBuild):
         CONTINUE = -2
+
+if exitcode == CONTINUE:
+    buildsettings = lookup(milestones, 'buildsettings')
+    package_name = lookup(milestones, 'NAMING', 'package_name',
+                          default=package_name)
+    pdf_file = lookup(milestones, 'pdf_file')
+    pdf_name = lookup(milestones, 'NAMING', 'pdf_name', default=pdf_name)
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -100,13 +109,12 @@ if CONTINUE != 0:
 
 if exitcode == CONTINUE:
 
-    import shutil
-    import subprocess
-
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+            cwd=cwd)
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
@@ -116,7 +124,8 @@ if exitcode == CONTINUE:
     # we first assemble everything for the package in the workdir temp folder
     # of this step. Afterwards we run 'zip' to pack everything.
 
-    dest_folder = os.path.join(workdir, 'packages', package_key, package_language)
+    dest_folder = os.path.join(workdir, 'packages', package_key,
+                               package_language)
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
@@ -128,6 +137,8 @@ if exitcode == CONTINUE:
         if not os.path.exists(dest_folder_pdf):
             os.makedirs(dest_folder_pdf)
         shutil.copy(pdf_file, os.path.join(dest_folder_pdf, pdf_name))
+    else:
+        pdf_name = None
 
     if 0 and "remove all font files":
         shutil.rmtree(ospj(dest_folder, 'html', '_static', 'fonts'),
@@ -145,11 +156,13 @@ if exitcode == CONTINUE:
 
     # use theme without fonts
     theme_css = ospj(dest_folder, 'html', '_static', 'css', 'theme.css')
-    theme_no_fonts_css = ospj(dest_folder, 'html', '_static', 'css', 'theme-no-fonts.css')
+    theme_no_fonts_css = ospj(dest_folder, 'html', '_static', 'css',
+                              'theme-no-fonts.css')
     if ospe(theme_css) and ospe(theme_no_fonts_css):
         os.remove(theme_css)
         os.rename(theme_no_fonts_css, theme_css)
 
+    # ToDo: Improve!
     # remove piwik call
     # find:  <script type = "text/javascript" id="idPiwikScript" src="/js/piwik.js">
     # write: <script type = "text/javascript" id="idPiwikScript">
@@ -157,7 +170,7 @@ if exitcode == CONTINUE:
     for dirpath, dirnames, filenames in os.walk(dest_folder):
         for filename in filenames:
             if filename.endswith('.html'):
-                with open(ospj(dirpath, filename), 'r') as f1:
+                with open(ospj(dirpath, filename), 'rb') as f1:
                     data = f1.read()
                 p1 = data.find(needle)
                 if p1 >= 0:
@@ -206,7 +219,7 @@ if build_package:
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================

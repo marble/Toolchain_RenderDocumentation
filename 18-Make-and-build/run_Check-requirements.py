@@ -6,9 +6,11 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import tct
+
 import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -32,22 +34,12 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 
 # ==================================================
-# Get and check required milestone(s)
+# Helper functions
 # --------------------------------------------------
 
-def milestones_get(name, default=None):
-    result = milestones.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def facts_get(name, default=None):
-    result = facts.get(name, default)
-    loglist.append((name, result))
-    return result
-
-def params_get(name, default=None):
-    result = params.get(name, default)
-    loglist.append((name, result))
+def lookup(D, *keys, **kwdargs):
+    result = deepget(D, *keys, **kwdargs)
+    loglist.append((keys, result))
     return result
 
 
@@ -65,27 +57,31 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    requirements = [
-        'ready_for_build',
-        'rebuild_needed',
-        'included_files_check_is_ok',
-    ]
+    ready_for_build = lookup(milestones, 'ready_for_build')
+    rebuild_needed = lookup(milestones, 'rebuild_needed')
 
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if v is None:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-            break
+    if not(1
+            and ready_for_build
+            and rebuild_needed
+    ):
+        exitcode = 22
+
+if exitcode == CONTINUE:
+    disable_include_files_check = lookup(milestones,
+                                         'disable_include_files_check')
+    included_files_check_is_ok = lookup(milestones,
+                                        'included_files_check_is_ok')
+
+    if not (0
+            or disable_include_files_check
+            or included_files_check_is_ok
+    ):
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS')
 
 
 # ==================================================
@@ -105,7 +101,7 @@ pass
 # save result
 # --------------------------------------------------
 
-tct.writejson(result, resultfile)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
 
 
 # ==================================================
