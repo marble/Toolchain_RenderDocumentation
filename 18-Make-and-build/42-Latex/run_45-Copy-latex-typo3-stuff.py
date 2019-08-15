@@ -108,7 +108,7 @@ if exitcode == CONTINUE:
         "\n"
         'scriptdir=$( cd $(dirname "$0") ; pwd -P )'
         "\n"
-        "# cd to this dir
+        "# cd to this dir\n"
         "pushd \"$scriptdir\" >/dev/null\n"
         "\n"
         "# set environment var pointing to the folder and run make\n"
