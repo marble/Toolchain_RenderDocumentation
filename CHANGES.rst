@@ -1,3 +1,9 @@
+Release v2.7.1 (to be released)
+===============================
+
+* in make_html get 'exitcode' if 'activateForLocalDebugging' is on
+
+
 Release v2.7.0 (Aug 15, 2019)
 =============================
 
