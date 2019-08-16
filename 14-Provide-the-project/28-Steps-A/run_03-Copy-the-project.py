@@ -6,9 +6,15 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
-import tct
+import shutil
+import subprocess
 import sys
+import tct
+
+from tct import deepget
 from os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
@@ -36,7 +42,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -74,8 +80,6 @@ if CONTINUE != 0:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    import codecs
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:
@@ -114,8 +118,6 @@ if exitcode == CONTINUE:
 # work
 # --------------------------------------------------
 
-from shutil import copytree, copyfile
-
 if exitcode == CONTINUE:
     TheProject = os.path.join(workdir_home, 'TheProject')
     if os.path.exists(TheProject):
@@ -133,10 +135,10 @@ if exitcode == CONTINUE:
         # copy files of the top level and ./doc/ and ./Documentation is existing
         for top, dirs, files in os.walk(gitdir):
             for afile in files:
-                copyfile(os.path.join(top, afile), os.path.join(TheProject, afile))
+                shutil.copy2(os.path.join(top, afile), os.path.join(TheProject, afile))
             for adir in dirs:
                 if adir in ['doc', 'Documentation']:
-                    copytree(os.path.join(top, adir), os.path.join(TheProject, adir))
+                    shutil.copytree(os.path.join(top, adir), os.path.join(TheProject, adir))
             break
 
     if 1 and "better use rsync":
@@ -144,7 +146,8 @@ if exitcode == CONTINUE:
         # be safe
         src = gitdir.replace('\\', '/').rstrip('/')
         dest = TheProject.replace('\\', '/').rstrip('/')
-        cmdlist=['rsync', '%s/*' % src, '%s/' % dest]
+        # keep times!
+        cmdlist=['rsync', '-t', '%s/*' % src, '%s/' % dest]
         exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
         for adir in ['doc', 'Documentation']:
             srcdir = os.path.join(src, adir)
