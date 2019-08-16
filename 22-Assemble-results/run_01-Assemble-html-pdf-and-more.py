@@ -45,12 +45,18 @@ def lookup(D, *keys, **kwdargs):
     loglist.append((keys, result))
     return result
 
+
 # ==================================================
 # define
 # --------------------------------------------------
 
+assembled = None
 package_file_new_value = None
+pdf_dest_file = None
+pdf_dest_folder = None
 TheProjectResult = None
+TheProjectResult = None
+TheProjectResultVersion = None
 xeq_name_cnt = 0
 
 
@@ -123,8 +129,6 @@ if exitcode == CONTINUE:
         assembled.append('singlehtml')
 
     pdf_file = milestones.get('pdf_file')
-    pdf_dest_file = None
-    pdf_dest_folder = None
     if pdf_file:
         srcname = os.path.split(pdf_file)[1]
         destname = srcname
@@ -157,21 +161,24 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 
-if exitcode == CONTINUE:
+if assembled:
+    result['MILESTONES'].append({'assembled': assembled})
 
-    result['MILESTONES'].append({
-        'assembled': assembled,
-        'TheProjectResult': TheProjectResult,
-        'TheProjectResultVersion': TheProjectResultVersion})
+if TheProjectResult:
+    result['MILESTONES'].append({'TheProjectResult': TheProjectResult})
 
-    if package_file_new_value:
-        result['MILESTONES'].append({'package_file': package_file_new_value})
+if TheProjectResultVersion:
+    result['MILESTONES'].append({'TheProjectResultVersion':
+                                  TheProjectResultVersion})
 
-    if pdf_dest_file:
-        result['MILESTONES'].append({'pdf_dest_file': pdf_dest_file})
+if package_file_new_value:
+    result['MILESTONES'].append({'package_file': package_file_new_value})
 
-    if pdf_dest_folder:
-        result['MILESTONES'].append({'pdf_dest_folder': pdf_dest_folder})
+if pdf_dest_file:
+    result['MILESTONES'].append({'pdf_dest_file': pdf_dest_file})
+
+if pdf_dest_folder:
+    result['MILESTONES'].append({'pdf_dest_folder': pdf_dest_folder})
 
 
 # ==================================================
