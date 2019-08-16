@@ -132,7 +132,7 @@ if exitcode == CONTINUE:
 
     def execute_cmdlist(cmdlist, cwd=None):
         global xeq_name_cnt
-        exitcode, out, err = 99, None, None
+        exitcode, out, err = 88, None, None
 
         cmd = ' '.join(cmdlist)
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
@@ -145,7 +145,7 @@ if exitcode == CONTINUE:
         with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
 
-        if 1 and 'activateLocalSphinxDebugging':
+        if 0 or milestones.get('activateLocalSphinxDebugging'):
             if cmdlist[0] == 'sphinx-build':
                 from sphinx.cmd.build import main as sphinx_cmd_build_main
                 exitcode = sphinx_cmd_build_main(cmdlist[1:])
