@@ -132,6 +132,8 @@ if exitcode == CONTINUE:
 
     def execute_cmdlist(cmdlist, cwd=None):
         global xeq_name_cnt
+        exitcode, out, err = 99, None, None
+
         cmd = ' '.join(cmdlist)
         cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
 
@@ -143,21 +145,23 @@ if exitcode == CONTINUE:
         with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
 
-        if 0 and 'activateLocalSphinxDebugging':
+        if 1 and 'activateLocalSphinxDebugging':
             if cmdlist[0] == 'sphinx-build':
                 from sphinx.cmd.build import main as sphinx_cmd_build_main
-                sphinx_cmd_build_main(cmdlist[1:])
-                exitcode, cmd, out, err = 99, cmd, b'', b''
+                exitcode = sphinx_cmd_build_main(cmdlist[1:])
         else:
             exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
 
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out,
+                        'err': err})
 
-        with codecs.open(ospj(workdir, filename_out), 'w', 'utf-8') as f2:
-            f2.write(out.decode('utf-8', 'replace'))
+        if out:
+            with codecs.open(ospj(workdir, filename_out), 'w', 'utf-8') as f2:
+                f2.write(out.decode('utf-8', 'replace'))
 
-        with codecs.open(ospj(workdir, filename_err), 'w', 'utf-8') as f2:
-            f2.write(err.decode('utf-8', 'replace'))
+        if err:
+            with codecs.open(ospj(workdir, filename_err), 'w', 'utf-8') as f2:
+                f2.write(err.decode('utf-8', 'replace'))
 
         return exitcode, cmd, out, err
 
