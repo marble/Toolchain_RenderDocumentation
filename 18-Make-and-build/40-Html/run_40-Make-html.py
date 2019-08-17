@@ -145,8 +145,10 @@ if exitcode == CONTINUE:
         with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
             f2.write(cmd_multiline.decode('utf-8', 'replace'))
 
-        if 0 or milestones.get('activateLocalSphinxDebugging'):
-            if cmdlist[0] == 'sphinx-build':
+        if (1
+            and milestones.get('activateLocalSphinxDebugging')
+            and cmdlist[0] == 'sphinx-build'
+            and 1):
                 from sphinx.cmd.build import main as sphinx_cmd_build_main
                 exitcode = sphinx_cmd_build_main(cmdlist[1:])
         else:
