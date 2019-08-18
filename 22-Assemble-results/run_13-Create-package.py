@@ -137,8 +137,10 @@ if exitcode == CONTINUE:
     the_copy = ospj(TheProjectResultCopyForPackage, package_folder)
     if not ospe(the_copy):
         os.makedirs(the_copy)
-    cmd = ['rsync', '-a', TheProjectResultVersion.rstrip('/') + '/',
-           the_copy.rstrip('/') + '/']
+    cmd = [
+        'rsync', '-a', '--exclude=.doctrees',
+        TheProjectResultVersion.rstrip('/') + '/',
+        the_copy.rstrip('/') + '/']
     exitcode, cmd, out, err = execute_cmdlist(cmd)
     if exitcode:
         the_copy = None
