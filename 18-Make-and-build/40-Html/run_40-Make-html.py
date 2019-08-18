@@ -264,6 +264,7 @@ if exitcode == CONTINUE:
         # TheProjectBuild is internal
         cmdlist = [
             'rsync', '-a', '--delete',
+            '--exclude=.doctrees',
             '"%s/"' % outdir_in_cache,
             '"%s/"' % outdir,
         ]
