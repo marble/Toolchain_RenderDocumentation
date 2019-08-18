@@ -15,6 +15,7 @@ import sys
 import tct
 
 from os.path import join as ospj, exists as ospe
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -42,7 +43,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
+    result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
@@ -190,14 +191,25 @@ if exitcode == CONTINUE:
     if builder_latex_folder and not ospe(builder_latex_folder):
         os.makedirs(builder_latex_folder)
 
+if exitcode == CONTINUE:
+    html_doctrees_folder = lookup(milestones, 'html_doctrees_folder')
+    if builder_latex_folder and html_doctrees_folder:
+        cmdlist = ['rsync', '-av', '--delete',
+                   html_doctrees_folder,
+                   builder_latex_folder]
+        exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+
+if exitcode == CONTINUE:
+
     cmdlist = [
         'sphinx-build',
       # '-a',                # always write all files
         '-b', builder,
         '-c', confpy_folder,
+        '-v', '-v', '-v',
         ]
 
-    if html_doctrees_folder:
+    if 0 and html_doctrees_folder:
         cmdlist.extend([
             '-d', html_doctrees_folder])
 
