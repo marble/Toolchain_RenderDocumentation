@@ -247,7 +247,6 @@ if exitcode == CONTINUE:
             '-w', warnings_file,   # write warnings (and errors) to given file
             SYMLINK_THE_PROJECT,   # need a stable name for Sphinx caching
             SYMLINK_THE_OUTPUT,    # # need a stable name for Sphinx caching
-            # '/home/marble/Repositories/mbnas/mbgit/t3docs-testing-sphinx-rendering/testing_tct/tct_001/Makedir/SYMLINK_THE_PROJECT/GettingStarted.rst',
         ])
 
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
