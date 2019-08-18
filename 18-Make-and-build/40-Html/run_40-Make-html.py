@@ -226,6 +226,8 @@ if exitcode == CONTINUE:
         cmdlist = [
             'sphinx-build',
             ]
+    if 1 or milestones.get('activateLocalSphinxDebugging'):
+        cmdlist.extend(['-v', '-v', '-v'])
     if 0:
         cmdlist.extend([
             '-a',                  # write all files; default is to only write new and changed files
