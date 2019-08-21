@@ -1,7 +1,8 @@
-Release v2.7.1 (to be released)
-===============================
+Release v2.8-dev (permanent release as 'develop')
+=================================================
 
-* in make_html get 'exitcode' if 'activateForLocalDebugging' is on
+* bugfix: in make_html get 'exitcode' if 'activateForLocalDebugging' is on
+* set version to 'v2.8-dev'
 
 
 Release v2.7.0 (Aug 15, 2019)
