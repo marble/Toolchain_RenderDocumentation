@@ -160,9 +160,9 @@ if exitcode == CONTINUE:
         d = lookup(milestones, 'jobfile_data', 'buildsettings_sh', k,
                    default=None)
         # from Makedir/buildsettings.sh
-        e = buildsettings_initial[k]
+        e = buildsettings_initial.get(k)
         # defaults defined above
-        f = buildsettings_default[k]
+        f = buildsettings_default.get(k)
         # desperation default
         g = None
 
