@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+import re
 import shutil
 import stat
 import sys
@@ -124,6 +125,18 @@ if exitcode == CONTINUE:
                                                           | stat.S_IXGRP
                                                           | stat.S_IXOTH)
     os.chmod(run_latex_make_sh_file, file_permissions)
+
+if exitcode == CONTINUE:
+    makefile_path = ospj(build_latex_folder, 'Makefile')
+    makefile_original_path = makefile_path + '.original'
+    if ospe(makefile_path) and not ospe(makefile_original_path):
+        shutil.copy2(makefile_path, makefile_original_path)
+    with open(makefile_path, 'rb') as f1:
+        data = f1.read()
+    data, cnt = re.subn("LATEXMKOPTS[ ]*=[ ]*\n", "\n\n\n\nLATEXMKOPTS = -interaction=nonstopmode\n\n\n\n\n", data)
+    if cnt:
+        with open(makefile_path, 'wb') as f2:
+            f2.write(data)
 
 
 # ==================================================
