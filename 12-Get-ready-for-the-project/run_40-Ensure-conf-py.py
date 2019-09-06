@@ -84,7 +84,7 @@ else:
 if exitcode == CONTINUE:
     conf_py_file = os.path.join(makedir_abspath, 'conf.py')
     if os.path.exists(conf_py_file):
-        CONTINUE = -0
+        CONTINUE = -2
     else:
         conf_py_file = ''
 
