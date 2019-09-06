@@ -86,8 +86,8 @@ if jobfile_json:
 
 def findRunParameter(key, default=None, D=None, fconv=None):
     a = deepget(milestones, key, default=None)
-    b = deepget(facts, 'run_command', key, default=None)
-    c = deepget(jobfile_data, 'tctconfig', key, default=None)
+    b = deepget(jobfile_data, 'tctconfig', key, default=None)
+    c = deepget(facts, 'run_command', key, default=None)
     d = deepget(facts, 'tctconfig', configset, key, default=None)
     e = default
     f = None
