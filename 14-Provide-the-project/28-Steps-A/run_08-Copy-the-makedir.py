@@ -7,8 +7,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import codecs
 import os
 import shutil
+import subprocess
 import sys
 import tct
 
@@ -51,6 +53,7 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 TheProjectMakedir = None
+TheProjectMakedirThemes = None
 xeq_name_cnt = 0
 
 
@@ -80,23 +83,112 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    TheProjectMakedir = TheProject + 'Makedir'
+    def cmdline(cmd, cwd=None):
+        if cwd is None:
+            cwd = os.getcwd()
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+            cwd=cwd)
+        bstdout, bstderr = process.communicate()
+        exitcode2 = process.returncode
+        return exitcode2, cmd, bstdout, bstderr
+
+    def execute_cmdlist(cmdlist, cwd=None):
+        global xeq_name_cnt
+        exitcode, out, err = 88, None, None
+
+        cmd = ' '.join(cmdlist)
+        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+
+        xeq_name_cnt += 1
+        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
+        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
+        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+
+        with codecs.open(ospj(workdir, filename_cmd), 'w', 'utf-8') as f2:
+            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+
+        if (0
+            and milestones.get('activateLocalSphinxDebugging')
+            and cmdlist[0] == 'sphinx-build'
+            and 1):
+                from sphinx.cmd.build import main as sphinx_cmd_build_main
+                exitcode = sphinx_cmd_build_main(cmdlist[1:])
+        else:
+            exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
+
+        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out,
+                        'err': err})
+
+        if out:
+            with codecs.open(ospj(workdir, filename_out), 'w', 'utf-8') as f2:
+                f2.write(out.decode('utf-8', 'replace'))
+
+        if err:
+            with codecs.open(ospj(workdir, filename_err), 'w', 'utf-8') as f2:
+                f2.write(err.decode('utf-8', 'replace'))
+
+        return exitcode, cmd, out, err
+
+
+# ==================================================
+# work
+# --------------------------------------------------
 
 if exitcode == CONTINUE:
-    srcdir = makedir.rstrip('/')
-    destdir = TheProjectMakedir.rstrip('/')
+    TheProjectMakedir = TheProject + 'Makedir'
+    cmdlist = [
+        # run rsync
+        'rsync',
+        # in archive mode, that is equivalent to -rlptgoD
+        '-a',
+        # but we want to resolve symlinks
+        # -L, --copy-links When symlinks are encountered, the item that they
+        # point to (the referent) is copied, rather than the symlink.
+        '-L',
+        # Exclude SYMLINK_THE_PROJECT and similar that may exist
+        '--exclude', '"SYMLINK_*"',
+        # srcdir - slash at the end!
+        makedir.rstrip('/') + '/',
+        # destdir - slash at the end!
+        TheProjectMakedir + '/'
+    ]
 
-    # we better only copy the top level files, no subdirs
-    for top, dirs, files in os.walk(srcdir):
-        dirs[:] = []
-        files.sort()
-        if not ospe(destdir):
-            os.mkdir(destdir)
-        for afile in files:
-            srcfile = ospj(top, afile)
-            destfile = destdir + srcfile[len(srcdir):]
-            if not os.path.islink(srcfile):
-                shutil.copy2(srcfile, destfile)
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+
+if exitcode == CONTINUE:
+    srcthemes = '/THEMES'
+    if not ospe(srcthemes):
+        loglist.append((srcthemes, 'does not exist. No themes to copy.'))
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    destthemes = TheProjectMakedir + '/_themes'
+    if ospe(destthemes):
+        loglist.append((destthemes, 'exists. I will not copy', srcthemes, 'because that may overwrite existing'))
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
+    cmdlist = [
+        # run rsync
+        'rsync',
+        # in archive mode, that is equivalent to -rlptgoD
+        '-a',
+        # but we want to resolve symlinks
+        # -L, --copy-links When symlinks are encountered, the item that they
+        # point to (the referent) is copied, rather than the symlink.
+        '-L',
+        # srcdir - slash at the end!
+        srcthemes.rstrip('/') + '/',
+        # destdir - slash at the end!
+        destthemes.rstrip('/') + '/',
+    ]
+
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+
+if exitcode == CONTINUE:
+    TheProjectMakedirThemes = destthemes
+
 
 
 # ==================================================
@@ -105,6 +197,10 @@ if exitcode == CONTINUE:
 
 if TheProjectMakedir:
     result['MILESTONES'].append({'TheProjectMakedir': TheProjectMakedir})
+
+if TheProjectMakedirThemes:
+    result['MILESTONES'].append({'TheProjectMakedirThemes':
+                                 TheProjectMakedirThemes})
 
 
 # ==================================================
