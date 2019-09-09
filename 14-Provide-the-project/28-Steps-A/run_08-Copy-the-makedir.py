@@ -174,10 +174,8 @@ if exitcode == CONTINUE:
         'rsync',
         # in archive mode, that is equivalent to -rlptgoD
         '-a',
-        # but we want to resolve symlinks
-        # -L, --copy-links When symlinks are encountered, the item that they
-        # point to (the referent) is copied, rather than the symlink.
-        '-L',
+        # leave out symlinks
+        '--no-links',
         # srcdir - slash at the end!
         srcthemes.rstrip('/') + '/',
         # destdir - slash at the end!
