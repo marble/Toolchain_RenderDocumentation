@@ -71,13 +71,13 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     build_latex = lookup(milestones, 'build_latex', default=None)
-    build_latex_folder = lookup(milestones, 'build_latex_folder', default=None)
+    builder_latex_folder = lookup(milestones, 'builder_latex_folder', default=None)
     latex_contrib_typo3_folder = lookup(milestones,
                                         'latex_contrib_typo3_folder',
                                         default=None)
     if not (1
             and build_latex
-            and build_latex_folder
+            and builder_latex_folder
             and latex_contrib_typo3_folder):
         CONTINUE = -2
 
@@ -97,11 +97,11 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     foldername = os.path.split(latex_contrib_typo3_folder)[1]
-    destpath = ospj(build_latex_folder, foldername)
+    destpath = ospj(builder_latex_folder, foldername)
     shutil.copytree(latex_contrib_typo3_folder, destpath)
 
 if exitcode == CONTINUE:
-    run_latex_make_sh_file = ospj(build_latex_folder, 'run-make.sh')
+    run_latex_make_sh_file = ospj(builder_latex_folder, 'run-make.sh')
     f2text = (
         "#!/bin/bash\n"
         "\n"
@@ -127,7 +127,7 @@ if exitcode == CONTINUE:
     os.chmod(run_latex_make_sh_file, file_permissions)
 
 if exitcode == CONTINUE:
-    makefile_path = ospj(build_latex_folder, 'Makefile')
+    makefile_path = ospj(builder_latex_folder, 'Makefile')
     makefile_original_path = makefile_path + '.original'
     if ospe(makefile_path) and not ospe(makefile_original_path):
         shutil.copy2(makefile_path, makefile_original_path)

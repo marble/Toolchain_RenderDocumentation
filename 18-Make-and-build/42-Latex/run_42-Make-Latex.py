@@ -188,8 +188,12 @@ if exitcode == CONTINUE:
         builder_latex_folder = os.path.join(TheProjectBuild, builder)
         usingTheProjectCacheDir = False
 
-    if builder_latex_folder and not ospe(builder_latex_folder):
-        os.makedirs(builder_latex_folder)
+    if builder_latex_folder:
+        localization_bs_as_path = lookup(milestones, 'localization_bs_as_path', default='')
+        if localization_bs_as_path:
+            builder_latex_folder += '-' + localization_bs_as_path
+        if not ospe(builder_latex_folder):
+            os.makedirs(builder_latex_folder)
 
 if exitcode == CONTINUE:
     html_doctrees_folder = lookup(milestones, 'html_doctrees_folder')

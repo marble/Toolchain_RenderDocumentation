@@ -63,12 +63,12 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     build_latex = lookup(milestones, 'build_latex', default=None)
-    build_latex_folder = lookup(milestones, 'build_latex_folder', default=None)
+    builder_latex_folder = lookup(milestones, 'builder_latex_folder', default=None)
     resultdir = lookup(milestones, 'resultdir', default=None)
 
     if not(1
             and build_latex
-            and build_latex_folder
+            and builder_latex_folder
             and resultdir
     ):
         CONTINUE = -2
@@ -134,14 +134,15 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     cmdlist = [
         'rsync', '-a', '--delete',
-        '"%s"' % build_latex_folder.rstrip('/'),
+        '--exclude', '.doctrees',
+        '"%s"' % builder_latex_folder.rstrip('/'),
         '"%s/"' % tmp_publish_dir_Result.rstrip('/'),
     ]
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
 if exitcode == CONTINUE:
     publish_dir_latex = ospj(tmp_publish_dir_Result,
-                             os.path.split(build_latex_folder)[1])
+                             os.path.split(builder_latex_folder)[1])
 
 
 # ==================================================
