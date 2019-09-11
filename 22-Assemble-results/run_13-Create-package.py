@@ -203,7 +203,11 @@ if exitcode == CONTINUE:
                     print(fpath)
 
 if exitcode == CONTINUE:
-    package_name = 'package.zip'
+    localization_bs_as_path = lookup(milestones, 'localization_bs_as_path', default='')
+    if localization_bs_as_path:
+        package_name = 'package-' + localization_bs_as_path + '.zip'
+    else:
+        package_name = 'package.zip'
     package_file = ospj(workdir, package_name)
     cmd = ['zip', '-r', '-9', '-q', package_file, package_folder]
     exitcode, cmd, out, err = execute_cmdlist(cmd, cwd=TheProjectResultCopyForPackage)
