@@ -72,19 +72,27 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
     TheProject = lookup(milestones, 'TheProject')
     localization_locales = lookup(milestones, 'localization_locales')
-    buildsettings = milestones.get('buildsettings', {}).copy()
+    buildsettings = lookup(milestones, 'buildsettings').copy()
+    resultdir = lookup(milestones, 'resultdir')
     project = buildsettings.get('project')
     version = buildsettings.get('version')
     localization = buildsettings.get('localization')
     if not (localization_locales):
         loglist.append('Nothing to do - no localizations found')
-        CONTINUE = -1
+        CONTINUE = -2
     if localization and localization != 'default':
         loglist.append("Nothing to do - we are building '%s' already" % localization)
-        CONTINUE = -1
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if not (TheProject and localization_locales and buildsettings and project and version):
+    if not (1
+        and TheProject
+        and localization_locales
+        and buildsettings
+        and project
+        and version
+        and resultdir
+    ):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -143,6 +151,12 @@ if exitcode == CONTINUE:
                 words.append('makedir')
                 words.append('~~~makedir~~~')
                 state = 0
+            elif k == 'resultdir':
+                # write '-c resultdir ~~~resultdir~~~'
+                words.append('-c')
+                words.append('resultdir')
+                words.append('~~~resultdir~~~')
+                state = 0
             elif k == 'jobfile':
                 # leave out jobfile
                 state = 0
@@ -153,6 +167,10 @@ if exitcode == CONTINUE:
                 state = 0
 
     new_cmdline = ' '.join(words)
+    if not '~~~makedir~~~' in new_cmdline:
+        new_cmdline += ' -c makedir ~~~makedir~~~'
+    if not '~~~resultdir~~~' in new_cmdline:
+        new_cmdline += ' -c resultdir ~~~resultdir~~~'
 
 if exitcode == CONTINUE:
 
@@ -161,14 +179,16 @@ if exitcode == CONTINUE:
     a, d = os.path.split(path_to_builddir)
     a, c = os.path.split(a)
     a, b = os.path.split(a)
-    # a = path_to_builddir
-    # b = builddir_project
-    # c = builddir_localization
-    # d = builddir_version
     xx_xx = re.compile('([a-z]{2}-[a-z]{2})|default')
 
     if not xx_xx.match(c):
-        a, b, c, d = os.path.join(a, b), c, '' ,d
+        a, b, c, d = os.path.join(a, b), c, '', d
+
+    # to easily inspect values in pycharm:
+    aa = a  # path_to_builddir
+    bb = b  # builddir_project
+    cc = c  # builddir_localization
+    dd = d  # builddir_version
 
     for locale in localization_locales:
         # builddir
@@ -202,20 +222,27 @@ if exitcode == CONTINUE:
             f2.write('GITDIR_IS_READY_FOR_USE=1\n')
 
         if TheProjectMakedir:
-            makedirfiles = ['.gitignore', '_htaccess', '_info.txt', 'conf.py', 'Overrides.cfg']
+            makedirfiles = ['.gitignore', '_htaccess', '_info.txt', 'conf.py',
+                            'docutils.conf', 'Overrides.cfg']
             for makedirfile in makedirfiles:
                 srcfile = os.path.join(TheProjectMakedir, makedirfile)
                 destfile = os.path.join(TheProjectTodosMakefolder, makedirfile)
                 if os.path.exists(srcfile):
-                    shutil.copy(srcfile, destfile)
+                    shutil.copy2(srcfile, destfile)
 
         if toolchain_temp_home_todo_folder:
             toolchain_temp_home_todo_file = os.path.join(toolchain_temp_home_todo_folder, locale)
             toolchain_temp_home_todo_file_all = os.path.join(toolchain_temp_home_todo_folder, 'ALL.source-me.sh')
-            line = new_cmdline.replace('-c makedir ~~~makedir~~~', '-c makedir ' + TheProjectTodosMakefolder)
+            final_cmdline = new_cmdline
+
+            final_cmdline = final_cmdline.replace('~~~makedir~~~', TheProjectTodosMakefolder)
+            final_cmdline = final_cmdline.replace('~~~resultdir~~~', resultdir)
+            final_cmdline = final_cmdline.replace(' run RenderDocumentation ', ' \\\n   run \\\n   RenderDocumentation ')
+            final_cmdline = final_cmdline.replace(' --', ' \\\n   --')
+            final_cmdline = final_cmdline.replace(' -c', ' \\\n   -c')
             with open(toolchain_temp_home_todo_file, 'a') as f2:
                 f2.write('#!/bin/sh\n\n')
-                f2.write(line + '\n')
+                f2.write(final_cmdline + '\n')
             # make executable
             st = os.stat(toolchain_temp_home_todo_file)
             os.chmod(toolchain_temp_home_todo_file, st.st_mode | stat.S_IEXEC)

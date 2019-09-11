@@ -56,6 +56,8 @@ def lookup(D, *keys, **kwdargs):
 conf_py_settings = None
 documentation_folder_for_sphinx = ''
 html_doctrees_folder = None
+localization_bs = None
+localization_bs_as_path = None
 settings_dump_json_file = None
 xeq_name_cnt = 0
 
@@ -174,13 +176,19 @@ if exitcode == CONTINUE:
     builder = 'html'
     confpy_folder = TheProjectMakedir
     documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
+    localization_bs = lookup(milestones, 'buildsettings', 'localization', default='')
+    localization_bs_as_path = localization_bs.lower().replace('_', '-')
     TheProjectCacheDir = lookup(milestones, 'TheProjectCacheDir', default=None)
+    if localization_bs_as_path == 'default':
+        localization_bs_as_path = ''
 
     # 2
     doctree_folder = ospj(TheProjectBuild, 'doctree', builder)
     outdir = ospj(TheProjectBuild, builder)
     if TheProjectCacheDir:
         outdir_in_cache = ospj(TheProjectCacheDir, builder)
+        if localization_bs_as_path:
+            outdir_in_cache += '-' + localization_bs_as_path
     else:
         outdir_in_cache = None
     sourcedir = documentation_folder_for_sphinx
@@ -226,8 +234,10 @@ if exitcode == CONTINUE:
         cmdlist = [
             'sphinx-build',
             ]
-    if 1 or milestones.get('activateLocalSphinxDebugging'):
+    if milestones.get('activateLocalSphinxDebugging'):
         cmdlist.extend(['-v', '-v', '-v'])
+    else:
+        cmdlist.extend(['-v', '-v'])
     if 0:
         cmdlist.extend([
             '-a',                  # write all files; default is to only write new and changed files
@@ -315,6 +325,15 @@ if settings_dump_json_file:
 if conf_py_settings:
     result['MILESTONES'].append({'conf_py_settings':
                                  conf_py_settings})
+
+if localization_bs:
+    result['MILESTONES'].append({'localization_bs':
+                                 localization_bs})
+
+if localization_bs_as_path:
+    result['MILESTONES'].append({'localization_bs_as_path':
+                                 localization_bs_as_path})
+
 
 
 # ==================================================

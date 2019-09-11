@@ -173,13 +173,18 @@ if exitcode == CONTINUE:
     builder = 'singlehtml'
     confpy_folder = TheProjectMakedir
     documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
+    localization_bs = lookup(milestones, 'buildsettings', 'localization', default='')
+    localization_bs_as_path = localization_bs.lower().replace('_', '-')
     TheProjectCacheDir = lookup(milestones, 'TheProjectCacheDir', default=None)
-
+    if localization_bs_as_path == 'default':
+        localization_bs_as_path = ''
 
 if exitcode == CONTINUE:
     outdir = ospj(TheProjectBuild, builder)
     if TheProjectCacheDir:
         outdir_in_cache = ospj(TheProjectCacheDir, builder)
+        if localization_bs_as_path:
+            outdir_in_cache += '-' + localization_bs_as_path
     else:
         outdir_in_cache = None
     sourcedir = documentation_folder_for_sphinx

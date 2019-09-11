@@ -171,19 +171,22 @@ if exitcode == CONTINUE:
         os.mkdir(publish_project_dir_planned)
     publish_project_dir = publish_project_dir_planned
 
+    if not os.path.exists(publish_dir_planned):
+        os.makedirs(publish_dir_planned)
+    publish_dir = publish_dir_planned
 
 if exitcode == CONTINUE:
     cmdlist = [
         'rsync', '-a', '--delete',
         '--exclude', '.doctrees',
         '"%s/"' % TheProjectResultVersion.rstrip('/'),
-        '"%s/"' % publish_dir_planned.rstrip('/'),
+        '"%s/"' % publish_dir.rstrip('/'),
     ]
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+    if exitcode != 0:
+        publish_dir = None
 
 if exitcode == CONTINUE:
-    publish_dir = publish_dir_planned
-    publish_project_dir = publish_project_dir_planned
     publish_language_dir = publish_project_dir_planned
 
 if exitcode == CONTINUE:

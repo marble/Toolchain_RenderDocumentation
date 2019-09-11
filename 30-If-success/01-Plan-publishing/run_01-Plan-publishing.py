@@ -120,6 +120,7 @@ else:
 
 if exitcode == CONTINUE:
     # 'typo3cms/project/0.0.0'
+    # 'project/de-de/0.0.0'
     relative_part_of_builddir_stripped = relative_part_of_builddir.strip('/')
     # /abspath/to/Documentation-GENERATED-temp
     resultdir = lookup(milestones, 'resultdir', default=None)
@@ -255,6 +256,43 @@ if exitcode == CONTINUE:
 
     if create_buildinfo:
         result['MILESTONES'].append({'create_buildinfo':create_buildinfo})
+
+    expected = {
+      "publish_dir": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0",
+      "publish_dir_buildinfo": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0/_buildinfo",
+      "publish_dir_buildinfo_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0/_buildinfo",
+      "publish_dir_pdf_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0/_pdf",
+      "publish_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0",
+      "publish_file_pdf_planned": "",
+      "publish_html_done": 1,
+      "publish_language_dir": "/ALL/dummy_webroot/typo3cms/drafts/project",
+      "publish_language_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de",
+      "publish_package_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/packages",
+      "publish_package_file_planned": "",
+      "publish_params_json_file": "/ALL/dummy_webroot/publish-params.json",
+      "publish_parent_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de",
+      "publish_project_dir": "/ALL/dummy_webroot/typo3cms/drafts/project",
+      "publish_project_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts/project",
+      "publish_project_parent_dir": "/ALL/dummy_webroot/typo3cms/drafts",
+      "publish_project_parent_dir_planned": "/ALL/dummy_webroot/typo3cms/drafts",
+      "publish_settings_cfg_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0/_buildinfo/Settings.cfg",
+      "publish_warnings_txt_planned": "/ALL/dummy_webroot/typo3cms/drafts/project/de-de/0.0.0/_buildinfo/warnings.txt",
+    }
+
+    #dummy = {"publish_params_data": {
+    #    "publish_dir": "typo3cms/drafts/project/de-de/0.0.0",
+    #    "publish_dir_buildinfo": "typo3cms/drafts/project/de-de/0.0.0/_buildinfo",
+    #    "publish_language_dir": "typo3cms/drafts/project",
+    #    "publish_package_file": "",
+    #    "publish_packages_xml_file": "",
+    #    "publish_project_dir": "typo3cms/drafts/project",
+    #    "publish_project_parent_dir": "typo3cms/drafts",
+    #    "todo_update_stable_symlink": 1
+    #}
+
+    for k, v in expected.items():
+        result['MILESTONES'].append({k+'_X': v})
+
 
 # ==================================================
 # save result
