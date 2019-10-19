@@ -50,6 +50,11 @@ def lookup(D, *keys, **kwdargs):
 
 buildsettings_changed = None
 configset = None
+
+OrigProject = None
+OrigProjectDocroot = None
+OrigProjectMasterdoc = None
+
 xeq_name_cnt = 0
 
 if 0:
@@ -247,6 +252,35 @@ if exitcode == CONTINUE:
                 drafts_builddir_relpath, gitdir_slugified, '0.0.0')
 
 
+if exitcode == CONTINUE:
+
+    # readonly, what the container copies initially
+    OrigProject = buildsettings['gitdir'].rstrip('/')
+
+    OrigProjectDocroot = buildsettings['t3docdir'].rstrip('/')
+    if not os.path.isabs(OrigProjectDocroot):
+        OrigProjectDocroot = os.path.join(OrigProject, OrigProjectDocroot)
+    OrigProjectDocroot = os.path.abspath(OrigProjectDocroot)
+
+    OrigProjectMasterdoc = buildsettings['masterdoc'].rstrip('/')
+    if not os.path.isabs(OrigProjectMasterdoc):
+        OrigProjectMasterdoc = os.path.join(OrigProject, OrigProjectMasterdoc)
+    OrigProjectMasterdoc = os.path.abspath(OrigProjectMasterdoc)
+
+    valid = len(OrigProject) > 0
+    valid = valid and OrigProjectDocroot.startswith(OrigProject)
+    valid = valid and OrigProjectMasterdoc.startswith(OrigProjectDocroot)
+
+    if not valid:
+        loglist.append(('Invalid', {
+            'OrigProject': OrigProject,
+            'OrigProjectDocroot': OrigProjectDocroot,
+            'OrigProjectMasterdoc': OrigProjectMasterdoc}))
+        OrigProject = None
+        OrigProjectDocroot = None
+        OrigProjectMasterdoc = None
+
+
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
@@ -256,6 +290,15 @@ if buildsettings_changed is not None:
 
 if configset:
     result['MILESTONES'].append({'configset': configset})
+
+if OrigProject:
+    result['MILESTONES'].append({'OrigProject': OrigProject})
+
+if OrigProjectDocroot:
+    result['MILESTONES'].append({'OrigProjectDocroot': OrigProjectDocroot})
+
+if OrigProjectMasterdoc:
+    result['MILESTONES'].append({'OrigProjectMasterdoc': OrigProjectMasterdoc})
 
 
 # ==================================================
