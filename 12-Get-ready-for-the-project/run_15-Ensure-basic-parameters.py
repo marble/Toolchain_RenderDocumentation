@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 from __future__ import absolute_import
 
@@ -23,6 +19,7 @@ ospnormp = os.path.normpath
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
@@ -73,7 +70,7 @@ if exitcode == CONTINUE:
     makedir = lookup(milestones, 'makedir', default=None)
     if not makedir:
         msg = (
-            "fatal error: parameter 'makedir' is missing\n'" 
+            "fatal error: parameter 'makedir' is missing\n'"
             'usage:\n'
             '   tct run %s -c makedir MAKEDIR [--toolchain-help]\n' % toolchain_name
         )
@@ -153,7 +150,7 @@ if resultdir:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 # ==================================================
 # Return with proper exitcode

@@ -141,7 +141,7 @@ if final_exitcode is not None:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 
 # ==================================================

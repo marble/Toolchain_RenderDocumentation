@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 from __future__ import absolute_import
 import os
@@ -175,7 +171,7 @@ if exitcode == CONTINUE:
     with codecs.open(resultfile + '.pprinted.txt', 'w', 'utf-8', 'replace') as f2:
         pprint.pprint(result, f2)
 
-    tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+    tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 
 # ==================================================

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 from __future__ import absolute_import
 
@@ -93,7 +89,7 @@ pass
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 # ==================================================
 # Return with proper exitcode

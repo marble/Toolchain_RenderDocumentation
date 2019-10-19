@@ -13,6 +13,7 @@ from tct import deepget, logstamp_finegrained
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 toolname = params['toolname']
@@ -167,7 +168,7 @@ if 1:
     if not masterdoc:
         print('ATTENTION:\n'
               '\n'
-              '   No documentation found! No documentation rendered!\n'  
+              '   No documentation found! No documentation rendered!\n'
               '\n'
               '   Reason: None of the possible starting files (called \n'
               '   "masterdoc") could not be found. Please provide at\n'
@@ -197,7 +198,7 @@ if time_finished_at_2_unixtime:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 # ==================================================
 # Return with proper exitcode

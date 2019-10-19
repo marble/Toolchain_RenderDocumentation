@@ -17,6 +17,7 @@ params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
@@ -126,7 +127,7 @@ if buildinfo_latex_folder:
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 
 # ==================================================

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 from __future__ import absolute_import
 
@@ -16,6 +12,7 @@ params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
@@ -101,7 +98,7 @@ pass
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE)
+tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
 
 
 # ==================================================
