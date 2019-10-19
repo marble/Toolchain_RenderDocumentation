@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ==================================================
-# open
-# --------------------------------------------------
-
 from __future__ import print_function
 from __future__ import absolute_import
 
-import codecs
 import os
-import subprocess
+import re
 import sys
 import tct
 
@@ -54,6 +49,9 @@ def lookup(D, *keys, **kwdargs):
 included_files_check_is_ok = 0
 included_files_check_logfile = None
 included_files_check_logfile_dumped_to_stdout = None
+pendingFiles = {}
+visitedBadFiles = {}
+visitedFiles = {}
 xeq_name_cnt = 0
 
 
@@ -74,12 +72,25 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     documentation_folder = lookup(milestones, 'documentation_folder')
     masterdoc = lookup(milestones, 'masterdoc')
+    OrigProject = lookup(milestones, 'OrigProject')
+    OrigProjectDocroot = lookup(milestones, 'OrigProjectDocroot')
+    OrigProjectMasterdoc = lookup(milestones, 'OrigProjectMasterdoc')
+    TheProject = lookup(milestones, 'TheProject')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
     toolfolderabspath = lookup(params, 'toolfolderabspath')
     workdir = lookup(params, 'workdir')
 
-    if not (documentation_folder and masterdoc and TheProjectLog and
-            toolfolderabspath and workdir):
+    if not (1
+        and documentation_folder
+        and masterdoc
+        and OrigProject
+        and OrigProjectDocroot
+        and OrigProjectMasterdoc
+        and TheProject
+        and TheProjectLog
+        and toolfolderabspath
+        and workdir
+    ):
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -87,6 +98,44 @@ if exitcode == CONTINUE:
 else:
     loglist.append('Bad PARAMS or nothing to do')
 
+# ==================================================
+# functions
+# --------------------------------------------------
+
+def rstFiles(startdir, endstr='.rst'):
+    for folder, dirs, files in os.walk(startdir):
+        dirs.sort()
+        files.sort()
+        for fname in files:
+            if fname.endswith(endstr):
+                yield (folder, fname)
+
+def processRstFile(folder, fname, minimum):
+    fpath = folder + "/" + fname
+    if not (fpath in visitedFiles):
+        error_cnt = 0
+        with open(fpath, 'rb') as f1:
+            f1bytes = f1.read()
+        hits = re.findall('^\s*\.\.\s+(literalinclude|include)::\s*(\S+)\s*$',
+                          f1bytes, flags=+re.MULTILINE)
+        for hit in hits:
+            include_type, incpath = hit
+            if not os.path.isabs(incpath):
+                incpathabs = os.path.abspath(os.path.join(folder, incpath))
+                incpathabs0, incpathabs1 = os.path.split(incpathabs)
+                legal = len(incpathabs0) >= minimum
+                if legal:
+                    if (include_type == 'include'
+                        and not incpathabs in visitedFiles
+                    ):
+                        pendingFiles['incpathabs'] = (incpathabs0, incpathabs1)
+                else:
+                    error_cnt += 1
+                    L = visitedBadFiles.get(fpath, [])
+                    L.append(incpathabs)
+                    visitedBadFiles[fpath] = L
+
+        visitedFiles[fpath] = error_cnt
 
 # ==================================================
 # work
@@ -94,57 +143,41 @@ else:
 
 if exitcode == CONTINUE:
 
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
-            cwd=cwd)
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
+    minimum = len(TheProject)
+    for folder, fname in rstFiles(TheProject):
+        processRstFile(folder, fname, minimum)
 
-if exitcode == CONTINUE:
-    cmdlist = [
-        facts['python_exe_abspath'],
-        os.path.join(toolfolderabspath, 'check_include_files.py'),
-        '--verbose',
-        documentation_folder,
-    ]
-    cmd = ' '.join(cmdlist)
-    cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+    while pendingFiles:
+        for k in pendingFiles:
+            incabspath0, incabspath1 = pendingFiles[k]
+            processRstFile(incabspath0, incabspath1, minimum)
+            del pendingFiles[k]
+            break
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-    if exitcode == 0:
-        included_files_check_is_ok = 1
-
-    loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
-
-    xeq_name_cnt += 1
-    filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-    filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-    filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
-
-    with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-        f2.write(cmd_multiline.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-        f2.write(out.decode('utf-8', 'replace'))
-
-    with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-        f2.write(err.decode('utf-8', 'replace'))
-
-    included_files_check_logfile = os.path.join(TheProjectLog, ('%s.txt' %
-                                                                toolname_pure))
-    with codecs.open(included_files_check_logfile, 'w', 'utf-8') as f2:
-        f2.write(out.decode('utf-8', 'replace'))
+    included_files_check_is_ok = not visitedBadFiles
 
 
-if (exitcode != 0) and included_files_check_logfile:
-    with codecs.open(included_files_check_logfile, 'r', 'utf-8') as f1:
-        for line in f1:
-            print(line, end='')
-    included_files_check_logfile_dumped_to_stdout = 1
+    visitedFilesJson = os.path.join(workdir, 'visitedFiles.json')
+    temp = {}
+    for k, v in visitedFiles.items():
+        temp['.' + k[minimum:]] = v
+    tct.writejson(temp, visitedFilesJson)
+
+    if visitedBadFiles:
+
+        included_files_check_logfile = os.path.join(workdir, 'visitedBadFiles.json')
+        tct.writejson(visitedBadFiles, included_files_check_logfile)
+        print('\n Files having bad includes:')
+        for k in sorted(visitedBadFiles):
+            print()
+            print('.' + k[minimum:])
+            print(k)
+            for objectedFpath in sorted(visitedBadFiles[k]):
+                print('   ', objectedFpath)
+            print()
+
+        included_files_check_logfile_dumped_to_stdout = 1
+
 
 
 # ==================================================
