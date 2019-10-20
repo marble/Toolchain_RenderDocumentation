@@ -73,7 +73,7 @@ if exitcode == CONTINUE:
     ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
 
-    if (1
+    if not (1
         and ter_extversion
         and ter_extversion
     ):
