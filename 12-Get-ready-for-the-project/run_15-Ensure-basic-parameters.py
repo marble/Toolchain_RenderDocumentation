@@ -77,6 +77,7 @@ if exitcode == CONTINUE:
         loglist.append(msg)
         print(msg)
         exitcode = 22
+        reason = "'makedir' is missing"
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -99,6 +100,7 @@ if exitcode == CONTINUE:
         loglist.append(msg)
         print(msg)
         exitcode = 22
+        reason = 'makedir not found'
 
 if exitcode == CONTINUE:
     makedir_abspath = makedir
@@ -118,6 +120,7 @@ if exitcode == CONTINUE:
             loglist.append(msg)
             print(msg)
             exitcode = 90
+            reason = 'resultdir does not exist'
 
 if exitcode == CONTINUE:
     temp = lookup(milestones, 'latex_contrib_typo3_folder')

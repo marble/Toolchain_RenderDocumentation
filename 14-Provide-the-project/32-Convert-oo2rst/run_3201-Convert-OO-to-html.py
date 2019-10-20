@@ -2,11 +2,11 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
-import tct
-import sys
-#
 import shutil
+import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -118,7 +118,8 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not os.path.exists(os.path.join(TheProject, 'doc', 'manual.sxw')):
-        loglist.append('./doc/manual.sxw does not exist')
+        reason = './doc/manual.sxw does not exist'
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -130,7 +131,8 @@ if exitcode == CONTINUE:
         'Documentation/Index.md',
         'Documentation/index.md']:
         if os.path.exists(os.path.join(TheProject, candidate)):
-            loglist.append( candidate + ' exists')
+            reason = candidate + ' exists'
+            loglist.append(reason)
             CONTINUE = -2
             break
 

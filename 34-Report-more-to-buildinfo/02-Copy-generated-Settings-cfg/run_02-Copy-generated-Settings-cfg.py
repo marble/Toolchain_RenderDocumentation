@@ -10,6 +10,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import shutil
 import tct
 import sys
 
@@ -71,6 +72,7 @@ if exitcode == CONTINUE:
     if not (has_settingscfg and has_settingscfg_generated and
             settingscfg_file and TheProjectResultBuildinfo):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -83,8 +85,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    import shutil
-
     buildinfo_settingscfg_file = os.path.join(TheProjectResultBuildinfo, 'Settings.cfg')
     shutil.copy(settingscfg_file, buildinfo_settingscfg_file)
 

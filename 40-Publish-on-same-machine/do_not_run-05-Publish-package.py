@@ -66,7 +66,8 @@ if exitcode == CONTINUE:
     publish_package_dir_planned = lookup(milestones, 'publish_package_dir_planned')
 
     if not (package_file and publish_package_dir_planned):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

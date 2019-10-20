@@ -65,6 +65,7 @@ if exitcode == CONTINUE:
     localization_has_localization = lookup(milestones, 'localization_has_localization')
     if not (TheProject and localization_has_localization):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -79,8 +80,9 @@ else:
 if exitcode == CONTINUE:
     localization = tct.deepget(milestones, 'buildsettings', 'localization', default='')
     if not localization in ['', 'default']:
-        loglist.append(('Nothing to move away. We want to render localization', localization))
-        CONTINUE = -2
+        reason = 'Nothing to move away, but we want to render localization.'
+        loglist.append((reason, localization))
+        exitcode = 22
 
 if exitcode == CONTINUE:
     TheProjectLocalization = TheProject + 'Localization'

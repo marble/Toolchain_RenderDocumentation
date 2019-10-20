@@ -70,6 +70,7 @@ if exitcode == CONTINUE:
             and replace_static_in_html
             and url_of_webroot):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -118,7 +119,8 @@ if exitcode == CONTINUE:
             loglist.append(['version_major_minor', version_major_minor])
 
     if not version:
-        loglist.append('No version found. Cannot replace anything.')
+        reason = 'No version found. Cannot replace anything.'
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:

@@ -85,7 +85,7 @@ if exitcode == CONTINUE:
 
     buildsettings = lookup(milestones, 'buildsettings')
     if not buildsettings:
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     jobfile_abspath = lookup(milestones, 'jobfile_abspath')

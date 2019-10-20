@@ -65,6 +65,7 @@ if exitcode == CONTINUE:
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
     if not TheProjectMakedir:
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

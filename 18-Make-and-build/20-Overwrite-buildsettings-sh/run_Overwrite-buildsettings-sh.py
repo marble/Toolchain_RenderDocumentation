@@ -51,32 +51,17 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = lookup(milestones, requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     buildsettings_file = lookup(milestones, 'buildsettings_file')
     buildsettings = lookup(milestones, 'buildsettings')
 
-    # test
     if not buildsettings_file and buildsettings:
         exitcode = 99
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================

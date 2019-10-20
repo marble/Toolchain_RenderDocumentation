@@ -88,7 +88,8 @@ if exitcode == CONTINUE:
 
     publish_html_done = lookup(milestones, "publish_html_done")
     if not publish_html_done:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
     publish_dir = lookup(milestones, "publish_dir", default=None)
     publish_language_dir = lookup(milestones, "publish_language_dir",
@@ -107,7 +108,8 @@ if exitcode == CONTINUE:
             and publish_project_dir
             and publish_project_parent_dir
             and TheProjectWebroot):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     publish_dir_buildinfo = lookup(milestones, "publish_dir_buildinfo",

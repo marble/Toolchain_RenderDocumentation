@@ -65,6 +65,7 @@ if exitcode == CONTINUE:
     toolchain_temp_home = lookup(params, 'toolchain_temp_home')
     if not (lockfile_name and run_id and toolchain_temp_home):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -124,6 +125,7 @@ if exitcode == CONTINUE:
     if 'version' in toolchain_actions:
         print(VERSION)
         exitcode = 90
+        reason = 'Just show version and stop.'
 
 if exitcode == CONTINUE:
     if 'unlock' in toolchain_actions:
@@ -135,6 +137,7 @@ if exitcode == CONTINUE:
                     os.remove(lockfile)
                     lockfiles_removed.append(lockfile)
         exitcode = 90
+        reason = "Just unlock and stop."
 
 if exitcode == CONTINUE:
     if 'clean' in toolchain_actions:
@@ -147,6 +150,7 @@ if exitcode == CONTINUE:
                         shutil.rmtree(fpath)
             dirs[:] = [] # stop recursion
         exitcode = 90
+        reason = "Just clean and stop."
 
 
 # ==================================================

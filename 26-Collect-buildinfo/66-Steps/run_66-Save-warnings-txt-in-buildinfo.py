@@ -61,7 +61,8 @@ if exitcode == CONTINUE:
     TheProjectLog = lookup(milestones, 'TheProjectLog')
 
     if not (TheProject and TheProjectLog):
-        CONTINUE = -1
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
     build_html = lookup(milestones, 'build_html')
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
@@ -72,7 +73,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Bad params or nothing to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -84,8 +85,10 @@ import codecs
 if exitcode == CONTINUE:
     src_warnings_file = os.path.join(TheProjectLog, 'html/warnings.txt')
     if not os.path.exists(src_warnings_file):
-        loglist.append(('warnings.txt file not found', src_warnings_file))
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'warnings.txt file not found'
+        loglist.append((reason, src_warnings_file))
+
 
 if exitcode == CONTINUE:
     TheProjectLen = len(TheProject)
@@ -105,7 +108,8 @@ if exitcode == CONTINUE:
         warnings_file_dumped_to_console = 1
 
 if not (build_html and TheProjectResultBuildinfo):
-    CONTINUE = -1
+    exitcode = 22
+    reason = 'warnings.txt file not found'
 
 if exitcode == CONTINUE:
     TheProjectLen = len(TheProject)

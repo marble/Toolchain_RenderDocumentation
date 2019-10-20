@@ -65,7 +65,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
     if not configset:
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     TheProjectLogHtmlmailMessageHtml = lookup(milestones, 'TheProjectLogHtmlmailMessageHtml')
@@ -77,12 +77,12 @@ if exitcode == CONTINUE:
     htmlfile = TheProjectLogHtmlmailMessageHtml
     if not (textfile or htmlfile):
         loglist.append('No textfile and no htmlfile specified')
-        CONTINUE = -2
+        exitcode = 22
 
     smtp_host = lookup(milestones, 'smtp_host', default="None")
     if not smtp_host or smtp_host == "None":
         loglist.append("'Won't send mails. No smtp_host specified.")
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     email_admin = lookup(milestones, 'email_admin')

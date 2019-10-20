@@ -67,7 +67,8 @@ if exitcode == CONTINUE:
     if not (1
             and makedir
             and TheProject):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -156,13 +157,16 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     srcthemes = '/THEMES'
     if not ospe(srcthemes):
-        loglist.append((srcthemes, 'does not exist. No themes to copy.'))
+        reason = srcthemes + ' does not exist. No themes to copy.'
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     destthemes = TheProjectMakedir + '/_themes'
     if ospe(destthemes):
-        loglist.append((destthemes, 'exists. I will not copy', srcthemes, 'because that may overwrite existing'))
+        reason = (destthemes + ' exists. I will not copy ' + srcthemes +
+                  ' because that may overwrite existing')
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:

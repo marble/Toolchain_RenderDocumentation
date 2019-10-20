@@ -70,6 +70,7 @@ if exitcode == CONTINUE:
     configset = lookup(milestones, 'configset')
     if not (configset and documentation_folder):
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

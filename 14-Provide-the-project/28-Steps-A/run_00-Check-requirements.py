@@ -58,6 +58,7 @@ if exitcode == CONTINUE:
 
     if not buildsettings:
         exitcode = 22
+        reason = "'buildsettings' is missing"
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

@@ -2,8 +2,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import tct
+import codecs
+import copy
+import six.moves.configparser
 import sys
+import tct
+import yaml
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -59,18 +63,20 @@ if exitcode == CONTINUE:
     settingsyml_file = milestones.get('settingsyml_file', '')
     settingscfg_file = milestones.get('settingscfg_file', '')
     if settingscfg_file:
-        loglist.append('Nothing to do. Settings.cfg is existing.')
-        CONTINUE = -1
+        reason = 'Nothing to do. Settings.cfg exists.'
+        loglist.append(reason)
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     if not settingsyml_file:
-        loglist.append('Settings.yml not found')
-        CONTINUE = -1
+        reason = 'Settings.yml not found'
+        loglist.append(reason)
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -78,10 +84,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    import codecs
-    import copy
-    import yaml
-    import six.moves.configparser
 
     config = six.moves.configparser.RawConfigParser()
 

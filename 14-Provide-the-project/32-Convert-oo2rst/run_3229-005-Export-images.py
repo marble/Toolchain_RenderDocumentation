@@ -76,6 +76,7 @@ if exitcode == CONTINUE:
 
     if not (masterdoc_manual_html_005_as_rst and TheProjectBuildOpenOffice2Rest):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

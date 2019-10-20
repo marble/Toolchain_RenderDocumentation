@@ -62,7 +62,8 @@ if exitcode == CONTINUE:
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
     if not (TheProjectResultBuildinfo):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

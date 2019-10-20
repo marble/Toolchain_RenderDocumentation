@@ -92,7 +92,8 @@ if exitcode == CONTINUE:
 
     makedir = lookup(milestones, 'makedir')
     if not makedir:
-        CONTINUE = -2
+        exitcode = 22
+        reason = "'makedir' is missing"
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

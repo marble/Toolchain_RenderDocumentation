@@ -69,7 +69,7 @@ if exitcode == CONTINUE:
     if not (latex_file_folder and latex_file_tweaked and
             latex_make_file_tweaked and toolname):
         loglist.append('parameters not sufficient')
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     latex = lookup(milestones, 'known_systemtools', 'latex')
@@ -77,7 +77,7 @@ if exitcode == CONTINUE:
     latexmk = lookup(milestones, 'known_systemtools', 'latexmk')
     if not (latex or pdflatex or latexmk):
         loglist.append('It seems the LaTeX PDF builder is not available.')
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

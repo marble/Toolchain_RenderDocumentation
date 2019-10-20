@@ -64,6 +64,7 @@ if exitcode == CONTINUE:
         if v is None:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
+            reason = 'Bad PARAMS or nothing to do'
             break
 
 if exitcode == CONTINUE:

@@ -79,7 +79,8 @@ if exitcode == CONTINUE:
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
     if not (create_buildinfo and TheProjectLog and TheProjectResultBuildinfo):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 
 if exitcode == CONTINUE:
@@ -90,7 +91,8 @@ if exitcode == CONTINUE:
 
     toolfolderabspath = lookup(params, 'toolfolderabspath')
     if not toolfolderabspath:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 
 if exitcode == CONTINUE:
@@ -118,6 +120,7 @@ if exitcode == CONTINUE:
     if not os.path.isfile(htmlmail_template_file):
         loglist.append(('fatal: htmlmail_template_file not found', htmlmail_template_file))
         exitcode = 22
+        reason = 'Fatal: htmlmail_template not found'
 
 if exitcode == CONTINUE:
     # use individual variables for nice code completion in PyCharm
@@ -176,8 +179,6 @@ def do_the_work():
             else:
                 result.append(arg)
         return result
-
-
 
 
     # gather information

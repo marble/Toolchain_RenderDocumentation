@@ -65,6 +65,7 @@ if exitcode == CONTINUE:
     make_singlehtml = lookup(milestones, 'make_singlehtml')
     if not make_singlehtml:
         CONTINUE = -2
+        reason = 'Nothing to do'
 
 if exitcode == CONTINUE:
     disable_include_files_check = lookup(milestones,
@@ -75,7 +76,8 @@ if exitcode == CONTINUE:
             or disable_include_files_check
             or included_files_check_is_ok
     ):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     build_html = lookup(milestones, 'build_html')
@@ -87,7 +89,8 @@ if exitcode == CONTINUE:
             and ready_for_build
             and rebuild_needed
     ):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     masterdoc = lookup(milestones, 'masterdoc', default=None)
@@ -111,7 +114,8 @@ if exitcode == CONTINUE:
             and TheProjectLog
             and TheProjectMakedir
     ):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 
 if exitcode == CONTINUE:

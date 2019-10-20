@@ -76,6 +76,7 @@ if exitcode == CONTINUE:
             and TheProjectResultVersion
     ):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -141,7 +142,8 @@ if exitcode == CONTINUE:
     exitcode, cmd, out, err = execute_cmdlist(cmd)
     if exitcode:
         the_copy = None
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'rsync failed'
 
 
 if exitcode == CONTINUE:

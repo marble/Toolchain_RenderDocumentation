@@ -71,12 +71,14 @@ if exitcode == CONTINUE:
     settingscfg_file = milestones.get('settingscfg_file', '')
     email_user_do_not_send = milestones.get('email_user_do_not_send', 0)
     if not (settingscfg_file):
-        CONTINUE = -1
+        CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
+
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEM with required params')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================

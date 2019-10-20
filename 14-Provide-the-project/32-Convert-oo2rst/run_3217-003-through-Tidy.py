@@ -2,11 +2,14 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import codecs
 import os
-import tct
-import sys
-#
+import os
 import PIL
+import subprocess
+import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -62,6 +65,7 @@ if exitcode == CONTINUE:
 
     if not (masterdoc_manual_html_copy_cleaned and TheProjectBuildOpenOffice2Rest and tidy):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -74,10 +78,6 @@ else:
 # ---------------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    import codecs
-    import os
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:

@@ -79,6 +79,7 @@ if exitcode == CONTINUE:
     TheProjectBuildOpenOffice2Rest = lookup(milestones, 'TheProjectBuildOpenOffice2Rest')
     if not (masterdoc_manual_html_005_as_rst and oo_parser and TheProject and TheProjectBuildOpenOffice2Rest):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -136,7 +137,9 @@ if exitcode == CONTINUE:
     if masterdoc_manual_rst_selected is None:
         masterdoc_manual_rst_selected = lookup(masterdoc_manual_html_005_as_rst, oo_parser, 'outfile', default=None)
     if not masterdoc_manual_rst_selected:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Masterdoc not found'
+
 
 if exitcode == CONTINUE:
     TheProjectDocumentation = os.path.join(TheProject, 'Documentation')

@@ -100,6 +100,7 @@ if exitcode == CONTINUE:
             # and webroot_abspath
             ):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
     buildsettings_localization = lookup(milestones, 'buildsettings',
                                         'localization', default='')
@@ -136,6 +137,7 @@ if exitcode == CONTINUE:
         loglist.append("'%s' is shorter than the '%s' required parts"
                        % (relative_part_of_builddir_stripped, required_parts))
         exitcode = 22
+        reason = 'Relpath of builddir has not enough parts.'
 
 if exitcode == CONTINUE:
 

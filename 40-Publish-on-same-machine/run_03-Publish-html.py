@@ -76,6 +76,7 @@ if exitcode == CONTINUE:
     ):
         # stop this folder
         exitcode = 22
+        reason = 'Bad params'
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
@@ -105,6 +106,7 @@ if exitcode == CONTINUE:
     ):
         # stop processing of rest of folder
         exitcode = 22
+        reason = 'Bad params'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

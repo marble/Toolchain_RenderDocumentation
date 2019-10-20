@@ -71,19 +71,12 @@ if exitcode == CONTINUE:
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
-
-    # fetch
-
-    # test
+            reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================

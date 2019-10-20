@@ -75,24 +75,22 @@ if exitcode == CONTINUE:
         if not v:
             loglist.append("'%s' not found" % requirement)
             exitcode = 22
+            reason = 'Bad PARAMS or nothing to do'
 
+if exitcode == CONTINUE:
     configset = milestones_get('configset')
     # fetch
     webroot_abspath = tct.deepget(facts, 'tctconfig', configset, 'webroot_abspath')
     loglist.append(('webroot_abspath', webroot_abspath))
 
-    # test
     if not webroot_abspath:
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -105,8 +103,10 @@ if exitcode == CONTINUE:
     publish_dir_pdf_planned = milestones_get('publish_dir_pdf_planned')
 
     if not (pdf_dest_file and pdf_dest_folder and publish_dir_pdf_planned):
-        loglist.append('nothing to do')
-        CONTINUE = -1
+        CONTINUE = -2
+        reason = 'Nothing to do'
+        loglist.append(reason)
+
 
 if exitcode == CONTINUE:
     temp = os.path.join(publish_dir_pdf_planned, os.path.split(pdf_dest_file)[1])

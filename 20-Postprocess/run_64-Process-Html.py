@@ -79,7 +79,8 @@ if exitcode == CONTINUE:
     if not (1
             and build_html_folder
             and sitemap_files_html_jsonfile):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
@@ -87,8 +88,9 @@ if exitcode == CONTINUE:
     sitemap_files_singlehtml_jsonfile = lookup(
         milestones, 'sitemap_files_singlehtml_jsonfile', default=None)
     if (not build_html_folder) != (not sitemap_files_html_jsonfile):
-        CONTINUE = -2
-        loglist.append('Either have none or both')
+        exitcode = 22
+        reason = 'Either have none or both'
+        loglist.append(reason)
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -105,11 +107,12 @@ if exitcode == CONTINUE:
     html_theme_options = lookup(milestones, "conf_py_settings",
                                 "html_theme_options", default={})
     if html_theme_options and not html_theme_options.get("docstypo3org"):
-        loglist.append(
+        reason = (
             "We don't do postprocessing, since we do have the\n"
             "Settings.dump.json of the Sphinx html build,\n"
             "but 'docstypo3org' (rendering for server) is not\n"
             "set in there.\n")
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:

@@ -65,7 +65,7 @@ if exitcode == CONTINUE:
     latex_file = milestones_get('latex_file')
 
     if not (latex_file):
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

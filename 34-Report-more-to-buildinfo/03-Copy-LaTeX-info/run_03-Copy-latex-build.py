@@ -32,6 +32,8 @@ exitcode = CONTINUE = 0
 # container for easy local rendering is available.
 
 CONTINUE = -2
+reason = 'Tool is turned OFF for now'
+
 
 
 # ==================================================

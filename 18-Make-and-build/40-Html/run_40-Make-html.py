@@ -73,6 +73,7 @@ if exitcode == CONTINUE:
             and rebuild_needed
     ):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     disable_include_files_check = lookup(milestones,
@@ -84,6 +85,7 @@ if exitcode == CONTINUE:
             or included_files_check_is_ok
     ):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 
 if exitcode == CONTINUE:
@@ -107,6 +109,7 @@ if exitcode == CONTINUE:
             and TheProjectLog
             and TheProjectMakedir):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

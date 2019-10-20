@@ -64,27 +64,10 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
-    # test
-
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -94,7 +77,8 @@ if CONTINUE != 0:
 if exitcode == CONTINUE:
     lockfile = milestones_get('lockfile')
     if not (lockfile):
-        CONTINUE = -1
+        reason = "lockfile is missing"
+        exitcode = 22
 
 if exitcode == CONTINUE:
     if os.path.isfile(lockfile):

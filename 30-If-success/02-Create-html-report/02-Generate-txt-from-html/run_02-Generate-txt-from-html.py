@@ -4,8 +4,11 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import cgi
+import codecs
 import os
+import re
 import shutil
+import subprocess
 import sys
 import tct
 from six.moves import range
@@ -71,16 +74,6 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
     # fetch
     TheProjectLogHtmlmail = milestones_get('TheProjectLogHtmlmail')
     TheProjectResultBuildinfoMessage = milestones_get('TheProjectResultBuildinfoMessage')
@@ -89,23 +82,19 @@ if exitcode == CONTINUE:
     # test
     if not (TheProjectLogHtmlmail and TheProjectResultBuildinfoMessage and
             TheProjectLogHtmlmailMessageHtml):
-        CONTINUE = -1
+        exitcode = 22
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('Bad PARAMS or nothing to do')
 
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
-
-import re
 
 pattern_re =re.compile('\{.*?\"\}')
 
@@ -123,10 +112,6 @@ if exitcode == CONTINUE:
     logDestfileMdTxt  = TheProjectLogHtmlmail + '/' + TheProjectResultBuildinfoMessageFstem +'.md.txt'
     logDestfileRstTxt = TheProjectLogHtmlmail + '/' + TheProjectResultBuildinfoMessageFstem + '.rst.txt'
     logDestfileTxt    = TheProjectLogHtmlmail + '/' + TheProjectResultBuildinfoMessageFstem + '.txt'\
-
-
-    import codecs
-    import subprocess
 
     def cmdline(cmd, cwd=None):
         if cwd is None:

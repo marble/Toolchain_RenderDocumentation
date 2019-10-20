@@ -74,11 +74,13 @@ if exitcode == CONTINUE:
     buildsettings = lookup(milestones, 'buildsettings')
     if not (configset and buildsettings):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     gitdir_is_ready_for_use = buildsettings.get('gitdir_is_ready_for_use')
     if gitdir_is_ready_for_use:
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     builddir = lookup(milestones, 'buildsettings', 'builddir', default='')
@@ -93,19 +95,22 @@ if exitcode == CONTINUE:
     if not (ter_extkey and ter_extversion):
         loglist.append('For a TER extension we need the key and the version.')
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     extensions_rootfolder = lookup(facts, 'tctconfig', configset, 'extensions_rootfolder')
     if not extensions_rootfolder:
         loglist.append('We need a place to unpack to')
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     gitbranch = buildsettings.get('gitbranch', '')
     giturl = buildsettings.get('giturl', '')
     if giturl:
         loglist.append('We can\'t have both: TER_EXTKEY and GITURL')
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 #   gitdir = lookup(milestones, 'buildsettings', 'gitdir')
 
@@ -159,7 +164,8 @@ if exitcode == CONTINUE:
     foldername = ter_extkey + '_' + ter_extversion
     foldername = foldername.replace('*', '').replace('?', '')
     if not foldername:
-        loglist.append('illegal extension specification')
+        reason = 'illegal extension specification'
+        loglist.append(reason)
         exitcode = 22
 
 if exitcode == CONTINUE:
@@ -184,7 +190,9 @@ if exitcode == CONTINUE:
         extension_file_abspath = os.path.join(gitdir, extension_file)
 
     if not extension_file_abspath:
-        exit = 2
+        exitcode = 22
+        reason = 'Bad extension_file_abspath'
+
 
 if exitcode == CONTINUE:
     exitcode, cmd, out, err = execute_cmdlist([

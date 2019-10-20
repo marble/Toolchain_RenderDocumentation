@@ -76,6 +76,7 @@ if exitcode == CONTINUE:
             and run_latex_make_sh_file
     ):
         CONTINUE = -2
+        reason = 'Bad params'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

@@ -75,6 +75,7 @@ if exitcode == CONTINUE:
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not gitdir:
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

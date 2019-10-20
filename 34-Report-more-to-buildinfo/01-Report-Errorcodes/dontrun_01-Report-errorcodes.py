@@ -78,7 +78,7 @@ if exitcode == CONTINUE:
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
     if not (tools_exitcodes and TheProjectResultBuildinfo):
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

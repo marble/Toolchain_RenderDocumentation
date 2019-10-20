@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+import os
 import tct
 import sys
 
@@ -68,21 +69,25 @@ if exitcode == CONTINUE:
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
 
     if not ((gitdir or giturl) or (ter_extkey and ter_extversion)):
-        loglist.append('no source project specified')
+        reason = 'No source project specified'
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:
     if not buildsettings:
         exitcode = 22
+        reason = 'buildsettings are missing'
 
 if exitcode == CONTINUE:
     if not gitdir_is_ready_for_use and giturl and not gitbranch:
-            loglist.append('we need to know the branch of the repository')
-            CONTINUE = -2
+        reason = 'Branch of repo is not specified.'
+        loglist.append(reason)
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     if not gitdir_is_ready_for_use and (gitdir or giturl) and (ter_extkey):
-        loglist.append('we either expect a manual or a ter extension. ')
+        reason = 'Either a manual or a TER extension is expected.'
+        loglist.append(reason)
         exitcode = 99
 
 if exitcode == CONTINUE:
@@ -90,7 +95,8 @@ if exitcode == CONTINUE:
         configset = lookup(milestones, 'configset')
         repositories_rootfolder = lookup(facts, 'tctconfig', configset, 'repositories_rootfolder')
         if not (configset and repositories_rootfolder):
-            CONTINUE = -2
+            exitcode = 22
+            reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -101,8 +107,6 @@ else:
 # ==================================================
 # work
 # --------------------------------------------------
-
-import os
 
 legalchars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-01234567890'
 

@@ -2,12 +2,12 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-import tct
-import sys
-#
+
 import codecs
 import os
 import subprocess
+import sys
+import tct
 
 
 params = tct.readjson(sys.argv[1])
@@ -61,14 +61,24 @@ if exitcode == CONTINUE:
 
     configset = lookup(milestones, 'configset')
     buildsettings = lookup(milestones, 'buildsettings')
-    ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
-    if not (configset and buildsettings and ter_extkey):
-        CONTINUE = -2
+
+    if not (1
+        and buildsettings
+        and configset
+    ):
+        exitcode = 22
+        reason = 'Bad PARAMS'
 
 if exitcode == CONTINUE:
+    ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
     ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
-    if ter_extversion:
+
+    if (1
+        and ter_extversion
+        and ter_extversion
+    ):
         CONTINUE = -2
+        reason = 'Nothing to do - insufficient params'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

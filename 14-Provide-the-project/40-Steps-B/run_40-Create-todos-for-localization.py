@@ -75,10 +75,12 @@ if exitcode == CONTINUE:
     version = buildsettings.get('version')
     localization = buildsettings.get('localization')
     if not (localization_locales):
-        loglist.append('Nothing to do - no localizations found')
+        reason = 'Nothing to do - no localizations found'
+        loglist.append(reason)
         CONTINUE = -2
     if localization and localization != 'default':
-        loglist.append("Nothing to do - we are building '%s' already" % localization)
+        reason = "Nothing to do - we are building '%s' already" % localization
+        loglist.append(reason)
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -90,13 +92,15 @@ if exitcode == CONTINUE:
         and version
         and resultdir
     ):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     cmdline = lookup(facts, 'cmdline')
     toolchain_temp_home = lookup(facts, 'toolchain_temp_home')
     if not (cmdline and toolchain_temp_home):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')

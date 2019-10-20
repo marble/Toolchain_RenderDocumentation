@@ -59,10 +59,12 @@ if exitcode == CONTINUE:
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     if not gitdir :
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     gitdir_is_ready_for_use = lookup(milestones, 'buildsettings', 'gitdir_is_ready_for_use')
     if gitdir_is_ready_for_use:
+        reason = 'Nothing to do'
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -70,6 +72,7 @@ if exitcode == CONTINUE:
     gitbranch = lookup(milestones, 'buildsettings', 'gitbranch')
     if not (giturl and gitbranch):
         CONTINUE = -2
+        reason = 'giturl AND gitbranch is not true'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -149,6 +152,7 @@ if exitcode == CONTINUE:
         gitdir_must_start_with = lookup(milestones, 'gitdir_must_start_with')
         if not gitdir_must_start_with:
             exitcode = 22
+            reason = "Gitdir starts with wrong string"
 
 if exitcode == CONTINUE:
     if do_clone_or_pull == 'clone':
@@ -156,9 +160,9 @@ if exitcode == CONTINUE:
             if gitdir.startswith(item):
                 break
         else:
-            CONTINUE = -1
-            loglist.append(('need to clone, but gitdir does not start with one of gitdir_must_start_with',
-                            gitdir))
+            exitcode = 22
+            reason = 'Need to clone, but gitdir does not start with one of gitdir_must_start_with'
+            loglist.append((reason, gitdir))
 
 # ==================================================
 # work

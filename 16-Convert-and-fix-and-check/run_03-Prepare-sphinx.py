@@ -63,6 +63,7 @@ if exitcode == CONTINUE:
     if not (buildsettings_file_fixed and makedir and masterdoc and TheProject
             and TheProjectBuild and TheProjectLog):
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

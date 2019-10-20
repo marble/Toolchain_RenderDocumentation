@@ -69,6 +69,7 @@ if exitcode == CONTINUE:
             and resultdir
     ):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -125,8 +126,9 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
    tmp_publish_dir_Result =  ospj(resultdir, 'Result')
    if not os.path.exists(tmp_publish_dir_Result):
-       # strange - not expected
-       CONTINUE = -2
+        # strange - not expected
+        exitcode = 22
+        reason = 'Publish dir does not exist'
 
 if exitcode == CONTINUE:
     cmdlist = [

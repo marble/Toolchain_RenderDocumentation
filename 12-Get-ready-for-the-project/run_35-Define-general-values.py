@@ -138,7 +138,8 @@ if not (1
         and url_of_webroot
         and webroot_abspath
     ):
-    CONTINUE = -2
+    exitcode = 22
+    reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

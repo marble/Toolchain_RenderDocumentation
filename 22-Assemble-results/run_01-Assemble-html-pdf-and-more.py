@@ -74,7 +74,8 @@ if exitcode == CONTINUE:
             and build_html_folder
             and TheProject
             and version):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -104,8 +105,11 @@ if exitcode == CONTINUE:
     if postprocessing_is_required:
         if not all_html_files_sanitized:
             exitcode = 22
+            reason = 'Not all html files sanitized'
         if not all_singlehtml_files_sanitized and build_singlehtml:
             exitcode = 22
+            reason = 'Not all singlehtml files sanitzized'
+
 
 if exitcode == CONTINUE:
 

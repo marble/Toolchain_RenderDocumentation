@@ -84,7 +84,7 @@ if exitcode == CONTINUE:
             and package_key
             and package_language
             and TheProjectBuild):
-        CONTINUE = -2
+        exitcode = 22
 
 if exitcode == CONTINUE:
     buildsettings = lookup(milestones, 'buildsettings')

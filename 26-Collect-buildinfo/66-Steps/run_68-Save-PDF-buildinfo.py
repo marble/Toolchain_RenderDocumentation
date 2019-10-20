@@ -64,33 +64,18 @@ TheProjectResultBuildinfoPdfFilesCnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     build_latex_folder = milestones_get('build_latex_folder')
 
-    # test
     if not (TheProjectResult and TheProjectResultBuildinfo and build_latex_folder):
         CONTINUE = -2
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================

@@ -61,7 +61,8 @@ if exitcode == CONTINUE:
 
     TheProjectWebroot = lookup(milestones, 'TheProjectWebroot')
     if not TheProjectWebroot:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

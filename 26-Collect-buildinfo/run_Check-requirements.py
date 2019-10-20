@@ -61,6 +61,7 @@ if exitcode == CONTINUE:
             and TheProjectResultVersion
     ):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 
 if exitcode == CONTINUE:

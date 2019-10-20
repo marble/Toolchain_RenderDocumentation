@@ -63,6 +63,7 @@ if exitcode == CONTINUE:
     toolchain_temp_home = lookup(params, 'toolchain_temp_home')
     if not (lockfile_name and toolchain_temp_home):
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -95,6 +96,7 @@ if exitcode == CONTINUE:
             os.remove(lockfile_planned)
             if os.path.exists(lockfile_planned):
                 exitcode = 22
+                reason = 'lockfile_planned already exists'
             else:
                 lockfile_removed = lockfile_planned
                 if talk:
@@ -104,6 +106,8 @@ if exitcode == CONTINUE:
     if os.path.exists(lockfile_planned):
         loglist.append('lockfile_planned still exists')
         exitcode = 22
+        reason = 'lockfile_planned exists but shouldn\'t'
+
 
 if exitcode == CONTINUE:
     tct.writejson(facts, lockfile_planned)

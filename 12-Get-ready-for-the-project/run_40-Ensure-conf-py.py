@@ -66,7 +66,8 @@ if exitcode == CONTINUE:
 
     makedir_abspath = milestones_get('makedir_abspath')
     if not makedir_abspath:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -82,6 +83,7 @@ if exitcode == CONTINUE:
     conf_py_file = os.path.join(makedir_abspath, 'conf.py')
     if os.path.exists(conf_py_file):
         CONTINUE = -2
+        reason = 'Ok, conf.py exists.'
     else:
         conf_py_file = ''
 
@@ -96,10 +98,11 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     if not os.path.exists(conf_py_file):
-        loglist.append(('conf.py not found in makedir', makedir_abspath))
+        reason = 'conf.py not found in makedir'
+        loglist.append((reason, makedir_abspath))
         printerror = print
         printerror('conf.py is missing in makedir ' + makedir_abspath)
-        CONTINUE = -2
+        exitcode = 22
 
 
 # ==================================================

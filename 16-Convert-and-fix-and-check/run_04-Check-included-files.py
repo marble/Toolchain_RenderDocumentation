@@ -68,6 +68,7 @@ if exitcode == CONTINUE:
                                          default=0)
 
     if disable_include_files_check:
+        reason = 'Nothing to do. disable_include_files_check is set.'
         CONTINUE = -2
 
 if exitcode == CONTINUE:
@@ -92,7 +93,8 @@ if exitcode == CONTINUE:
         and toolfolderabspath
         and workdir
     ):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

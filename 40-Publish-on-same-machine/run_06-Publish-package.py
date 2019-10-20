@@ -71,6 +71,7 @@ if exitcode == CONTINUE:
             and resultdir
     ):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

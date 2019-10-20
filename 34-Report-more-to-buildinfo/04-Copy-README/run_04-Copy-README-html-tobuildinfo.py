@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import shutil
 import tct
 import sys
 
@@ -61,19 +62,18 @@ if exitcode == CONTINUE:
     TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
 
     if not (TheProjectLogREADMEfile and TheProjectResultBuildinfo):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Nothing to do for these params')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
-
-import shutil
 
 if exitcode == CONTINUE:
     dummy, fname = os.path.split(TheProjectLogREADMEfile)

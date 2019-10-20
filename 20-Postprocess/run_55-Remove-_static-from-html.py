@@ -67,6 +67,7 @@ if exitcode == CONTINUE:
             and (build_html_folder or build_singlehtml_folder)
             and remove_static_folder_from_html_done):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

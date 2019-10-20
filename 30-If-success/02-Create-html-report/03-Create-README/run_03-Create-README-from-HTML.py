@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import cgi
+import codecs
 import os
 import shutil
 import sys
@@ -13,6 +14,7 @@ params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
 loglist = result['loglist'] = result.get('loglist', [])
@@ -64,18 +66,17 @@ if exitcode == CONTINUE:
 
     if not (TheProjectLogHtmlmailMessageHtml and absurl_html_dir):
         CONTINUE = -2
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Cannot work with these PARAMS')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
 # work
 # --------------------------------------------------
-
-import codecs
 
 if exitcode == CONTINUE:
     TheProjectLogREADMEfile = os.path.join(os.path.split(TheProjectLogHtmlmailMessageHtml)[0], 'README.html')

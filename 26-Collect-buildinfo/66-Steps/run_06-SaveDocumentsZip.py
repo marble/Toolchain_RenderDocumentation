@@ -79,6 +79,7 @@ if exitcode == CONTINUE:
             and TheProjectDocumentation
             and zip_systemtool):
         CONTINUE = -2
+        reason = 'warnings.txt file not found'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

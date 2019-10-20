@@ -62,6 +62,7 @@ if exitcode == CONTINUE:
             and TheProject
             and (build_html or build_singlehtml)):
         CONTINUE = -1
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     build_html_folder = lookup(milestones, 'build_html_folder', default=None)
@@ -69,6 +70,7 @@ if exitcode == CONTINUE:
                                      default=None)
     if not (build_html_folder or build_singlehtml_folder):
         CONTINUE = -1
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

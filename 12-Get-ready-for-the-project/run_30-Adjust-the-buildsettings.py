@@ -91,14 +91,16 @@ if exitcode == CONTINUE:
     if not (1
             and buildsettings
             and configset):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     localization = buildsettings.get('localization', '')
     if localization and not xx_XX.match(localization):
         loglist.append('Bad buildsettings.localization. '
                        'Not matching "([a-z]{2}_[a-z]{2})|default"')
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     extensions_builddir_relpath = lookup(facts, 'tctconfig', configset, 'extensions_builddir_relpath', default=None)
@@ -111,7 +113,8 @@ if exitcode == CONTINUE:
             and extensions_builddir_relpath
             and webroot_abspath
             and 1):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -209,7 +212,7 @@ if exitcode == CONTINUE:
 
         parts = buildsettings['giturl'].split('/') # ['https:', '', 'github.com', 'user', 'repo']
         if len(parts) < 4 or not (parts[0] in ['https:', 'http:']) or parts[1]:
-            CONTINUE = -2
+            exitcode = 22
             loglist.append('giturl is to short')
 
         if exitcode == CONTINUE:

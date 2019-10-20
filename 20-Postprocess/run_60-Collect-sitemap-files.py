@@ -66,7 +66,8 @@ if exitcode == CONTINUE:
 
     build_html_folder = lookup(milestones, 'build_html_folder')
     if not build_html_folder:
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

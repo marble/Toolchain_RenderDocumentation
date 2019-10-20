@@ -59,6 +59,7 @@ if exitcode == CONTINUE:
     TheProjectBuildOpenOffice2Rest = lookup(milestones, 'TheProjectBuildOpenOffice2Rest')
     if not (masterdoc_manual_000_html and TheProjectBuildOpenOffice2Rest):
         CONTINUE = -2
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

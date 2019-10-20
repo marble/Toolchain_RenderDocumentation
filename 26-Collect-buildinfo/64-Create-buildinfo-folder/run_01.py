@@ -62,6 +62,7 @@ if exitcode == CONTINUE:
             and TheProjectResultVersion
             and toolfolderabspath):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

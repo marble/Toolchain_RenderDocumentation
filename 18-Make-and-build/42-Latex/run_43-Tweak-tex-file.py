@@ -69,6 +69,7 @@ if exitcode == CONTINUE:
             and build_latex_folder
     ):
         CONTINUE = -2
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

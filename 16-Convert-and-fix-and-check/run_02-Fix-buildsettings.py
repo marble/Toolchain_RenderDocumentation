@@ -3,7 +3,9 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+import codecs
 import os
+import shutil
 import tct
 import sys
 
@@ -65,6 +67,7 @@ if exitcode == CONTINUE:
     TheProjectLog = lookup(milestones, 'TheProjectLog')
     if not (TheProjectLog):
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -82,12 +85,11 @@ if exitcode == CONTINUE:
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
     if not (masterdoc and TheProjectMakedir and documentation_folder):
         loglist.append('SKIPPING')
-        CONTINUE = -1
+        CONTINUE = -2
+        reason = 'Skipping'
+
 
 if exitcode == CONTINUE:
-    import shutil
-    import codecs
-
     buildsettings_file = os.path.join(TheProjectMakedir, 'buildsettings.sh')
     if not os.path.exists(buildsettings_file):
         with open(buildsettings_file, 'w') as f2:

@@ -55,7 +55,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================
@@ -84,7 +84,7 @@ Toolchain options:
   -T version                      Show toolchain version and exit.
 
   -c makedir PATH/TO/MAKEDIR      Required! The path to the 'make' folder.
-  -c resultdir PATH/TO/MAKEDIR    Optional. The path to the 
+  -c resultdir PATH/TO/MAKEDIR    Optional. The path to the
                                   'Documentation-GENERATED-temp' folder. Must
                                   exist if specified.
 
@@ -124,7 +124,7 @@ if exitcode == CONTINUE:
         if show_toolchain_usage_and_exit:
             print(toolchain_usage)
             exitcode = 90
-            reason = 'show_toolchain_usage_and_exit'
+            reason = 'Just show toolchain usage and stop.'
 
 
 # ==================================================

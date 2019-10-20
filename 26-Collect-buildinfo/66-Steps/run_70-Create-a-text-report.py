@@ -69,17 +69,6 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    # required milestones
-    requirements = []
-
-    # just test
-    for requirement in requirements:
-        v = milestones_get(requirement)
-        if not v:
-            loglist.append("'%s' not found" % requirement)
-            exitcode = 22
-
-    # fetch
     TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
     TheProjectResult = milestones_get('TheProjectResult')
     TheProjectResultVersion = milestones_get('TheProjectResultVersion')
@@ -89,7 +78,6 @@ if exitcode == CONTINUE:
     relative_part_of_builddir = milestones_get('relative_part_of_builddir')
     webroot_abspath = milestones_get('webroot_abspath')
 
-    # test
     if not (1
             and buildsettings
             and buildsettings_builddir
@@ -101,15 +89,12 @@ if exitcode == CONTINUE:
             and webroot_abspath
             ):
         exitcode = 22
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('PROBLEMS with params')
-
-if CONTINUE != 0:
-    loglist.append({'CONTINUE': CONTINUE})
-    loglist.append('NOTHING to do')
+    loglist.append('Bad PARAMS or nothing to do')
 
 
 # ==================================================

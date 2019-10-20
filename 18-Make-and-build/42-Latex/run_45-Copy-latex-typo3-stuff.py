@@ -65,6 +65,7 @@ if exitcode == CONTINUE:
     make_latex = lookup(milestones, 'make_latex', default=None)
     if not make_latex:
         CONTINUE == -2
+        reason = 'Nothing to do'
 
 if exitcode == CONTINUE:
     build_latex = lookup(milestones, 'build_latex', default=None)
@@ -77,6 +78,7 @@ if exitcode == CONTINUE:
             and builder_latex_folder
             and latex_contrib_typo3_folder):
         CONTINUE = -2
+        reason = 'Bad params or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
@@ -90,7 +92,8 @@ else:
 
 if exitcode == CONTINUE:
     if not os.path.isdir(latex_contrib_typo3_folder):
-        CONTINUE = -2
+        exitcode = 22
+        reason = 'Folder does not exist'
 
 if exitcode == CONTINUE:
     foldername = os.path.split(latex_contrib_typo3_folder)[1]

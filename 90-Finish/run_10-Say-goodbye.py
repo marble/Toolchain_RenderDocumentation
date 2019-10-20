@@ -68,6 +68,7 @@ if exitcode == CONTINUE:
                                   default=1)
     if not checksum_ttl_seconds:
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')

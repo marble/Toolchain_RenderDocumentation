@@ -3,10 +3,9 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
-import tct
-import sys
-#
 import shutil
+import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -64,6 +63,7 @@ if exitcode == CONTINUE:
     masterdoc_candidates = lookup(milestones, 'masterdoc_candidates')
     if not (TheProject and masterdoc_candidates):
         exitcode = 22
+        reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
