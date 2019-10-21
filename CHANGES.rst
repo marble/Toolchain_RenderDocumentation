@@ -1,8 +1,52 @@
-Release v2.8-dev (permanent release as 'develop')
-=================================================
+Release v2.8.0 (Oct 21, 2019)
+=============================
 
-* bugfix: in make_html get 'exitcode' if 'activateForLocalDebugging' is on
-* set version to 'v2.8-dev'
+Lots of improvements!
+
+Starting with 'reason' strings in the toolchain:
+
+* b956969 Revamp 'reason' strings and 'exitcode'
+
+Replace the old CheckIncludeFiles code:
+
+* 32a54f6 Revamp run_04-Check-included-files
+
+Start renaming the old variable name and use, for example, 'OrigProject' (now)
+instead of 'gitdir' (previously):
+
+* ce168d6 Add OrigProject in run_30-Adjust-the-buildsettings
+
+Allow configuration of which files of the original project
+'OrigProject' (=/PROJECT) shall be available in the copy 'TheProject' that
+is used for documentation generation:
+
+* 36e9c6b Add run_22-Get-more-documentation-files
+* e131a6b Use 'get_documentation' in run_03-Copy-the-project.py
+* 31e372e Add get_documentation_defaults in run_01-Start-with-everything
+
+
+Make everything work for every localization as well:
+
+* 9c08fb6 [BUGFIX][FEATURE] Have package result for each localization
+* 884f9db [BUGFIX][FEATURE] Have latex result for each localization
+* 286e1d2 [BUFGIX] Make localization work again
+
+
+Allow a mapping for themes:
+
+* 4c0e0b6 Update run_08-Copy-the-makedir.py: Copy /THEMES as MAKEDIR/_themes
+
+
+Make everything configurable in - superpowered! - jobfile.json:
+
+* b662d32 [!!!] jobfile.json takes precedence of commandline params
+
+
+Enhancements, interesting or useful stuff:
+
+* b3ab839 Set 'nonstopmode' in Makefile for 'make latex'
+* cf5ea9d run_40-Make-html.py: Use 'sphinx-build -v -v -v'
+
 
 
 Release v2.7.0 (Aug 15, 2019)
