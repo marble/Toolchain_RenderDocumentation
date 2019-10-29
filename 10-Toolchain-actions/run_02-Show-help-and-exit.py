@@ -3,12 +3,15 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import tct
-import os
 import sys
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
+
+sys.path.insert(1, params['toolchain_folder'] + '/toolchain-packages')
+import tclib
+
 reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
@@ -17,6 +20,7 @@ toolname_pure = params['toolname_pure']
 toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
 loglist = result['loglist'] = result.get('loglist', [])
+lookup = tclib.lookup_function(loglist)
 exitcode = CONTINUE = 0
 
 
@@ -26,16 +30,6 @@ exitcode = CONTINUE = 0
 
 if 0 or milestones.get('debug_always_make_milestones_snapshot'):
     tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
-
-
-# ==================================================
-# Helper functions
-# --------------------------------------------------
-
-def lookup(D, *keys, **kwdargs):
-    result = tct.deepget(D, *keys, **kwdargs)
-    loglist.append((keys, result))
-    return result
 
 
 # ==================================================
