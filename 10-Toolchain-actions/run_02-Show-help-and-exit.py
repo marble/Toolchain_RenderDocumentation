@@ -46,6 +46,8 @@ show_toolchain_usage_and_exit = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    abc = lookup(milestones, 'a', 'b', 'c')
+
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:

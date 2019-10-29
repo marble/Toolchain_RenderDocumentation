@@ -89,8 +89,8 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     file_patterns = [
         '.buildinfo',
-        '_static/*.map',
-        '_static/css/*.map',
+        #'_static/*.map',
+        #'_static/css/*.map',
         '_static/jquery-*.js',
         '_static/js/t3autocomplete2.js',
         '_static/js/zumklaun.js',
