@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 import codecs
 import os
-import shutil
 import subprocess
 import sys
 import tct
@@ -133,6 +132,8 @@ if exitcode == CONTINUE:
 # work
 # --------------------------------------------------
 
+themesdir = lookup(milestones, 'themesdir')
+
 if exitcode == CONTINUE:
     TheProjectMakedir = TheProject + 'Makedir'
     cmdlist = [
@@ -154,39 +155,45 @@ if exitcode == CONTINUE:
 
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
+
 if exitcode == CONTINUE:
-    srcthemes = '/THEMES'
-    if not ospe(srcthemes):
-        reason = srcthemes + ' does not exist. No themes to copy.'
+
+    if not themesdir:
+        reason = "No themes to copy, because 'themesdir' is not given"
         loglist.append(reason)
         CONTINUE = -2
+    if exitcode == CONTINUE:
+        if not ospe(themesdir):
+            reason = "themesdir '" + themesdir + "' does not exist."
+            loglist.append(reason)
+            CONTINUE = -2
 
-if exitcode == CONTINUE:
-    destthemes = TheProjectMakedir + '/_themes'
-    if ospe(destthemes):
-        reason = (destthemes + ' exists. I will not copy ' + srcthemes +
-                  ' because that may overwrite existing')
-        loglist.append(reason)
-        CONTINUE = -2
+    if exitcode == CONTINUE:
+        destthemes = TheProjectMakedir + '/_themes'
+        if ospe(destthemes):
+            reason = ('We don\'t want to overwrite the existing '
+                      '"TheProjectMakedir/_themes" folder')
+            loglist.append(reason)
+            CONTINUE = -2
 
-if exitcode == CONTINUE:
-    cmdlist = [
-        # run rsync
-        'rsync',
-        # in archive mode, that is equivalent to -rlptgoD
-        '-a',
-        # leave out symlinks
-        '--no-links',
-        # srcdir - slash at the end!
-        srcthemes.rstrip('/') + '/',
-        # destdir - slash at the end!
-        destthemes.rstrip('/') + '/',
-    ]
+    if exitcode == CONTINUE:
+        cmdlist = [
+            # run rsync
+            'rsync',
+            # in archive mode, that is equivalent to -rlptgoD
+            '-a',
+            # leave out symlinks
+            '--no-links',
+            # srcdir - slash at the end!
+            themesdir.rstrip('/') + '/',
+            # destdir - slash at the end!
+            destthemes.rstrip('/') + '/',
+        ]
 
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+        exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
-if exitcode == CONTINUE:
-    TheProjectMakedirThemes = destthemes
+    if exitcode == CONTINUE:
+        TheProjectMakedirThemes = destthemes
 
 
 
