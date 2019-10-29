@@ -141,6 +141,7 @@ reveal_exitcodes = findRunParameter('reveal_exitcodes', 1, ATNM, int)
 reveal_milestones = findRunParameter('reveal_milestones', 1, ATNM, int)
 smtp_host = findRunParameter('smtp_host', None, ATNM)
 talk = findRunParameter('talk', 1, ATNM, int)
+themesdir = findRunParameter('themesdir', '/THEMES', ATNM)
 try_pdf_build_from_published_latex = findRunParameter('try_pdf_build_from_published_latex', 0, ATNM, int)
 
 get_documentation_defaults = findRunParameter('get_documentation_defaults', [
