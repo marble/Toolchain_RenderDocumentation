@@ -223,8 +223,13 @@ if exitcode == CONTINUE:
         loglist.append(('os.symlink(outdir, SYMLINK_THE_OUTPUT)', outdir,
                         SYMLINK_THE_OUTPUT))
 
-    os.symlink(sourcedir, SYMLINK_THE_PROJECT)
-    loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir,
+    #os.symlink(sourcedir, SYMLINK_THE_PROJECT)
+    #loglist.append(('os.symlink(sourcedir, SYMLINK_THE_PROJECT)', sourcedir,
+    #                SYMLINK_THE_PROJECT))
+
+    # todo: do it correctly. This isn't the general form atm. Hack!
+    os.symlink(TheProject, SYMLINK_THE_PROJECT)
+    loglist.append(('os.symlink(TheProject, SYMLINK_THE_PROJECT)', TheProject,
                     SYMLINK_THE_PROJECT))
 
 if exitcode == CONTINUE:
@@ -239,10 +244,10 @@ if exitcode == CONTINUE:
         cmdlist = [
             'sphinx-build',
             ]
-    if 1:
-        cmdlist.extend([
-            '-v', '-v', '-v',
-            ])
+    if milestones.get('activateLocalSphinxDebugging'):
+        cmdlist.extend(['-v', '-v', '-v'])
+    else:
+        cmdlist.extend(['-v'])
     if 0:
         cmdlist.extend([
             '-a',                  # write all files; default is to only write new and changed files
@@ -260,7 +265,8 @@ if exitcode == CONTINUE:
             '-N',                      # do not emit colored output
             '-T',                      # show full traceback on exception
             '-w', warnings_file,       # write warnings (and errors) to given file
-            SYMLINK_THE_PROJECT,       # need a stable name for Sphinx caching
+            # todo: do it correctly. It isn't always ./Documentation. Hack!
+            SYMLINK_THE_PROJECT + '/Documentation',   # need a stable name for Sphinx caching
             SYMLINK_THE_OUTPUT,        # need a stable name for Sphinx caching
         ])
 
