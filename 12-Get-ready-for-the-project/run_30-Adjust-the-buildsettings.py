@@ -84,7 +84,7 @@ if 0:
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    xx_XX = re.compile('([a-z]{2}_[a-z]{2})|default')
+    xx_XX = re.compile('([a-z]{2}_[A-Z]{2})|default')
 
     buildsettings = lookup(milestones, 'buildsettings')
     configset = lookup(milestones, 'configset')
