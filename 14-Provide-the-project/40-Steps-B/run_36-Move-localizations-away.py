@@ -79,10 +79,10 @@ else:
 
 if exitcode == CONTINUE:
     localization = tct.deepget(milestones, 'buildsettings', 'localization', default='')
-    if not localization in ['', 'default']:
-        reason = 'Nothing to move away, but we want to render localization.'
+    if localization not in ['', 'default']:
+        reason = 'Nothing to move away, because we want to render the localized version.'
         loglist.append((reason, localization))
-        exitcode = 22
+        CONTINUE = -2
 
 if exitcode == CONTINUE:
     TheProjectLocalization = TheProject + 'Localization'
