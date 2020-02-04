@@ -43,7 +43,6 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-buildsettings = {}
 documentation_folder = None
 documentation_folder_created = None
 documentation_folder_moved = None
@@ -215,7 +214,6 @@ if documentation_folder_moved:
     result['MILESTONES'].append({'documentation_folder_moved': documentation_folder_moved})
 
 if documentation_folder:
-    buildsettings['t3docdir'] = documentation_folder
     result['MILESTONES'].append({'documentation_folder': documentation_folder})
 
 
