@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import glob
 import os
+import os.path as osp
 import re
 import sys
 import tct
@@ -176,13 +177,26 @@ if masterdoc_selected:
     if masterdoc:
         masterdoc_no_ext = os.path.splitext(masterdoc)[0]
         buildsettings['masterdoc'] = os.path.join(gitdir, masterdoc_no_ext)
-        hit = None
+        hit = ''
         left, right = os.path.split(masterdoc_no_ext)
+        hit_before = ''
+        localization_xx_XX = re.compile('Documentation/Localization\.[a-z]{2}_[A-Z]{2}')
         while left:
+            hit_before = hit
             hit = left
             left = os.path.split(left)[0]
+        if localization_xx_XX.match(hit_before):
+            hit = hit_before
         if hit:
             buildsettings['t3docdir'] = os.path.join(gitdir, hit)
+
+gitdir = osp.abspath(buildsettings['gitdir'])
+t3docdir = buildsettings['t3docdir']
+if not osp.isabs(t3docdir):
+    t3docdir = osp.join(gitdir, t3docdir)
+t3docdir = osp.abspath(t3docdir)
+t3docdir = t3docdir[len(gitdir)+1:]
+buildsettings['t3docdir'] = t3docdir
 
 
 # ==================================================
