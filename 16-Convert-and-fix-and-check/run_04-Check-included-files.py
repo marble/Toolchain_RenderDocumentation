@@ -74,9 +74,9 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     documentation_folder = lookup(milestones, 'documentation_folder')
     masterdoc = lookup(milestones, 'masterdoc')
-    OrigProject = lookup(milestones, 'OrigProject')
-    OrigProjectDocroot = lookup(milestones, 'OrigProjectDocroot')
-    OrigProjectMasterdoc = lookup(milestones, 'OrigProjectMasterdoc')
+    origproject = lookup(milestones, 'buildsettings', 'origproject')
+    origprojectdocroot = lookup(milestones, 'buildsettings', 'origprojectdocroot')
+    origprojectmasterdoc = lookup(milestones, 'buildsettings', 'origprojectmasterdoc')
     TheProject = lookup(milestones, 'TheProject')
     TheProjectLog = lookup(milestones, 'TheProjectLog')
     toolfolderabspath = lookup(params, 'toolfolderabspath')
@@ -85,9 +85,9 @@ if exitcode == CONTINUE:
     if not (1
         and documentation_folder
         and masterdoc
-        and OrigProject
-        and OrigProjectDocroot
-        and OrigProjectMasterdoc
+        and origproject
+        and origprojectdocroot
+        and origprojectmasterdoc
         and TheProject
         and TheProjectLog
         and toolfolderabspath
