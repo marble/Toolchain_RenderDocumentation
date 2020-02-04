@@ -176,6 +176,7 @@ if exitcode == CONTINUE:
     documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
     localization_bs = lookup(milestones, 'buildsettings', 'localization', default='')
     localization_bs_as_path = localization_bs.lower().replace('_', '-')
+    t3docdir = lookup(milestones, 'buildsettings', 't3docdir', default='')
     TheProjectCacheDir = lookup(milestones, 'TheProjectCacheDir', default=None)
     if localization_bs_as_path == 'default':
         localization_bs_as_path = ''
@@ -257,6 +258,10 @@ if exitcode == CONTINUE:
             '-E',                  # don't use a saved environment, always read all files
             ])
     if 1:
+        if t3docdir:
+            t3docdir_relpath = '/' + t3docdir
+        else:
+            t3docdir_relpath = ''
         cmdlist.extend([
             '-b', builder,             # builder to use; default is html
             '-c', SYMLINK_THE_MAKEDIR, # path where configuration file(conf.py) is located (default: same as sourcedir)
@@ -265,9 +270,8 @@ if exitcode == CONTINUE:
             '-N',                      # do not emit colored output
             '-T',                      # show full traceback on exception
             '-w', warnings_file,       # write warnings (and errors) to given file
-            # todo: do it correctly. It isn't always ./Documentation. Hack!
-            SYMLINK_THE_PROJECT + '/Documentation',   # need a stable name for Sphinx caching
-            SYMLINK_THE_OUTPUT,        # need a stable name for Sphinx caching
+            SYMLINK_THE_PROJECT + t3docdir_relpath,   # need a stable name for Sphinx caching
+            SYMLINK_THE_OUTPUT,    # # need a stable name for Sphinx caching
         ])
 
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
