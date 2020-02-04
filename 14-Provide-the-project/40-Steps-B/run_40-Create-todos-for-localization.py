@@ -117,6 +117,7 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    jobfile_json_abspath = milestones.get('jobfile_json_abspath')
     TheProjectTodos = milestones.get('TheProjectTodos', TheProject + 'Todos')
     TheProjectLocalization = TheProject + 'Localization'
     if not os.path.exists(TheProjectTodos):
@@ -159,7 +160,13 @@ if exitcode == CONTINUE:
                 words.append('~~~resultdir~~~')
                 state = 0
             elif k == 'jobfile':
-                # leave out jobfile
+                if jobfile_json_abspath:
+                    words.append('-c')
+                    words.append(k)
+                    words.append(jobfile_json_abspath)
+                else:
+                    # leave out jobfile
+                    pass
                 state = 0
             else:
                 words.append('-c')
@@ -172,6 +179,10 @@ if exitcode == CONTINUE:
         new_cmdline += ' -c makedir ~~~makedir~~~'
     if not '~~~resultdir~~~' in new_cmdline:
         new_cmdline += ' -c resultdir ~~~resultdir~~~'
+
+if exitcode == CONTINUE:
+    # make a copy
+    locale_buildsettings = dict(buildsettings)
 
 if exitcode == CONTINUE:
 
@@ -198,18 +209,21 @@ if exitcode == CONTINUE:
         # "webroot_abspath": "/ALL/dummy_webroot",
         if abcd.startswith(webroot_abspath):
             abcd = abcd[len(webroot_abspath):]
-        buildsettings['builddir'] = abcd
+        locale_buildsettings['builddir'] = abcd
 
         # package_language
-        buildsettings['package_language'] = c
+        locale_buildsettings['package_language'] = c
 
         # localization
-        buildsettings['localization'] = locale
+        locale_buildsettings['localization'] = locale
 
         # masterdoc
         masterdoc_selected = tct.deepget(milestones, 'masterdoc_selected', locale, default='MASTERDOC')
-        masterdoc_selected_file = os.path.join(buildsettings['gitdir'], masterdoc_selected)
-        buildsettings['masterdoc'] = masterdoc_selected_file
+        masterdoc_selected_file = os.path.join(locale_buildsettings['gitdir'], masterdoc_selected)
+        locale_buildsettings['masterdoc'] = masterdoc_selected_file
+
+        #t3docdir
+        locale_buildsettings['t3docdir'] = locale_buildsettings['origprojectdocroot'] + '/Localization.' + locale
 
         folder_name = 'make_%s_%s_%s' % (b, c, d)
         TheProjectTodosMakefolder = os.path.join(TheProjectTodos, folder_name)
@@ -217,8 +231,8 @@ if exitcode == CONTINUE:
         os.makedirs(TheProjectTodosMakefolder)
         f2path = TheProjectTodosMakefolderBuildsettingsSh = os.path.join(TheProjectTodosMakefolder, 'buildsettings.sh')
         with open(f2path, 'w') as f2:
-            for k in sorted(buildsettings):
-                v = buildsettings[k]
+            for k in sorted(locale_buildsettings):
+                v = locale_buildsettings[k]
                 f2.write('%s=%s\n' % (k.upper(), v))
             f2.write('GITDIR_IS_READY_FOR_USE=1\n')
 
