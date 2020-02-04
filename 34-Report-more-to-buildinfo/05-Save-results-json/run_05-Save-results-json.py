@@ -181,8 +181,15 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     # Defined in Dockerfile:
     interesting = [
-        'TOOLCHAIN_VERSION', 'TYPOSCRIPT_PY_VERSION', 'OUR_IMAGE',
-        'OUR_IMAGE_SHORT', 'OUR_IMAGE_VERSION', 'THEME_VERSION', 'THEME_MTIME']
+        'OUR_IMAGE',
+        'OUR_IMAGE_SHORT',
+        'OUR_IMAGE_VERSION',
+        'THEME_MTIME',
+        'THEME_NAME',
+        'THEME_VERSION',
+        'TOOLCHAIN_VERSION',
+        'TYPOSCRIPT_PY_VERSION',
+    ]
     R['environ'] = {k: os.environ[k] for k in interesting if k in os.environ}
 
 
