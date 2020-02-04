@@ -111,7 +111,16 @@ if exitcode == CONTINUE:
                     loglist.append(('LOGDIR_line', LOGDIR_line))
                     line = LOGDIR_line
                 elif line.startswith('T3DOCDIR='):
-                    T3DOCDIR_line = 'T3DOCDIR=' + documentation_folder + '\n'
+                    tail = ''
+                    line = line.strip()
+                    if not line.endswith('/Documentation'):
+                        splitted = line.split('/Documentation')
+                        if len(splitted) > 1:
+                            tail = splitted[-1].strip().strip('/')
+                        if tail:
+                            # tail should be 'Localization.xx_XX'
+                            tail = '/' + tail
+                    T3DOCDIR_line = 'T3DOCDIR=' + documentation_folder + tail + '\n'
                     loglist.append(('T3DOCDIR_line', T3DOCDIR_line))
                     line = T3DOCDIR_line
                 f2.write(line)
