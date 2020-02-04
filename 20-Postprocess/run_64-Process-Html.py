@@ -263,7 +263,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
 
     if statics_path_replacement:
-        replace_static_in_html_done = 'yes'
+        replace_static_in_html_done = '1'
 
     if neutralized_links:
         neutralized_links_jsonfile = os.path.join(workdir,
