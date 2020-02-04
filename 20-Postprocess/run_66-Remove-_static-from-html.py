@@ -46,7 +46,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 remove_static_folder_from_html_done = None
-remove_static_folder_from_html_happened = None
 xeq_name_cnt = 0
 
 
@@ -60,19 +59,20 @@ if exitcode == CONTINUE:
     build_html_folder = lookup(milestones, 'build_html_folder', default=None)
     build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
                                      default=None)
-    replace_static_in_html_done = lookup(
-        milestones, 'replace_static_in_html_done', default=None)
-
+    replace_static_in_html_done = lookup(milestones,
+                                         'replace_static_in_html_done',
+                                         default=None)
     if not (1
             and (build_html_folder or build_singlehtml_folder)
-            and remove_static_folder_from_html_done):
+            and replace_static_in_html_done
+            ):
         CONTINUE = -2
         reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append(reason)
 
 
 # ==================================================
@@ -88,7 +88,7 @@ if exitcode == CONTINUE:
         if os.path.exists(fpath):
             shutil.rmtree(fpath)
             loglist.append('%s, %s' % ('remove', fpath))
-            remove_static_folder_from_html_happened = 1
+            remove_static_folder_from_html_done = 1
 
 
 # ==================================================
@@ -99,11 +99,6 @@ if remove_static_folder_from_html_done:
     result['MILESTONES'].append({
         'remove_static_folder_from_html_done':
         remove_static_folder_from_html_done})
-
-if remove_static_folder_from_html_happened:
-    result['MILESTONES'].append({
-        'remove_static_folder_from_html_happened':
-        remove_static_folder_from_html_happened})
 
 
 # ==================================================
