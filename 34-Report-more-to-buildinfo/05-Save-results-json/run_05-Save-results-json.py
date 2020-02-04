@@ -177,6 +177,9 @@ if exitcode == CONTINUE:
     R['postprocessed_html_files'] = milestones.get(
         'all_html_files_sanitized_count', 0)
 
+    theme_info = milestones.get('theme_info')
+    if theme_info:
+        R['theme_info'] = theme_info
 
 if exitcode == CONTINUE:
     # Defined in Dockerfile:
