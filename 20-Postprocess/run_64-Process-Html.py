@@ -148,20 +148,19 @@ if exitcode == CONTINUE:
     # https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/master/css/theme.css
 
     statics_path = '_static/'
-    statics_path_replacement = (
-        'https://typo3.azureedge.net/typo3documentation/'
-        'theme/sphinx_typo3_theme/master/')
-
-    if not replace_static_in_html:
-        statics_path_replacement = ''
+    statics_path_replacement = ''
+    if replace_static_in_html:
+        version_scm_core = theme_info.get('version_scm_core')
+        if version_scm_core:
+            statics_path_replacement = ('https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/%s/' % version_scm_core)
     if statics_path_replacement:
-        if lookup(theme_info, 'theme_name') != 'sphinx_typo3_theme':
+        if theme_info.get('module_name') != 'sphinx_typo3_theme':
             statics_path_replacement = ''
-            reason = 'no replacement - unknown theme name'
+            reason = 'we don\'t do replacements for unknown theme'
     if statics_path_replacement:
-        if not is_valid_version(lookup(theme_info, 'theme_version_core')):
+        if not is_valid_version(version_scm_core):
             statics_path_replacement = ''
-            reason = 'no replacement - unknown theme version'
+            reason = "no replacement - bad version '%s'" % version_scm_core
 
 
 def process_html_file(folder, relpath):

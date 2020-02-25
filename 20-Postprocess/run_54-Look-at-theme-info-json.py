@@ -81,10 +81,10 @@ else:
 
 if exitcode == CONTINUE:
 
-    f1path = os.path.join(build_html_folder, '_static/theme_info.json')
+    f1path = os.path.join(build_html_folder, '_static/_version_info_GENERATED.json')
     if not os.path.exists(f1path):
         CONTINUE = -2
-        reason = "'theme_info.json' not found"
+        reason = "'_static/_version_info_GENERATED.json' not found"
 
 if exitcode == CONTINUE:
     with open(f1path) as f1:
