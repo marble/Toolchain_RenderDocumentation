@@ -1,7 +1,8 @@
-Release v2.9.0-dev (To be released)
-===================================
+Release v2.9.0 (2020-02-25)
+===========================
 
-* (to be written)git
+* Handle the sphinx_typo3_theme
+* Account for Azure CDN
 
 
 Release v2.8.0 (Oct 21, 2019)
