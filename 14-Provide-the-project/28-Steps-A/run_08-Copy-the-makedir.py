@@ -48,6 +48,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+remove_docutils_conf_done = None
 TheProjectMakedir = None
 TheProjectMakedirThemes = None
 xeq_name_cnt = 0
@@ -78,6 +79,8 @@ else:
 # ==================================================
 # work
 # --------------------------------------------------
+
+remove_docutils_conf = lookup(milestones, 'remove_docutils_conf')
 
 if exitcode == CONTINUE:
     def cmdline(cmd, cwd=None):
@@ -195,6 +198,12 @@ if exitcode == CONTINUE:
     if exitcode == CONTINUE:
         TheProjectMakedirThemes = destthemes
 
+if exitcode == CONTINUE:
+    if remove_docutils_conf:
+        docutils_conf_file = ospj(TheProjectMakedir, 'docutils.conf')
+        if ospe(docutils_conf_file):
+            os.remove(docutils_conf_file)
+            remove_docutils_conf_done = 1
 
 
 # ==================================================
@@ -207,6 +216,10 @@ if TheProjectMakedir:
 if TheProjectMakedirThemes:
     result['MILESTONES'].append({'TheProjectMakedirThemes':
                                  TheProjectMakedirThemes})
+
+if remove_docutils_conf_done:
+    result['MILESTONES'].append({'remove_docutils_conf_done':
+                                 remove_docutils_conf_done})
 
 
 # ==================================================

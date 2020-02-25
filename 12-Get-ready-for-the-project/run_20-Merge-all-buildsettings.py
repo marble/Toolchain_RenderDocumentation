@@ -75,7 +75,11 @@ buildsettings_default = {
     "ter_extension": 0,
     "ter_extkey": "",
     "ter_extversion": "",
-    "version": ""
+    "version": "",
+    # 2020-01-23
+    "origproject": "",
+    "origprojectdocroot": "",
+    "origprojectmasterdoc": "",
   }
 buildsettings_from_run_command = {}
 buildsettings_from_jobfile = {}

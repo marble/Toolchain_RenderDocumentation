@@ -1,7 +1,8 @@
-Release v2.9.0-dev (To be released)
-===================================
+Release v2.9.0 (2020-02-25)
+===========================
 
-* …
+* Handle the sphinx_typo3_theme
+* Account for Azure CDN
 
 
 Release v2.8.0 (Oct 21, 2019)
@@ -17,13 +18,13 @@ Replace the old CheckIncludeFiles code:
 
 * 32a54f6 Revamp run_04-Check-included-files
 
-Start renaming the old variable name and use, for example, 'OrigProject' (now)
+Start renaming the old variable name and use, for example, 'origproject' (now)
 instead of 'gitdir' (previously):
 
-* ce168d6 Add OrigProject in run_30-Adjust-the-buildsettings
+* ce168d6 Add origproject in run_30-Adjust-the-buildsettings
 
 Allow configuration of which files of the original project
-'OrigProject' (=/PROJECT) shall be available in the copy 'TheProject' that
+'origproject' (=/PROJECT) shall be available in the copy 'TheProject' that
 is used for documentation generation:
 
 * 36e9c6b Add run_22-Get-more-documentation-files

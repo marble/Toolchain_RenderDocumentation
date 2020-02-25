@@ -1,26 +1,31 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 from __future__ import print_function
 from __future__ import absolute_import
-import os
-import tct
-import sys
 
-# special
+import codecs
 import glob
-import shutil
+import json
+import os
+import re
+import six
+import sys
+import tct
+
+from tct import deepget
 
 params = tct.readjson(sys.argv[1])
+binabspath = sys.argv[2]
 facts = tct.readjson(params['factsfile'])
 milestones = tct.readjson(params['milestonesfile'])
 reason = ''
 resultfile = params['resultfile']
 result = tct.readjson(resultfile)
+loglist = result['loglist'] = result.get('loglist', [])
 toolname = params['toolname']
 toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
 workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
 exitcode = CONTINUE = 0
 
 
@@ -36,8 +41,6 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # Helper functions
 # --------------------------------------------------
 
-deepget = tct.deepget
-
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
@@ -47,12 +50,9 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-localization_folder_names = []  # ['Localization.de_DE']
-localization_folders = []
-localization_locales = []       # ['de_DE', 'en_US']
-localization_pattern = None
-TheProjectLocalization = None
-
+theme_info = None
+theme_info_json_file = None
+xeq_name_cnt = 0
 
 # ==================================================
 # Check params
@@ -61,16 +61,18 @@ TheProjectLocalization = None
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
-    TheProject = lookup(milestones, 'TheProject')
-    localization_has_localization = lookup(milestones, 'localization_has_localization')
-    if not (TheProject and localization_has_localization):
+    build_html_folder = lookup(milestones, 'build_html_folder')
+
+    if not (1
+            and build_html_folder
+            and 1):
         CONTINUE = -2
         reason = 'Bad PARAMS or nothing to do'
 
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append(reason)
 
 
 # ==================================================
@@ -78,44 +80,31 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    localization = tct.deepget(milestones, 'buildsettings', 'localization', default='')
-    if localization not in ['', 'default']:
-        reason = 'Nothing to move away, because we want to render the localized version.'
-        loglist.append((reason, localization))
+
+    f1path = os.path.join(build_html_folder, '_static/_version_info_GENERATED.json')
+    if not os.path.exists(f1path):
         CONTINUE = -2
+        reason = "'_static/_version_info_GENERATED.json' not found"
 
 if exitcode == CONTINUE:
-    TheProjectLocalization = TheProject + 'Localization'
+    with open(f1path) as f1:
+        theme_info = json.load(f1)
 
-    if not os.path.exists(TheProjectLocalization):
-        os.makedirs(TheProjectLocalization)
+    theme_info_json_file = f1path
 
-    localization_pattern = TheProject + '/Documentation/Localization.*'
-    localization_folders = glob.glob(localization_pattern)
-    for folder in localization_folders:
-        shutil.move(folder, TheProjectLocalization)
-        localization_folder_name = os.path.split(folder)[1]
-        localization_folder_names.append(localization_folder_name)
-        localization_locales.append(localization_folder_name[len('Localization.'):])
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if localization_folder_names:    result['MILESTONES'].append(
-    {'localization_folder_names': localization_folder_names})
+if theme_info_json_file:
+    result['MILESTONES'].append(
+        {'theme_info_json_file': theme_info_json_file})
 
-if localization_folders:    result['MILESTONES'].append(
-    {'localization_folders': localization_folders})
+if theme_info:
+    result['MILESTONES'].append(
+        {'theme_info': theme_info})
 
-if localization_locales:    result['MILESTONES'].append(
-    {'localization_locales': localization_locales})
-
-if localization_pattern:    result['MILESTONES'].append(
-    {'localization_pattern': localization_pattern})
-
-if TheProjectLocalization:    result['MILESTONES'].append(
-    {'TheProjectLocalization': TheProjectLocalization})
 
 
 # ==================================================

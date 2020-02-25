@@ -83,7 +83,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append(reason)
 
 
 # ==================================================
