@@ -9,7 +9,7 @@ import shutil
 import sys
 import tct
 
-VERSION = '2.9.0'
+VERSION = '2.9.1'
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]

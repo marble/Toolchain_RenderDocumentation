@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import codecs
 import json
 import os
+import re
 import sys
 import tct
 
@@ -61,6 +62,7 @@ neutralized_links_jsonfile = None
 postprocessing_is_required = None
 replace_static_in_html_done = None
 statics_path = None
+statics_to_keep = ['_static/language_data.js']
 statics_path_replacement = None
 sitemap_files_html = None
 sitemap_files_singlehtml = None
@@ -148,6 +150,7 @@ if exitcode == CONTINUE:
     # https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/master/css/theme.css
 
     statics_path = '_static/'
+    statics_path_re = re.compile('^(\\.\\./)*_static/')
     statics_path_replacement = ''
     if replace_static_in_html:
         version_scm_core = theme_info.get('version_scm_core')
@@ -196,23 +199,6 @@ def process_html_file(folder, relpath):
                         link['rel'] = ' '.join(parts)
                         soup_modified = True
 
-    if statics_path_replacement:
-        for link in soup.find_all('link'):
-            href = link.get('href')
-            if href is not None:
-                if href.startswith(statics_path):
-                    link['href'] = (statics_path_replacement +
-                                    href[len(statics_path):])
-                    soup_modified = True
-
-        for script in soup.find_all('script'):
-            src = script.get('src')
-            if src is not None:
-                if src.startswith(statics_path):
-                    script['src'] = (statics_path_replacement +
-                                     src[len(statics_path):])
-                    soup_modified = True
-
     for img in soup.find_all('img'):
         src = img.get('src')
         if src is not None:
@@ -226,6 +212,46 @@ def process_html_file(folder, relpath):
                 img['src'] = (statics_path_replacement +
                               src[len(statics_path):])
                 soup_modified = True
+
+    if statics_path_replacement:
+        for link in soup.find_all('link'):
+            href = link.get('href')
+            if href is not None:
+                change_it = True
+                for item in statics_to_keep:
+                    if href.endswith(item):
+                        change_it = False
+                        break
+                if change_it and statics_path_re.search(href):
+                    link['href'] = statics_path_re.sub(statics_path_replacement,
+                                                       href)
+                    soup_modified = True
+
+        for script in soup.find_all('script'):
+            src = script.get('src')
+            if src is not None:
+                change_it = True
+                for item in statics_to_keep:
+                    if src.endswith(item):
+                        change_it = False
+                        break
+                if change_it and statics_path_re.search(src):
+                    script['src'] = statics_path_re.sub(statics_path_replacement,
+                                                        src)
+                    soup_modified = True
+
+        for img in soup.find_all('img'):
+            src = img.get('src')
+            if src is not None:
+                change_it = True
+                for item in statics_to_keep:
+                    if src.endswith(item):
+                        change_it = False
+                        break
+                if change_it and statics_path_re.search(src):
+                    img['src'] = statics_path_re.sub(statics_path_replacement,
+                                                        src)
+                    soup_modified = True
 
     if soup_modified:
         with open(abspath, 'wb') as f2:
@@ -321,6 +347,10 @@ if statics_path_replacement:
 if replace_static_in_html_done:
     result['MILESTONES'].append({
         'replace_static_in_html_done': replace_static_in_html_done})
+
+if statics_to_keep:
+    result['MILESTONES'].append({
+        'statics_to_keep': statics_to_keep})
 
 
 # ==================================================

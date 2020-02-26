@@ -81,12 +81,23 @@ else:
 
 if exitcode == CONTINUE:
 
+    statics_to_keep = milestones.get('statics_to_keep', [])
     for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
             continue
-        fpath = os.path.join(build_folder, '_static')
+        startfolder = '_static'
+        fixed_part_length = len(build_folder)
+        fpath = os.path.join(build_folder, startfolder)
         if os.path.exists(fpath):
-            shutil.rmtree(fpath)
+            for top, dirs, files in os.walk(fpath, topdown=False):
+                for file in files:
+                    relfile = (top + '/' + file)[fixed_part_length+1:]
+                    if not relfile in statics_to_keep:
+                        os.remove(top + '/' + file)
+                if not os.listdir(top):
+                    os.rmdir(top)
+
+
             loglist.append('%s, %s' % ('remove', fpath))
             remove_static_folder_from_html_done = 1
 
