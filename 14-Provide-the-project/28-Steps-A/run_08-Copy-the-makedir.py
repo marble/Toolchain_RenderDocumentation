@@ -80,6 +80,7 @@ else:
 # work
 # --------------------------------------------------
 
+allow_unsafe = lookup(milestones, 'allow_unsafe')
 remove_docutils_conf = lookup(milestones, 'remove_docutils_conf')
 
 if exitcode == CONTINUE:
@@ -199,7 +200,7 @@ if exitcode == CONTINUE:
         TheProjectMakedirThemes = destthemes
 
 if exitcode == CONTINUE:
-    if remove_docutils_conf:
+    if remove_docutils_conf or allow_unsafe:
         docutils_conf_file = ospj(TheProjectMakedir, 'docutils.conf')
         if ospe(docutils_conf_file):
             os.remove(docutils_conf_file)

@@ -124,6 +124,7 @@ ATNM['time_started_at'] = time_started_at
 # --------------------------------------------------
 
 activateLocalSphinxDebugging = findRunParameter('activateLocalSphinxDebugging', 0, ATNM, int)
+allow_unsafe = findRunParameter('allow_unsafe', 0, ATNM, int)
 debug_always_make_milestones_snapshot = findRunParameter('debug_always_make_milestones_snapshot', 1, ATNM, int)
 disable_include_files_check = findRunParameter('disable_include_files_check', 0, ATNM, int)
 force_rebuild_needed = findRunParameter('force_rebuild_needed', 1, ATNM, int)

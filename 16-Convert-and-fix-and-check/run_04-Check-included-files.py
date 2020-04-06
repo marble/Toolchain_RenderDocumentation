@@ -62,7 +62,11 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+    if lookup(milestones, 'allow_unsafe'):
+        reason = 'Nothing to do because "allow_unsafe" is selected.'
+        CONTINUE = -2
 
+if exitcode == CONTINUE:
     disable_include_files_check = lookup(milestones,
                                          'disable_include_files_check',
                                          default=0)

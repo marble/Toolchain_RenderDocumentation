@@ -74,7 +74,11 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+    if lookup(milestones, 'allow_unsafe'):
+        CONTINUE = -2
+        reason = 'Nothing to do, because unsafe is allowed.'
 
+if exitcode == CONTINUE:
     # we reuse the sitmap files we already have to identify the html files for
     # postprocessing
 
