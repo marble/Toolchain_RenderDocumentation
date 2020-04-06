@@ -1,3 +1,11 @@
+Release v2.10.0 (2020-04-06)
+===========================
+
+* Bump version
+* Supress pip warnings
++ Add '-c allow_unsafe 1' option
+
+
 Release v2.9.1 (2020-02-26)
 ===========================
 
