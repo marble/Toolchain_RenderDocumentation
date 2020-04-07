@@ -74,9 +74,9 @@ if exitcode == CONTINUE:
     included_files_check_is_ok = lookup(milestones,
                                         'included_files_check_is_ok')
     allow_unsafe = lookup(milestones, 'allow_unsafe')
-    if not any[disable_include_files_check,
+    if not any([disable_include_files_check,
                included_files_check_is_ok,
-               allow_unsafe]:
+               allow_unsafe]):
         CONTINUE = -2
         reason = 'Bad params or nothing to do'
 
