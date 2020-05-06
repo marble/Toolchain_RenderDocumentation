@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import codecs
+import json
 import os
 import subprocess
 import sys
@@ -52,6 +53,7 @@ remove_docutils_conf_done = None
 TheProjectMakedir = None
 TheProjectMakedirThemes = None
 xeq_name_cnt = 0
+buildsettings_jsonfile_in_makedir = None
 
 
 # ==================================================
@@ -61,10 +63,12 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    buildsettings = lookup(milestones, 'buildsettings')
     makedir = lookup(milestones, 'makedir')
     TheProject = lookup(milestones, 'TheProject')
 
     if not (1
+            and buildsettings
             and makedir
             and TheProject):
         exitcode = 22
@@ -206,6 +210,11 @@ if exitcode == CONTINUE:
             os.remove(docutils_conf_file)
             remove_docutils_conf_done = 1
 
+if exitcode == CONTINUE:
+    buildsettings_jsonfile_in_makedir = ospj(TheProjectMakedir, 'buildsettings.json')
+    with codecs.open(buildsettings_jsonfile_in_makedir, 'w', 'utf-8') as f2:
+        json.dump(buildsettings, f2, indent=4, sort_keys=True)
+
 
 # ==================================================
 # Set MILESTONE
@@ -222,6 +231,9 @@ if remove_docutils_conf_done:
     result['MILESTONES'].append({'remove_docutils_conf_done':
                                  remove_docutils_conf_done})
 
+if buildsettings_jsonfile_in_makedir:
+    result['MILESTONES'].append({'buildsettings_jsonfile_in_makedir':
+                                 buildsettings_jsonfile_in_makedir})
 
 # ==================================================
 # save result
