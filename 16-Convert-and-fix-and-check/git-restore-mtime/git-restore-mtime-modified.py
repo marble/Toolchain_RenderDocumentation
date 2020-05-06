@@ -1,4 +1,4 @@
-#!/home/marble/Repositories/mbnas/mbgit/t3docs-running-tct/.venv/bin/python2.7
+# /usr/bin/env python
 # coding: utf-8
 #
 # git-restore-mtime - Change mtime of files based on commit date of last change
@@ -194,18 +194,19 @@ def normalize(path):
     # Make sure the slash matches the OS; for Windows we need a backslash
     return os.path.normpath(path)
 
-gitlogresult = {}
+jsondata = {}
+filedata = {}
 
 if UPDATE_SYMLINKS:
     def touch(path, mtime, test=False, commit_hash=None, repo_path=None):
         """The actual mtime update"""
-        gitlogresult[repo_path] = (mtime, commit_hash)
+        filedata[repo_path] = (mtime, commit_hash)
         if test: return
         os.utime(path, (mtime, mtime), follow_symlinks=False)
 else:
     def touch(path, mtime, test=False, commit_hash=None, repo_path=None):
         """The actual mtime update"""
-        gitlogresult[repo_path] = (mtime, commit_hash)
+        filedata[repo_path] = (mtime, commit_hash)
         if test: return
         os.utime(path, (mtime, mtime))
 
@@ -335,6 +336,15 @@ def main():
         # Not in a git repository, and git already informed user on stderr. So we just...
         return e.returncode
 
+    # /path/to/repo/.git
+    jsondata['abspath_to_gitdir'] = git.gitdir
+    # /path/to/repo/and/in/there/the/project
+    jsondata['abspath_to_project'] = os.path.normpath(os.getcwd())
+    # /path/to/repo
+    jsondata['abspath_to_repo'] = git.workdir
+    # filedata = {'gitlogfilename': (timestamp, commit_hash), …}
+    jsondata['filedata'] = filedata
+
     # Do not work on dirty repositories, unless --force
     if not args.force and git.is_dirty():
         log.critical(
@@ -414,16 +424,20 @@ def main():
     if args.test:
         log.info("TEST RUN - No files modified!")
 
+    if 1:
+        log.info("running in: " + os.getcwd())
 
-if 0 and 'example call':
-    os.chdir('/home/marble/kannweg/TYPO3.CMS-1')
+
+
+if 0 and __name__ == "__main__" and 'example call':
+    os.chdir('~/Repositories/git.typo3.org/Packages/TYPO3.CMS.git/typo3/sysext/dashboard')
     sys.argv[1:] = [
         # '--help',
         '--test',
-        '--quiet',
+        '--verbose',
         '--no-directories',
         '--destfile-gitloginfo=%s' % (os.path.split(__file__)[0] + '/temp.json'),
-        'typo3/sysext/core'
+        '.',
         ]
 
 
@@ -436,8 +450,10 @@ try:
     exitcode = main()
     if not exitcode and args.gitloginfo:
         #https://stackoverflow.com/questions/18337407/saving-utf-8-texts-in-json-dumps-as-utf8-not-as-u-escape-sequence
-        with io.open(args.gitloginfo, 'wb') as json_file:
-            json.dump(gitlogresult, json_file, sort_keys=True, indent=0)
+        log.info("Creating gigloginfo file: '%s'" % args.gitloginfo)
+        filemode = 'wb' if six.PY2 else 'w'
+        with io.open(args.gitloginfo, filemode) as jsonfile:
+            json.dump(jsondata, jsonfile, sort_keys=True, indent=0)
     sys.exit(exitcode)
 except KeyboardInterrupt:
     log.info("Aborting")
