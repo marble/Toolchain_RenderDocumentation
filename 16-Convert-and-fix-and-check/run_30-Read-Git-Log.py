@@ -61,10 +61,12 @@ xeq_name_cnt = 0
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
+    buildsettings = lookup(milestones, 'buildsettings')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
 
     if not (1
+        and buildsettings
         and gitdir
         and TheProjectMakedir
     ):
@@ -121,6 +123,8 @@ def execute_cmdlist(cmdlist, cwd=None):
 
 if exitcode == CONTINUE:
 
+    loglist.append(('running in cwd:', gitdir))
+
     scriptfile = ospj(params['toolfolderabspath'], 'git-restore-mtime/git-restore-mtime-modified.py')
     jsonfile = ospj(TheProjectMakedir, 'gitloginfo.json')
     cmdlist = [
@@ -129,7 +133,7 @@ if exitcode == CONTINUE:
         '--test', # don't touch files
         '--no-directories', # unnotably faster
         '--destfile-gitloginfo=' + jsonfile,
-        '.'
+        '.'  # restrict to this tree only
         ]
 
     exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=gitdir)
