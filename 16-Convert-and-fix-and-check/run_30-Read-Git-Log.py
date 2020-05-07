@@ -62,11 +62,13 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     buildsettings = lookup(milestones, 'buildsettings')
+    git = lookup(milestones, 'known_systemtools', 'git')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
 
     if not (1
         and buildsettings
+        and git
         and gitdir
         and TheProjectMakedir
     ):
