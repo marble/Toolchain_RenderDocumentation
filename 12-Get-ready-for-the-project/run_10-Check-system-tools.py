@@ -55,6 +55,7 @@ list_for_which = [
     'dvips',
     'git',
     'git-restore-mtime',
+    'git-restore-mtime-modified',
     'gzip',
     'html2text',
     'latex',
