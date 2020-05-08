@@ -194,6 +194,13 @@ if time_finished_at_2_unixtime:
     result['MILESTONES'].append({
         'time_finished_at_2_unixtime': time_finished_at_2_unixtime})
 
+# TODO: Fix tct. Due to a bug this FINAL_EXITCODE doesn't work if set
+# in the very last step
+if 'html' in milestones.get('builds_successful', []):
+    # 0 means: Toolchain did finish and 'html' was build
+    result['MILESTONES'].append({
+        'FINAL_EXITCODE': 0})
+
 
 # ==================================================
 # save result

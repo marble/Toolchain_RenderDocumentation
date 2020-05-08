@@ -187,6 +187,9 @@ if jobfile_json_abspath is not None:
 if jobfile_data is not None:
     result['MILESTONES'].append({'jobfile_data': jobfile_data})
 
+if 1:
+    # read 255 as: Toolchain did not finish
+    result['MILESTONES'].append({'FINAL_EXITCODE': 255})
 
 # ==================================================
 # save result
