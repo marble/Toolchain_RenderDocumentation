@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 import codecs
 import os
+import shutil
 import subprocess
 import sys
 import tct
@@ -50,7 +51,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-gitloginfo_json_file = None
+gitloginfo_jsonfile = None
 xeq_name_cnt = 0
 
 
@@ -62,14 +63,14 @@ if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
 
     buildsettings = lookup(milestones, 'buildsettings')
-    git = lookup(milestones, 'known_systemtools', 'git')
     gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    TheProject = lookup(milestones, 'TheProject')
     TheProjectMakedir = lookup(milestones, 'TheProjectMakedir')
 
     if not (1
         and buildsettings
-        and git
         and gitdir
+        and TheProject
         and TheProjectMakedir
     ):
         CONTINUE = -2
@@ -125,32 +126,46 @@ def execute_cmdlist(cmdlist, cwd=None):
 
 if exitcode == CONTINUE:
 
-    loglist.append(('running in cwd:', gitdir))
+    jsonfile_dest = ospj(TheProjectMakedir, 'gitloginfo.json')
 
-    scriptfile = ospj(params['toolfolderabspath'], 'git-restore-mtime/git-restore-mtime-modified.py')
-    jsonfile = ospj(TheProjectMakedir, 'gitloginfo.json')
-    cmdlist = [
-        'python',
-        scriptfile,
-        '--test', # don't touch files
-        '--no-directories', # unnotably faster
-        '--destfile-gitloginfo=' + jsonfile,
-        '.'  # restrict to this tree only
-        ]
+    # first attempt
+    git = lookup(milestones, 'known_systemtools', 'git')
+    if git and not gitloginfo_jsonfile:
+        loglist.append(('running in cwd:', gitdir))
+        scriptfile = ospj(params['toolfolderabspath'], 'git-restore-mtime/git-restore-mtime-modified.py')
+        cmdlist = [
+            'python',
+            scriptfile,
+            '--test', # don't touch files
+            '--no-directories', # unnotably faster
+            '--destfile-gitloginfo=' + jsonfile_dest,
+            '.'  # restrict to this tree only
+            ]
+        exitcode_git, cmd, out, err = execute_cmdlist(cmdlist, cwd=gitdir)
+        if exitcode_git == 0 and ospe(jsonfile_dest):
+            gitloginfo_jsonfile = jsonfile_dest
 
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=gitdir)
+    # second attempt
+    if not gitloginfo_jsonfile:
+        jsonfile_candidate = ospj(TheProject, '.gitloginfo-GENERATED.json')
+        if ospe(jsonfile_candidate):
+            shutil.copyfile(jsonfile_candidate, jsonfile_dest)
+        if ospe(jsonfile_dest):
+            gitloginfo_jsonfile = jsonfile_dest
 
-if exitcode == CONTINUE:
-    gitloginfo_jsonfile = jsonfile
+    # third attempt - did a miracle happen?
+    if not gitloginfo_jsonfile:
+        if ospe(jsonfile_dest):
+            gitloginfo_jsonfile = jsonfile_dest
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if gitloginfo_json_file:
-    result['MILESTONES'].append({'gitloginfo_json_file':
-                                 gitloginfo_json_file})
+if gitloginfo_jsonfile:
+    result['MILESTONES'].append({'gitloginfo_jsonfile':
+                                 gitloginfo_jsonfile})
 
 
 # ==================================================
