@@ -1,9 +1,20 @@
-Release v2.10.0 (2020-04-06)
+===========
+CHANGES.rst
+===========
+
+Next release
+============
+
+...
+
+
+Release v2.10.0 (2020-05-08)
 ===========================
 
-* Bump version
 * Supress pip warnings
-+ Add '-c allow_unsafe 1' option
+* Add '-c allow_unsafe 1' option
+* Prepare input files for 'sphinxcontrib.gitloginfo' Sphinx extension
+* Use 0 or 255 for FINAL_EXIT_CODE, indication whether html build succeeded
 
 
 Release v2.9.1 (2020-02-26)
