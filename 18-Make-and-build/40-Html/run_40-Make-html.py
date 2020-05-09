@@ -240,10 +240,18 @@ if exitcode == CONTINUE:
         cmdlist = [
             'sphinx-build',
             ]
+    v_cnt = milestones.get('sphinxVerboseLevel')
+    if not isinstance(v_cnt, int):
+        v_cnt = None
     if milestones.get('activateLocalSphinxDebugging'):
-        cmdlist.extend(['-v', '-v', '-v'])
+        if v_cnt is None:
+            v_cnt = 3
     else:
-        cmdlist.extend(['-v'])
+        if v_cnt is None:
+            v_cnt = 1
+    v_cnt = max(0, min(6, v_cnt))
+    if v_cnt:
+        cmdlist.extend(['-v'] * v_cnt)
     if 0:
         cmdlist.extend([
             '-a',                  # write all files; default is to only write new and changed files
