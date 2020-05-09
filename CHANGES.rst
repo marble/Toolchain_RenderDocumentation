@@ -8,6 +8,12 @@ Next release
 ...
 
 
+Release v2.10.1 (2020-05-09)
+===========================
+
+* [FEATURE] Add option '-c sphinxVerboseLevel n'
+
+
 Release v2.10.0 (2020-05-08)
 ===========================
 
