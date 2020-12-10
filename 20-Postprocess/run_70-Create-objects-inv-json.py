@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 from __future__ import print_function
 from __future__ import absolute_import
 
+import codecs
+import json
 import os
+import posixpath
 import sys
 import tct
 
-from os.path import exists as ospe
+from sphinx.util.inventory import InventoryFile
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -46,7 +48,8 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-remove_static_folder_from_html_done = None
+objects_inv_json_path = None
+objects_inv_path = None
 xeq_name_cnt = 0
 
 
@@ -56,26 +59,16 @@ xeq_name_cnt = 0
 
 if exitcode == CONTINUE:
     loglist.append('CHECK PARAMS')
+    reason = 'PARAMS are ok'
 
-    build_html_folder = lookup(milestones, 'build_html_folder', default=None)
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
-                                     default=None)
-    replace_static_in_html_done = lookup(milestones,
-                                         'replace_static_in_html_done',
-                                         default=None)
-    theme_module_path = lookup(milestones, 'theme_module_path')
-    if not (1
-            and (build_html_folder or build_singlehtml_folder)
-            and replace_static_in_html_done
-            and theme_module_path
-            ):
-        CONTINUE = -2
+    build_html = lookup(milestones, 'build_html')
+    build_html_folder = lookup(milestones, 'build_html_folder')
+
+    if not (build_html and build_html_folder):
+        exitcode = 22
         reason = 'Bad PARAMS or nothing to do'
 
-if exitcode == CONTINUE:
     loglist.append('PARAMS are ok')
-else:
-    loglist.append(reason)
 
 
 # ==================================================
@@ -83,37 +76,40 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    f1path = os.path.join(build_html_folder, 'objects.inv')
+    f2path = os.path.join(build_html_folder, 'objects.inv.json')
+    if os.path.exists(f1path):
+        try:
+            with open(f1path, 'rb') as f1:
+                inventory = InventoryFile.load(f1, '', posixpath.join)
+            objects_inv_path = f1path
+        except:
+            reason = 'FAILED: InventoryFile.load()'
+            exitcode = 2
 
-    statics_to_keep = milestones.get('statics_to_keep', [])
-    for build_folder in [build_html_folder, build_singlehtml_folder]:
-        if not build_folder:
-            continue
-        startfolder = '_static'
-        fixed_part_length = len(build_folder)
-        fpath = os.path.join(build_folder, startfolder)
-        if os.path.exists(fpath):
-            for top, dirs, files in os.walk(fpath, topdown=False):
-                for file in files:
-                    topfile = top + '/' + file
-                    relfile = topfile[fixed_part_length+1:]
-                    themefile = theme_module_path + '/' + relfile[1:]
-                    if not (relfile in statics_to_keep) and ospe(themefile):
-                        os.remove(topfile)
-                if not os.listdir(top):
-                    os.rmdir(top)
+if exitcode == CONTINUE:
+    try:
+        with codecs.open(f2path, 'w', 'utf-8') as f2:
+            json.dump(inventory, f2, sort_keys=True, indent=3)
+        objects_inv_json_path = f2path
+    except:
+        reason = 'FAILED: json.dump(inventory)'
+        exitcode = 2
 
-            loglist.append('%s, %s' % ('remove', fpath))
-            remove_static_folder_from_html_done = 1
+
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if remove_static_folder_from_html_done:
-    result['MILESTONES'].append({
-        'remove_static_folder_from_html_done':
-        remove_static_folder_from_html_done})
+if objects_inv_path:
+    result['MILESTONES'].append(
+        {'objects_inv_path': objects_inv_path})
+
+if objects_inv_json_path:
+    result['MILESTONES'].append(
+        {'objects_inv_json_path': objects_inv_json_path})
 
 
 # ==================================================

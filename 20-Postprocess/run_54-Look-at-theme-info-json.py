@@ -13,6 +13,7 @@ import six
 import sys
 import tct
 
+from os.path import join as ospj
 from tct import deepget
 
 params = tct.readjson(sys.argv[1])
@@ -52,6 +53,7 @@ def lookup(D, *keys, **kwdargs):
 
 theme_info = None
 theme_info_json_file = None
+theme_module_path = None
 xeq_name_cnt = 0
 
 # ==================================================
@@ -92,19 +94,25 @@ if exitcode == CONTINUE:
 
     theme_info_json_file = f1path
 
+    theme_module = __import__(theme_info['module_name'])
+    theme_module_path = ospj(theme_module.get_html_theme_path(), theme_info['module_name'])
+
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 
-if theme_info_json_file:
-    result['MILESTONES'].append(
-        {'theme_info_json_file': theme_info_json_file})
-
 if theme_info:
     result['MILESTONES'].append(
         {'theme_info': theme_info})
 
+if theme_info_json_file:
+    result['MILESTONES'].append(
+        {'theme_info_json_file': theme_info_json_file})
+
+if theme_module_path:
+    result['MILESTONES'].append(
+        {'theme_module_path': theme_module_path})
 
 
 # ==================================================

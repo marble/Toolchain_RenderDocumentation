@@ -2,38 +2,48 @@
 CHANGES.rst
 ===========
 
-Next release
-============
+Release v2.12
+=============
 
-...
+* …
+
+Release v2.11.0-dev (2020-12-10)
+================================
+
+*  8033dc4  Improve information in final Good-bye output
+*  b4f0fa9  Address only theme files in HTML postprocessing
+*  d5eaf5d  Add milestone "theme_module_path"
+*  0f112e5  Add -jauto to Sphinx build for parallel build
+*  436189d  Add run_70-Create-objects-inv-json.py
+
 
 
 Release v2.10.1 (2020-05-09)
 ===========================
 
-* [FEATURE] Add option '-c sphinxVerboseLevel n'
+*  [FEATURE] Add option '-c sphinxVerboseLevel n'
 
 
 Release v2.10.0 (2020-05-08)
 ===========================
 
-* Supress pip warnings
-* Add '-c allow_unsafe 1' option
-* Prepare input files for 'sphinxcontrib.gitloginfo' Sphinx extension
-* Use 0 or 255 for FINAL_EXIT_CODE, indication whether html build succeeded
+*  Supress pip warnings
+*  Add '-c allow_unsafe 1' option
+*  Prepare input files for 'sphinxcontrib.gitloginfo' Sphinx extension
+*  Use 0 or 255 for FINAL_EXIT_CODE, indication whether html build succeeded
 
 
 Release v2.9.1 (2020-02-26)
 ===========================
 
-* Bugfix: replacing static files
+*  Bugfix: replacing static files
 
 
 Release v2.9.0 (2020-02-25)
 ===========================
 
-* Handle the sphinx_typo3_theme
-* Account for Azure CDN
+*  Handle the sphinx_typo3_theme
+*  Account for Azure CDN
 
 
 Release v2.8.0 (Oct 21, 2019)
@@ -43,47 +53,47 @@ Lots of improvements!
 
 Starting with 'reason' strings in the toolchain:
 
-* b956969 Revamp 'reason' strings and 'exitcode'
+*  b956969 Revamp 'reason' strings and 'exitcode'
 
 Replace the old CheckIncludeFiles code:
 
-* 32a54f6 Revamp run_04-Check-included-files
+*  32a54f6 Revamp run_04-Check-included-files
 
 Start renaming the old variable name and use, for example, 'origproject' (now)
 instead of 'gitdir' (previously):
 
-* ce168d6 Add origproject in run_30-Adjust-the-buildsettings
+*  ce168d6 Add origproject in run_30-Adjust-the-buildsettings
 
 Allow configuration of which files of the original project
 'origproject' (=/PROJECT) shall be available in the copy 'TheProject' that
 is used for documentation generation:
 
-* 36e9c6b Add run_22-Get-more-documentation-files
-* e131a6b Use 'get_documentation' in run_03-Copy-the-project.py
-* 31e372e Add get_documentation_defaults in run_01-Start-with-everything
+*  36e9c6b Add run_22-Get-more-documentation-files
+*  e131a6b Use 'get_documentation' in run_03-Copy-the-project.py
+*  31e372e Add get_documentation_defaults in run_01-Start-with-everything
 
 
 Make everything work for every localization as well:
 
-* 9c08fb6 [BUGFIX][FEATURE] Have package result for each localization
-* 884f9db [BUGFIX][FEATURE] Have latex result for each localization
-* 286e1d2 [BUFGIX] Make localization work again
+*  9c08fb6 [BUGFIX][FEATURE] Have package result for each localization
+*  884f9db [BUGFIX][FEATURE] Have latex result for each localization
+*  286e1d2 [BUFGIX] Make localization work again
 
 
 Allow a mapping for themes:
 
-* 4c0e0b6 Update run_08-Copy-the-makedir.py: Copy /THEMES as MAKEDIR/_themes
+*  4c0e0b6 Update run_08-Copy-the-makedir.py: Copy /THEMES as MAKEDIR/_themes
 
 
 Make everything configurable in - superpowered! - jobfile.json:
 
-* b662d32 [!!!] jobfile.json takes precedence of commandline params
+*  b662d32 [!!!] jobfile.json takes precedence of commandline params
 
 
 Enhancements, interesting or useful stuff:
 
-* b3ab839 Set 'nonstopmode' in Makefile for 'make latex'
-* cf5ea9d run_40-Make-html.py: Use 'sphinx-build -v -v -v'
+*  b3ab839 Set 'nonstopmode' in Makefile for 'make latex'
+*  cf5ea9d run_40-Make-html.py: Use 'sphinx-build -v -v -v'
 
 
 
@@ -95,28 +105,29 @@ See the few commits in the 'master' branch or all the ugly little changes
 done back and forth in the 'develop' branch that both lead to this v2.7.1
 
 Some from 'develop':
-* 70ef40f Neutralize images with src scheme 'javascript:' or 'data:'
-* 80f62b3 Neutralize hyperlinks that would start like 'data:'
-* 74f469e [BUGFIX] Do not pretty print postprocessed html code
+
+*  70ef40f Neutralize images with src scheme 'javascript:' or 'data:'
+*  80f62b3 Neutralize hyperlinks that would start like 'data:'
+*  74f469e [BUGFIX] Do not pretty print postprocessed html code
 
 
 
 Release v2.6.1 (Jun 23, 2019)
 =============================
 
-* 75abf03 [BUGFIX] Use the correct formatter="minimal" with BeautifulSoup
-* 6dbb907 [BUGFIX] Dump the right sitemap-files list for singlehtml
+*  75abf03 [BUGFIX] Use the correct formatter="minimal" with BeautifulSoup
+*  6dbb907 [BUGFIX] Dump the right sitemap-files list for singlehtml
 
 
 Release v2.6.0 (Jun 22, 2019)
 =============================
 
-* ffbd087 Dump info to stdout if there are forbidden include files
-* f68ebf0 Dump warnings.txt to stdout if not in _buildinfo
-* 4606616 Add rel="nofollow noopener" to external + foreign links
-* ee6533e Return sitemap-files in .txt format and not .json as result
-* ec9fb21 Provide sitemap-files as .txt file too
-* 4d65da1 v2.6.0 Set new version number
+*  ffbd087 Dump info to stdout if there are forbidden include files
+*  f68ebf0 Dump warnings.txt to stdout if not in _buildinfo
+*  4606616 Add rel="nofollow noopener" to external + foreign links
+*  ee6533e Return sitemap-files in .txt format and not .json as result
+*  ec9fb21 Provide sitemap-files as .txt file too
+*  4d65da1 v2.6.0 Set new version number
 
 
 Release v2.5.1 (Jun 14 29, 2019)
@@ -158,12 +169,12 @@ Release v2.3.1 (May 22, 2018)
 Release v2.3.0 (May 7, 2018)
 ============================
 
-* work in progress
+*  work in progress
 
 Release v2.2.0
 ==============
 
-* work in progress
+*  work in progress
 
 
 

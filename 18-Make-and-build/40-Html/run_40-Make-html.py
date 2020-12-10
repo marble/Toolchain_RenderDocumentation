@@ -269,6 +269,7 @@ if exitcode == CONTINUE:
             '-b', builder,       # builder to use; default is html
             '-c', SYMLINK_THE_MAKEDIR, # path where configuration file(conf.py) is located (default: same as sourcedir)
             #'-d ', doctree_folder,# path for the cached environment and doctree files (default: outdir /.doctrees)
+            '-j', 'auto',          # try to build in parallel
             '-n',                  # nit-picky mode, warn about all missing references
             '-N',                  # do not emit colored output
             '-T',                  # show full traceback on exception

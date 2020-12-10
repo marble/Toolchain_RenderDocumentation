@@ -9,8 +9,8 @@ RenderDocumentation
 A Toolchain To Render TYPO3 Documentation
 -----------------------------------------
 
-:Version:         2.10.1
-:Date:            2020-05-09
+:Version:         2.11.0-dev
+:Date:            2020-12-10
 :Author:          Martin Bless <martin.bless@mbless.de>
 :Repository:      https://github.com/marble/Toolchain_RenderDocumentation
 :Target Folder:   ~/Toolchains/RenderDocumentation
