@@ -5,9 +5,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import shutil
 import sys
 import tct
+
+from os.path import exists as ospe
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -62,9 +63,11 @@ if exitcode == CONTINUE:
     replace_static_in_html_done = lookup(milestones,
                                          'replace_static_in_html_done',
                                          default=None)
+    theme_module_path = lookup(milestones, 'theme_module_path')
     if not (1
             and (build_html_folder or build_singlehtml_folder)
             and replace_static_in_html_done
+            and theme_module_path
             ):
         CONTINUE = -2
         reason = 'Bad PARAMS or nothing to do'
@@ -91,12 +94,13 @@ if exitcode == CONTINUE:
         if os.path.exists(fpath):
             for top, dirs, files in os.walk(fpath, topdown=False):
                 for file in files:
-                    relfile = (top + '/' + file)[fixed_part_length+1:]
-                    if not relfile in statics_to_keep:
-                        os.remove(top + '/' + file)
+                    topfile = top + '/' + file
+                    relfile = topfile[fixed_part_length+1:]
+                    themefile = theme_module_path + '/' + relfile[1:]
+                    if not (relfile in statics_to_keep) and ospe(themefile):
+                        os.remove(topfile)
                 if not os.listdir(top):
                     os.rmdir(top)
-
 
             loglist.append('%s, %s' % ('remove', fpath))
             remove_static_folder_from_html_done = 1
