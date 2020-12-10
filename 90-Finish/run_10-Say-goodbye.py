@@ -194,13 +194,28 @@ if time_finished_at_2_unixtime:
     result['MILESTONES'].append({
         'time_finished_at_2_unixtime': time_finished_at_2_unixtime})
 
-# TODO: Fix tct. Due to a bug this FINAL_EXITCODE doesn't work if set
-# in the very last step
 if 'html' in milestones.get('builds_successful', []):
     # 0 means: Toolchain did finish and 'html' was build
-    result['MILESTONES'].append({
-        'FINAL_EXITCODE': 0})
+    result['MILESTONES'].append({'FINAL_EXITCODE': 0})
+    print(
+        '   ------------------------------------------------\n'
+        '   FINAL STATUS is: SUCCESS (exitcode 0)\n'
+        '                    because HTML builder succeeded')
+else:
+    print(
+        '   ------------------------------------------------\n'
+        '   FINAL STATUS is: FAILURE (exitcode 255)\n'
+        '                    because HTML builder failed')
 
+if (not milestones.get("disable_include_files_check")
+    and not milestones.get("included_files_check_is_ok")
+):
+    print(
+        '   ------------------------------------------------\n'
+        '   An attempt was made to include a file external to the project.\n'
+        '   This prevents any build.')
+
+print('   ------------------------------------------------')
 
 # ==================================================
 # save result
