@@ -7,8 +7,8 @@ Release v2.12
 
 * …
 
-Release v2.11.0-dev (2020-12-10)
-================================
+Release v2.11.0 (2020-12-10)
+============================
 
 *  8033dc4  Improve information in final Good-bye output
 *  b4f0fa9  Address only theme files in HTML postprocessing
