@@ -297,7 +297,7 @@ def process_html_file(folder, relpath):
                         change_it = False
                 if change_it:
                     src_new = statics_path_re.sub(statics_path_replacement, src)
-                    script['src'] = src_new
+                    img['src'] = src_new
                     soup_modified = True
                     replaced_static_paths[src] = src_new
 
