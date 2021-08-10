@@ -13,16 +13,16 @@ from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -30,13 +30,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -63,18 +64,18 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
+    TheProjectResultBuildinfo = lookup(milestones, "TheProjectResultBuildinfo")
 
     if not TheProjectResultBuildinfo:
         exitcode = 22
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -82,76 +83,114 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    included_files_check_logfile = lookup(milestones, 'included_files_check_logfile')
+    included_files_check_logfile = lookup(milestones, "included_files_check_logfile")
     if included_files_check_logfile:
         dummy, fname = os.path.split(included_files_check_logfile)
-        fname = 'includedFilesCheck.txt'
-        TheProjectResultBuildinfoCheckIncludesFile = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(included_files_check_logfile, TheProjectResultBuildinfoCheckIncludesFile)
+        fname = "includedFilesCheck.txt"
+        TheProjectResultBuildinfoCheckIncludesFile = os.path.join(
+            TheProjectResultBuildinfo, fname
+        )
+        shutil.copy(
+            included_files_check_logfile, TheProjectResultBuildinfoCheckIncludesFile
+        )
 
 if 0 and exitcode == CONTINUE:
-    sitemap_files_html_jsonfile = lookup(milestones, 'sitemap_files_html_jsonfile')
+    sitemap_files_html_jsonfile = lookup(milestones, "sitemap_files_html_jsonfile")
     if sitemap_files_html_jsonfile:
         dummy, fname = os.path.split(sitemap_files_html_jsonfile)
-        TheProjectResultBuildinfoSitemapFilesHtmlJson = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_html_jsonfile, TheProjectResultBuildinfoSitemapFilesHtmlJson)
+        TheProjectResultBuildinfoSitemapFilesHtmlJson = os.path.join(
+            TheProjectResultBuildinfo, fname
+        )
+        shutil.copy(
+            sitemap_files_html_jsonfile, TheProjectResultBuildinfoSitemapFilesHtmlJson
+        )
 
 if 0 and exitcode == CONTINUE:
-    sitemap_files_singlehtml_jsonfile = lookup(milestones, 'sitemap_files_singlehtml_jsonfile')
+    sitemap_files_singlehtml_jsonfile = lookup(
+        milestones, "sitemap_files_singlehtml_jsonfile"
+    )
     if sitemap_files_singlehtml_jsonfile:
         dummy, fname = os.path.split(sitemap_files_singlehtml_jsonfile)
-        TheProjectResultBuildinfoSitemapFilesSinglehtmlJson = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_singlehtml_jsonfile, TheProjectResultBuildinfoSitemapFilesSinglehtmlJson)
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlJson = os.path.join(
+            TheProjectResultBuildinfo, fname
+        )
+        shutil.copy(
+            sitemap_files_singlehtml_jsonfile,
+            TheProjectResultBuildinfoSitemapFilesSinglehtmlJson,
+        )
 
 if exitcode == CONTINUE:
-    sitemap_files_html_txtfile = lookup(milestones, 'sitemap_files_html_txtfile')
+    sitemap_files_html_txtfile = lookup(milestones, "sitemap_files_html_txtfile")
     if sitemap_files_html_txtfile:
         dummy, fname = os.path.split(sitemap_files_html_txtfile)
-        TheProjectResultBuildinfoSitemapFilesHtmlTxt = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_html_txtfile, TheProjectResultBuildinfoSitemapFilesHtmlTxt)
+        TheProjectResultBuildinfoSitemapFilesHtmlTxt = os.path.join(
+            TheProjectResultBuildinfo, fname
+        )
+        shutil.copy(
+            sitemap_files_html_txtfile, TheProjectResultBuildinfoSitemapFilesHtmlTxt
+        )
 
 if exitcode == CONTINUE:
-    sitemap_files_singlehtml_txtfile = lookup(milestones, 'sitemap_files_singlehtml_txtfile')
+    sitemap_files_singlehtml_txtfile = lookup(
+        milestones, "sitemap_files_singlehtml_txtfile"
+    )
     if sitemap_files_singlehtml_txtfile:
         dummy, fname = os.path.split(sitemap_files_singlehtml_txtfile)
-        TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt = os.path.join(TheProjectResultBuildinfo, fname)
-        shutil.copy(sitemap_files_singlehtml_txtfile, TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt)
+        TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt = os.path.join(
+            TheProjectResultBuildinfo, fname
+        )
+        shutil.copy(
+            sitemap_files_singlehtml_txtfile,
+            TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt,
+        )
 
 
 # ==================================================
 # Set MILESTONE
 # --------------------------------------------------
 if TheProjectResultBuildinfoCheckIncludesFile:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoCheckIncludesFile':
-        TheProjectResultBuildinfoCheckIncludesFile})
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoCheckIncludesFile": TheProjectResultBuildinfoCheckIncludesFile
+        }
+    )
 
 if TheProjectResultBuildinfoSitemapFilesHtmlJson:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesHtmlJson':
-        TheProjectResultBuildinfoSitemapFilesHtmlJson})
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoSitemapFilesHtmlJson": TheProjectResultBuildinfoSitemapFilesHtmlJson
+        }
+    )
 
 if TheProjectResultBuildinfoSitemapFilesSinglehtmlJson:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesSinglehtmlJson':
-        TheProjectResultBuildinfoSitemapFilesSinglehtmlJson})
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoSitemapFilesSinglehtmlJson": TheProjectResultBuildinfoSitemapFilesSinglehtmlJson
+        }
+    )
 
 if TheProjectResultBuildinfoSitemapFilesHtmlTxt:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesHtmlTxt':
-        TheProjectResultBuildinfoSitemapFilesHtmlTxt})
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoSitemapFilesHtmlTxt": TheProjectResultBuildinfoSitemapFilesHtmlTxt
+        }
+    )
 
 if TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt':
-        TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt})
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt": TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt
+        }
+    )
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

@@ -7,16 +7,16 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
+loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
@@ -24,8 +24,8 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
@@ -33,6 +33,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 deepget = tct.deepget
+
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -52,18 +53,18 @@ pass
 
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    buildsettings = lookup(milestones, 'buildsettings')
+    buildsettings = lookup(milestones, "buildsettings")
 
     if not buildsettings:
         exitcode = 22
         reason = "'buildsettings' is missing"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -76,14 +77,16 @@ else:
 # --------------------------------------------------
 
 if 0:
-    result['MILESTONES'].append({'dummy': 'dummy'})
+    result["MILESTONES"].append({"dummy": "dummy"})
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

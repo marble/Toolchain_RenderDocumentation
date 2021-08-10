@@ -6,20 +6,20 @@ import tct
 import sys
 
 params = tct.readjson(sys.argv[1])
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
 
-sys.path.insert(1, params['toolchain_folder'] + '/toolchain-packages')
+sys.path.insert(1, params["toolchain_folder"] + "/toolchain-packages")
 import tclib
 
-reason = ''
-resultfile = params['resultfile']
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
+loglist = result["loglist"] = result.get("loglist", [])
 lookup = tclib.lookup_function(loglist)
 exitcode = CONTINUE = 0
 
@@ -28,8 +28,8 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
@@ -44,14 +44,14 @@ show_toolchain_usage_and_exit = None
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    abc = lookup(milestones, 'a', 'b', 'c')
+    abc = lookup(milestones, "a", "b", "c")
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -112,15 +112,17 @@ Toolchain options:
   -c email_user_bcc "email1,email2,..."  additionally, secretly
   -c email_user_send_to_admin_too  1     like it says
 
-""" % {'toolchain_name': toolchain_name}
+""" % {
+    "toolchain_name": toolchain_name
+}
 
 if exitcode == CONTINUE:
-    if params.get('toolchain_help') or ('help' in params.get('toolchain_actions', [])):
+    if params.get("toolchain_help") or ("help" in params.get("toolchain_actions", [])):
         show_toolchain_usage_and_exit = 1
         if show_toolchain_usage_and_exit:
             print(toolchain_usage)
             exitcode = 90
-            reason = 'Just show toolchain usage and stop.'
+            reason = "Just show toolchain usage and stop."
 
 
 # ==================================================
@@ -128,14 +130,17 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if show_toolchain_usage_and_exit:
-    result['MILESTONES'].append({'show_toolchain_usage_and_exit':
-                                 show_toolchain_usage_and_exit})
+    result["MILESTONES"].append(
+        {"show_toolchain_usage_and_exit": show_toolchain_usage_and_exit}
+    )
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

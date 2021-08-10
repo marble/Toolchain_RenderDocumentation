@@ -8,15 +8,15 @@ import sys
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -24,18 +24,20 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
 
+
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
+
 
 # ==================================================
 # define
@@ -49,19 +51,19 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    build_html = lookup(milestones, 'build_html', default='html')
-    build_singlehtml = lookup(milestones, 'build_singlehtml', default='html')
+    build_html = lookup(milestones, "build_html", default="html")
+    build_singlehtml = lookup(milestones, "build_singlehtml", default="html")
 
     if not (build_html or build_singlehtml):
         exitcode = 22
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS')
+    loglist.append("Bad PARAMS")
 
 
 # ==================================================
@@ -82,7 +84,9 @@ pass
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

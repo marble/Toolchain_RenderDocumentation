@@ -12,16 +12,16 @@ import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -29,8 +29,8 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
@@ -39,17 +39,19 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 
 deepget = tct.deepget
 
+
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
     loglist.append((keys, result))
     return result
 
+
 # ==================================================
 # define
 # --------------------------------------------------
 
-TheProjectLogHtmlmail = ''
-TheProjectLogREADMEfile = ''
+TheProjectLogHtmlmail = ""
+TheProjectLogREADMEfile = ""
 xeq_name_cnt = 0
 
 
@@ -58,20 +60,22 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    TheProjectLogHtmlmailMessageHtml = lookup( milestones, 'TheProjectLogHtmlmailMessageHtml')
+    TheProjectLogHtmlmailMessageHtml = lookup(
+        milestones, "TheProjectLogHtmlmailMessageHtml"
+    )
     # "https://t3docs.local/typo3cms/Project/default/0.0.0/"
-    absurl_html_dir = lookup(milestones, 'absurl_html_dir')
+    absurl_html_dir = lookup(milestones, "absurl_html_dir")
 
     if not (TheProjectLogHtmlmailMessageHtml and absurl_html_dir):
         CONTINUE = -2
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -79,25 +83,27 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    TheProjectLogREADMEfile = os.path.join(os.path.split(TheProjectLogHtmlmailMessageHtml)[0], 'README.html')
+    TheProjectLogREADMEfile = os.path.join(
+        os.path.split(TheProjectLogHtmlmailMessageHtml)[0], "README.html"
+    )
 
-    with codecs.open(TheProjectLogHtmlmailMessageHtml, 'r', 'utf-8') as f1:
-        uhtml = f1.read().decode('utf-8', 'replace')
+    with codecs.open(TheProjectLogHtmlmailMessageHtml, "r", "utf-8") as f1:
+        uhtml = f1.read().decode("utf-8", "replace")
 
     replacements = [
-        ('href="' + absurl_html_dir + '_buildinfo/',
-         'href="./'),
-        ('href="' + absurl_html_dir + 'singlehtml/"',
-         'href="../singlehtml/Index.html"'),
-        ('href="' + absurl_html_dir + '"',
-         'href="../Index.html"'),
-        ('href="' + absurl_html_dir,
-         'href="../') ]
+        ('href="' + absurl_html_dir + "_buildinfo/", 'href="./'),
+        (
+            'href="' + absurl_html_dir + 'singlehtml/"',
+            'href="../singlehtml/Index.html"',
+        ),
+        ('href="' + absurl_html_dir + '"', 'href="../Index.html"'),
+        ('href="' + absurl_html_dir, 'href="../'),
+    ]
 
     for a, b in replacements:
         uhtml = uhtml.replace(a, b)
 
-    with codecs.open(TheProjectLogREADMEfile, 'w', 'utf-8') as f2:
+    with codecs.open(TheProjectLogREADMEfile, "w", "utf-8") as f2:
         f2.write(uhtml)
 
 # ==================================================
@@ -105,14 +111,16 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if TheProjectLogREADMEfile:
-    result['MILESTONES'].append({'TheProjectLogREADMEfile': TheProjectLogREADMEfile})
+    result["MILESTONES"].append({"TheProjectLogREADMEfile": TheProjectLogREADMEfile})
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

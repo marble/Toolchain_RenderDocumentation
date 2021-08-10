@@ -5,7 +5,7 @@
 Some common constants of this package.
 """
 
-__version__ = '1.0.1'
+__version__ = "1.0.1"
 
 # leave your name and notes here:
 __history__ = """\
@@ -37,37 +37,39 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE!
 """
 
 
-WHITESPACECHARS = '\t\n\x0b\x0c\r '
+WHITESPACECHARS = "\t\n\x0b\x0c\r "
 
 SECTION_UNDERLINERS = list("""=-^"~'#*$`+;.,_/\%&!""")
 
 META_MAPPING = {
     # name lower : (canonical spelling, keep in output?),
-    'content-type'   : ('Content-type'  , 0),
-    'description'    : ('Description'   , 1),
-    'generator'      : ('Generator'     , 0),
-    'author'         : ('Author'        , 1),
-    'created'        : ('Created'       , 1),
-    'changedby'      : ('Changed by'    , 1),
-    'changed'        : ('Changed'       , 1),
-    'classification' : ('Classification', 1),
-    'content-style-type' : ('Content-style-type', 0),
-    'keywords'       : ('Keywords'      , 1),
-    'author'         : ('Author'        , 1),
-    'email'          : ('Email'         , 1),
-    'language (en, de, fr, nl, dk, es, ... )' : ('Language'  , 1),
-    'resourceloaderdynamicstyles' : ('Resource_Loader_Dynamic_Styles', 0),
-    'sdfootnote'     : ('sdfootnote'    , 0),
-    'sdendnote'      : ('sdendnote'     , 0),
+    "content-type": ("Content-type", 0),
+    "description": ("Description", 1),
+    "generator": ("Generator", 0),
+    "author": ("Author", 1),
+    "created": ("Created", 1),
+    "changedby": ("Changed by", 1),
+    "changed": ("Changed", 1),
+    "classification": ("Classification", 1),
+    "content-style-type": ("Content-style-type", 0),
+    "keywords": ("Keywords", 1),
+    "author": ("Author", 1),
+    "email": ("Email", 1),
+    "language (en, de, fr, nl, dk, es, ... )": ("Language", 1),
+    "resourceloaderdynamicstyles": ("Resource_Loader_Dynamic_Styles", 0),
+    "sdfootnote": ("sdfootnote", 0),
+    "sdendnote": ("sdendnote", 0),
 }
 
-NL = '\n'
-CRLF = '\r\n'
+NL = "\n"
+CRLF = "\r\n"
 
-CUTTER_MARK_IMAGES = '.. ######CUTTER_MARK_IMAGES######'
+CUTTER_MARK_IMAGES = ".. ######CUTTER_MARK_IMAGES######"
+
 
 class Dummy(object):
     pass
+
 
 SNIPPETS = Dummy()
 SNIPPETS.include_includes_txt = """\

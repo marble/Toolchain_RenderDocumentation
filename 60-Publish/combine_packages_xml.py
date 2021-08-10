@@ -21,19 +21,22 @@ import sys
 import time
 
 if not __name__ == "__main__":
-    print('Please run as main.')
+    print("Please run as main.")
     sys.exit(1)
+
 
 def usage(exitcode=0):
     print(__doc__)
     sys.exit(exitcode)
 
+
 def usage1(exitcode=1):
-    lines = __doc__.split('\n')
-    print('\n'.join(lines[2:4] + ['    Try --help']))
+    lines = __doc__.split("\n")
+    print("\n".join(lines[2:4] + ["    Try --help"]))
     sys.exit(exitcode)
 
-if len(sys.argv) == 1 or '--help' in sys.argv:
+
+if len(sys.argv) == 1 or "--help" in sys.argv:
     usage()
 
 if len(sys.argv) != 3:
@@ -44,7 +47,7 @@ fpath2 = sys.argv[2]
 
 unixtime = int(time.time())
 dt = datetime.datetime.fromtimestamp(unixtime)
-datetimestr = dt.strftime('%Y-%m-%d %H:%M:%S')
+datetimestr = dt.strftime("%Y-%m-%d %H:%M:%S")
 
 example_data = """
 <?xml version="1.0" standalone="yes" ?>
@@ -207,39 +210,45 @@ epilog = """\
 	</languagePackIndex>
 </documentationPackIndex>"""
 
-re_obj = re.compile('''
+re_obj = re.compile(
+    """
    <languagepack
    \\s+
    version="(?P<version>\d+\.\d+\.\d+)"
    \\s+
    language="(?P<language>[a-zA-Z-_]*)"\\s*.
    \\s*<md5>(?P<md5>[a-f0-9]*)</md5>
-''', re.VERBOSE + re.DOTALL)
+""",
+    re.VERBOSE + re.DOTALL,
+)
 
 
 def version_tuple(v):
-    return tuple([int(part) for part in v.split('.') if part.isdigit()])
+    return tuple([int(part) for part in v.split(".") if part.isdigit()])
+
 
 def version_cmp(a, b):
     return cmp(version_tuple(a), version_tuple(b))
 
+
 def getversions(fpath):
     result = {}
-    with codecs.open(fpath, 'r', 'utf-8') as f1:
+    with codecs.open(fpath, "r", "utf-8") as f1:
         data = f1.read()
     for m in re_obj.finditer(data):
-        k = '%s,%s' % (m.group('version'), m.group('language'))
+        k = "%s,%s" % (m.group("version"), m.group("language"))
         result[k] = {
-            'version': m.group('version'),
-            'language': m.group('language'),
-            'md5': m.group('md5')
+            "version": m.group("version"),
+            "language": m.group("language"),
+            "md5": m.group("md5"),
         }
     return result
 
+
 def version_cmp(a, b):
-    result = cmp(version_tuple(a[1]['version']), version_tuple(b[1]['version']))
+    result = cmp(version_tuple(a[1]["version"]), version_tuple(b[1]["version"]))
     if result == 0:
-        result = cmp(a[1]['language'], b[1]['language'])
+        result = cmp(a[1]["language"], b[1]["language"])
     return result
 
 
@@ -248,7 +257,7 @@ versions2 = getversions(fpath2)
 versions3 = versions1.copy()
 versions3.update(versions2)
 
-print(prolog_template % {'unixtime': unixtime, 'datetimestr': datetimestr})
+print(prolog_template % {"unixtime": unixtime, "datetimestr": datetimestr})
 for k, v in sorted(list(versions3.items()), cmp=version_cmp):
     print(languagepack % v)
 print(epilog)

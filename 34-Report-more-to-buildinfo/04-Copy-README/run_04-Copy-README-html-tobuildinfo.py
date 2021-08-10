@@ -10,16 +10,16 @@ import sys
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -27,8 +27,8 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
@@ -36,6 +36,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 deepget = tct.deepget
+
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -56,19 +57,19 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    TheProjectLogREADMEfile = lookup(milestones, 'TheProjectLogREADMEfile')
-    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
+    TheProjectLogREADMEfile = lookup(milestones, "TheProjectLogREADMEfile")
+    TheProjectResultBuildinfo = lookup(milestones, "TheProjectResultBuildinfo")
 
     if not (TheProjectLogREADMEfile and TheProjectResultBuildinfo):
         exitcode = 22
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -85,14 +86,18 @@ if exitcode == CONTINUE:
 # Set MILESTONE
 # --------------------------------------------------
 if TheProjectResultBuildinfoREADMEfile:
-    result['MILESTONES'].append({'TheProjectResultBuildinfoREADMEfile': TheProjectResultBuildinfoREADMEfile})
+    result["MILESTONES"].append(
+        {"TheProjectResultBuildinfoREADMEfile": TheProjectResultBuildinfoREADMEfile}
+    )
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

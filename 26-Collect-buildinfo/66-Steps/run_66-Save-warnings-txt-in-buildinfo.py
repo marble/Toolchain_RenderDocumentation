@@ -8,16 +8,16 @@ import sys
 import tct
 
 params = tct.readjson(sys.argv[1])
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
+loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
@@ -25,8 +25,8 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
@@ -34,6 +34,7 @@ if 0 or milestones.get('debug_always_make_milestones_snapshot'):
 # --------------------------------------------------
 
 deepget = tct.deepget
+
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -55,25 +56,25 @@ warnings_file_dumped_to_console = None
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    TheProject = lookup(milestones, 'TheProject')
-    TheProjectLog = lookup(milestones, 'TheProjectLog')
+    TheProject = lookup(milestones, "TheProject")
+    TheProjectLog = lookup(milestones, "TheProjectLog")
 
     if not (TheProject and TheProjectLog):
         exitcode = 22
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
-    build_html = lookup(milestones, 'build_html')
-    TheProjectResultBuildinfo = lookup(milestones, 'TheProjectResultBuildinfo')
+    build_html = lookup(milestones, "build_html")
+    TheProjectResultBuildinfo = lookup(milestones, "TheProjectResultBuildinfo")
 
     if not (build_html and TheProjectResultBuildinfo):
         "check that later!"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -83,10 +84,10 @@ else:
 import codecs
 
 if exitcode == CONTINUE:
-    src_warnings_file = os.path.join(TheProjectLog, 'html/warnings.txt')
+    src_warnings_file = os.path.join(TheProjectLog, "html/warnings.txt")
     if not os.path.exists(src_warnings_file):
         exitcode = 22
-        reason = 'warnings.txt file not found'
+        reason = "warnings.txt file not found"
         loglist.append((reason, src_warnings_file))
 
 
@@ -95,33 +96,33 @@ if exitcode == CONTINUE:
     if not TheProjectResultBuildinfo:
         # we cannot deliver warnings.txt with _buildinfo
         # so dump it to the console
-        print('\n########## SPHINX warnings.txt BEGIN ##########')
-        with codecs.open(src_warnings_file, 'r', 'utf-8', 'replace') as f1:
+        print("\n########## SPHINX warnings.txt BEGIN ##########")
+        with codecs.open(src_warnings_file, "r", "utf-8", "replace") as f1:
             for line1 in f1:
                 if line1.startswith(TheProject):
-                    print('.', line1[TheProjectLen:], sep='', end='')
-                elif line1.startswith('/ALL/Makedir/SYMLINK_THE_PROJECT/'):
-                    print('.', line1[32:], sep='', end='')
+                    print(".", line1[TheProjectLen:], sep="", end="")
+                elif line1.startswith("/ALL/Makedir/SYMLINK_THE_PROJECT/"):
+                    print(".", line1[32:], sep="", end="")
                 else:
-                    print(line1, end='')
-        print('########## SPHINX warnings.txt END ##########\n')
+                    print(line1, end="")
+        print("########## SPHINX warnings.txt END ##########\n")
         warnings_file_dumped_to_console = 1
 
 if not (build_html and TheProjectResultBuildinfo):
     exitcode = 22
-    reason = 'warnings.txt file not found'
+    reason = "warnings.txt file not found"
 
 if exitcode == CONTINUE:
     TheProjectLen = len(TheProject)
-    warnings_file = os.path.join(TheProjectResultBuildinfo, 'warnings.txt')
-    with codecs.open(src_warnings_file, 'r', 'utf-8', 'replace') as f1:
-        with codecs.open(warnings_file, 'w', 'utf-8') as f2:
+    warnings_file = os.path.join(TheProjectResultBuildinfo, "warnings.txt")
+    with codecs.open(src_warnings_file, "r", "utf-8", "replace") as f1:
+        with codecs.open(warnings_file, "w", "utf-8") as f2:
             for line1 in f1:
                 if line1.startswith(TheProject):
-                    f2.write('.')
+                    f2.write(".")
                     f2.write(line1[TheProjectLen:])
-                elif line1.startswith('/ALL/Makedir/SYMLINK_THE_PROJECT/'):
-                    f2.write('.')
+                elif line1.startswith("/ALL/Makedir/SYMLINK_THE_PROJECT/"):
+                    f2.write(".")
                     f2.write(line1[32:])
                 else:
                     f2.write(line1)
@@ -134,19 +135,25 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if warnings_file:
-    result['MILESTONES'].append({'warnings_file': warnings_file,
-                                 'warnings_file_size': warnings_file_size,
-                                 })
+    result["MILESTONES"].append(
+        {
+            "warnings_file": warnings_file,
+            "warnings_file_size": warnings_file_size,
+        }
+    )
 if warnings_file_dumped_to_console:
-    result['MILESTONES'].append({'warnings_file_dumped_to_console':
-                                 warnings_file_dumped_to_console})
+    result["MILESTONES"].append(
+        {"warnings_file_dumped_to_console": warnings_file_dumped_to_console}
+    )
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

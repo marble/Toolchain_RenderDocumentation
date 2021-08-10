@@ -9,15 +9,15 @@ import sys
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -25,23 +25,26 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
 
+
 def milestones_get(name, default=None):
     result = milestones.get(name, default)
     loglist.append((name, result))
     return result
 
+
 def facts_get(name, default=None):
     result = facts.get(name, default)
     loglist.append((name, result))
     return result
+
 
 def params_get(name, default=None):
     result = params.get(name, default)
@@ -62,20 +65,20 @@ TheProjectResultBuildinfoPdfFilesCnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    TheProjectResult = milestones_get('TheProjectResult')
-    TheProjectResultBuildinfo = milestones_get('TheProjectResultBuildinfo')
-    build_latex_folder = milestones_get('build_latex_folder')
+    TheProjectResult = milestones_get("TheProjectResult")
+    TheProjectResultBuildinfo = milestones_get("TheProjectResultBuildinfo")
+    build_latex_folder = milestones_get("build_latex_folder")
 
     if not (TheProjectResult and TheProjectResultBuildinfo and build_latex_folder):
         CONTINUE = -2
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -86,17 +89,17 @@ import glob
 import shutil
 
 if exitcode == CONTINUE:
-    files = glob.glob(build_latex_folder.rstrip('/') + '/PROJECT*.*')
+    files = glob.glob(build_latex_folder.rstrip("/") + "/PROJECT*.*")
     for file in files:
         filename = os.path.split(file)[1]
         src = os.path.join(build_latex_folder, file)
-        dest = os.path.join(TheProjectResultBuildinfo, 'PDF' + filename)
+        dest = os.path.join(TheProjectResultBuildinfo, "PDF" + filename)
         fileext = os.path.splitext(dest)[1]
-        if fileext.lower() in ['.tex', '.log']:
-            dest = dest + '.txt'
+        if fileext.lower() in [".tex", ".log"]:
+            dest = dest + ".txt"
             shutil.copy(src, dest)
             TheProjectResultBuildinfoPdfFilesCnt += 1
-            if dest.endswith('.log.txt'):
+            if dest.endswith(".log.txt"):
                 TheProjectResultBuildinfoPdfLogFile = dest
 
 
@@ -105,17 +108,21 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if TheProjectResultBuildinfoPdfLogFile:
-    result['MILESTONES'].append({
-        'TheProjectResultBuildinfoPdfLogFile': TheProjectResultBuildinfoPdfLogFile,
-        'TheProjectResultBuildinfoPdfFilesCnt': TheProjectResultBuildinfoPdfFilesCnt
-    })
+    result["MILESTONES"].append(
+        {
+            "TheProjectResultBuildinfoPdfLogFile": TheProjectResultBuildinfoPdfLogFile,
+            "TheProjectResultBuildinfoPdfFilesCnt": TheProjectResultBuildinfoPdfFilesCnt,
+        }
+    )
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

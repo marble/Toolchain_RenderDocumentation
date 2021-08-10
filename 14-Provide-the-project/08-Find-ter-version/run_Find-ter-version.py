@@ -12,16 +12,16 @@ import tct
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-toolchain_name = facts['toolchain_name']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+toolchain_name = facts["toolchain_name"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -29,13 +29,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
@@ -57,33 +58,27 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    configset = lookup(milestones, 'configset')
-    buildsettings = lookup(milestones, 'buildsettings')
+    configset = lookup(milestones, "configset")
+    buildsettings = lookup(milestones, "buildsettings")
 
-    if not (1
-        and buildsettings
-        and configset
-    ):
+    if not (1 and buildsettings and configset):
         exitcode = 22
-        reason = 'Bad PARAMS'
+        reason = "Bad PARAMS"
 
 if exitcode == CONTINUE:
-    ter_extkey = lookup(milestones, 'buildsettings', 'ter_extkey')
-    ter_extversion = lookup(milestones, 'buildsettings', 'ter_extversion')
+    ter_extkey = lookup(milestones, "buildsettings", "ter_extkey")
+    ter_extversion = lookup(milestones, "buildsettings", "ter_extversion")
 
-    if not (1
-        and ter_extversion
-        and ter_extversion
-    ):
+    if not (1 and ter_extversion and ter_extversion):
         CONTINUE = -2
-        reason = 'Nothing to do - insufficient params'
+        reason = "Nothing to do - insufficient params"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -96,39 +91,40 @@ if exitcode == CONTINUE:
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
+        )
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
 
     def execute_cmdlist(cmdlist):
         global xeq_name_cnt
-        cmd = ' '.join(cmdlist)
-        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+        cmd = " ".join(cmdlist)
+        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
         xeq_name_cnt += 1
-        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
+        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
+        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
-        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
+            f2.write(cmd_multiline.decode("utf-8", "replace"))
 
         exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
 
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
 
-        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-            f2.write(out.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
+            f2.write(out.decode("utf-8", "replace"))
 
-        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-            f2.write(err.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
+            f2.write(err.decode("utf-8", "replace"))
 
         return exitcode, cmd, out, err
 
 
 if exitcode == CONTINUE:
-    exitcode, cmd, out, err = execute_cmdlist([
-        't3xutils.phar', 'info', ter_extkey])
+    exitcode, cmd, out, err = execute_cmdlist(["t3xutils.phar", "info", ter_extkey])
 
 if exitcode == CONTINUE:
     example = """
@@ -161,14 +157,14 @@ Available versions:
  2.5.0    uploaded: 08.01.2017 11:16:36
  2.5.1    uploaded: 05.05.2017 12:12:21
 """
-    for line in out.split('\n'):
+    for line in out.split("\n"):
         parts = line.split()
         # ['0.1.0', 'uploaded:', '19.04.2013', '16:05:26']
         if len(parts) != 4:
             continue
-        if parts[1] != 'uploaded:':
+        if parts[1] != "uploaded:":
             continue
-        version = parts[0].split('.')
+        version = parts[0].split(".")
         if len(version) != 3:
             continue
         try:
@@ -181,14 +177,16 @@ Available versions:
             ter_extversion_highest = max(ter_extversion_highest, version)
 
     if ter_extversion_highest:
-        buildsettings['ter_extversion'] = '.'.join([str(item) for item in ter_extversion_highest])
-        if buildsettings['version'] in ['', '0.0.0']:
-            buildsettings['version'] = buildsettings['ter_extversion']
-        parts = buildsettings['builddir'].split('/')
+        buildsettings["ter_extversion"] = ".".join(
+            [str(item) for item in ter_extversion_highest]
+        )
+        if buildsettings["version"] in ["", "0.0.0"]:
+            buildsettings["version"] = buildsettings["ter_extversion"]
+        parts = buildsettings["builddir"].split("/")
         if parts:
-            if parts[-1] in ['', '0.0.0']:
-                parts[-1] = buildsettings['ter_extversion']
-            buildsettings['builddir'] = '/'.join(parts)
+            if parts[-1] in ["", "0.0.0"]:
+                parts[-1] = buildsettings["ter_extversion"]
+            buildsettings["builddir"] = "/".join(parts)
         buildsettings_changed = True
 
 # ==================================================
@@ -199,20 +197,22 @@ Available versions:
 D = {}
 
 if buildsettings_changed:
-    D['buildsettings'] = buildsettings
+    D["buildsettings"] = buildsettings
 
 if ter_extversion_highest:
-    D['ter_extversion_highest'] = ter_extversion_highest
+    D["ter_extversion_highest"] = ter_extversion_highest
 
 if D:
-    result['MILESTONES'].append(D)
+    result["MILESTONES"].append(D)
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

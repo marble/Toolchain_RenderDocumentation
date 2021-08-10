@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 teststring = """
 old: href="../../_static/css/t3more.css"
 new: href="/t3SphinxThemeRtd/3.6.0/css/t3more.css"
@@ -30,9 +31,12 @@ regexpattern = re.compile(
         \s*                    # unlikely whitespace
         (?P=quote)             # the quote again
     """,
-    re.VERBOSE)
+    re.VERBOSE,
+)
 
-version = '3.6.0'
-replacement = r'\g<intro>\g<quote>/t3SphinxThemeRtd/' + version + '/' + '\g<payload>\g<quote>'
+version = "3.6.0"
+replacement = (
+    r"\g<intro>\g<quote>/t3SphinxThemeRtd/" + version + "/" + "\g<payload>\g<quote>"
+)
 
 print(regexpattern.sub(replacement, teststring))

@@ -8,15 +8,15 @@ import os
 import sys
 
 params = tct.readjson(sys.argv[1])
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
+loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
@@ -24,13 +24,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
@@ -42,7 +43,7 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-talk = milestones.get('talk', 1)
+talk = milestones.get("talk", 1)
 lockfile = None
 lockfile_time = None
 lockfile_planned = None
@@ -58,17 +59,17 @@ unixtime = None
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
-    lockfile_name = lookup(milestones, 'lockfile_name')
-    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    loglist.append("CHECK PARAMS")
+    lockfile_name = lookup(milestones, "lockfile_name")
+    toolchain_temp_home = lookup(params, "toolchain_temp_home")
     if not (lockfile_name and toolchain_temp_home):
         exitcode = 22
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('PROBLEM with params')
+    loglist.append("PROBLEM with params")
 
 
 # ==================================================
@@ -76,37 +77,40 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    lockfile_ttl_seconds = milestones.get('lockfile_ttl_seconds', 3600)
+    lockfile_ttl_seconds = milestones.get("lockfile_ttl_seconds", 3600)
     lockfile_planned = os.path.join(toolchain_temp_home, lockfile_name)
 
     if os.path.exists(lockfile_planned):
-        loglist.append('lockfile_planned exists')
+        loglist.append("lockfile_planned exists")
         lockfile_planned_time = int(os.path.getmtime(lockfile_planned))
-        loglist.append(('lockfile_planned_time', lockfile_planned_time))
+        loglist.append(("lockfile_planned_time", lockfile_planned_time))
         unixtime = int(time.time())
-        loglist.append(('unixtime', unixtime))
+        loglist.append(("unixtime", unixtime))
         lockfile_planned_age = unixtime - lockfile_planned_time
-        loglist.append(('lockfile_planned_age', lockfile_planned_age))
+        loglist.append(("lockfile_planned_age", lockfile_planned_age))
 
         if talk:
-            print('is locked since %s seconds, will wait until %s' % (lockfile_planned_age, lockfile_ttl_seconds))
+            print(
+                "is locked since %s seconds, will wait until %s"
+                % (lockfile_planned_age, lockfile_ttl_seconds)
+            )
 
         # seconds
         if lockfile_planned_age >= lockfile_ttl_seconds:
             os.remove(lockfile_planned)
             if os.path.exists(lockfile_planned):
                 exitcode = 22
-                reason = 'lockfile_planned already exists'
+                reason = "lockfile_planned already exists"
             else:
                 lockfile_removed = lockfile_planned
                 if talk:
-                    print('unlock because of age')
+                    print("unlock because of age")
 
 if exitcode == CONTINUE:
     if os.path.exists(lockfile_planned):
-        loglist.append('lockfile_planned still exists')
+        loglist.append("lockfile_planned still exists")
         exitcode = 22
-        reason = 'lockfile_planned exists but shouldn\'t'
+        reason = "lockfile_planned exists but shouldn't"
 
 
 if exitcode == CONTINUE:
@@ -114,7 +118,7 @@ if exitcode == CONTINUE:
     lockfile_create_logstamp = tct.logstamp_finegrained()
     lockfile = lockfile_planned
     lockfile_time = int(os.path.getmtime(lockfile))
-    loglist.append(('lockfile_time', lockfile_time))
+    loglist.append(("lockfile_time", lockfile_time))
 
 
 # ==================================================
@@ -122,32 +126,34 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if lockfile:
-    result['MILESTONES'].append({'lockfile': lockfile})
+    result["MILESTONES"].append({"lockfile": lockfile})
 
 if lockfile_time:
-    result['MILESTONES'].append({'lockfile_time': lockfile_time})
+    result["MILESTONES"].append({"lockfile_time": lockfile_time})
 
 if lockfile_planned:
-    result['MILESTONES'].append({'lockfile_planned': lockfile_planned})
+    result["MILESTONES"].append({"lockfile_planned": lockfile_planned})
 
 if lockfile_planned_age:
-    result['MILESTONES'].append({'lockfile_planned_age': lockfile_planned_age})
+    result["MILESTONES"].append({"lockfile_planned_age": lockfile_planned_age})
 
 if lockfile_planned_time:
-    result['MILESTONES'].append({'lockfile_planned_time': lockfile_planned_time})
+    result["MILESTONES"].append({"lockfile_planned_time": lockfile_planned_time})
 
 if lockfile_removed:
-    result['MILESTONES'].append({'lockfile_removed':lockfile_removed})
+    result["MILESTONES"].append({"lockfile_removed": lockfile_removed})
 
 if lockfile_create_logstamp:
-    result['MILESTONES'].append({'lockfile_create_logstamp': lockfile_create_logstamp})
+    result["MILESTONES"].append({"lockfile_create_logstamp": lockfile_create_logstamp})
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

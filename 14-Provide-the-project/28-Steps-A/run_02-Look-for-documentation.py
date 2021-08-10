@@ -10,15 +10,15 @@ import sys
 import tct
 
 params = tct.readjson(sys.argv[1])
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
-loglist = result['loglist'] = result.get('loglist', [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
+loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
@@ -26,13 +26,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Get and check required milestone(s)
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
@@ -45,17 +46,17 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 buildsettings = {}
-locale_folders = {'': '', 'default': ''} # 'fr_FR':'Localization.fr_FR'
+locale_folders = {"": "", "default": ""}  # 'fr_FR':'Localization.fr_FR'
 locale_locales = []
 locale_masterdocs = []
-localization = 'default'
+localization = "default"
 masterdoc_candidates = [
-    'Documentation/Index.rst',
-    'Documentation/index.rst',
-    'Documentation/Index.md',
-    'Documentation/index.md',
-    'README.rst',
-    'README.md',
+    "Documentation/Index.rst",
+    "Documentation/index.rst",
+    "Documentation/Index.md",
+    "Documentation/index.md",
+    "README.rst",
+    "README.md",
     # 'doc/manual.sxw',
     # 'doc/manual.pdf',
 ]
@@ -69,19 +70,21 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    buildsettings = lookup(milestones, 'buildsettings')
-    localization = lookup(milestones, 'buildsettings', 'localization', default='default')
-    gitdir = lookup(milestones, 'buildsettings', 'gitdir')
+    buildsettings = lookup(milestones, "buildsettings")
+    localization = lookup(
+        milestones, "buildsettings", "localization", default="default"
+    )
+    gitdir = lookup(milestones, "buildsettings", "gitdir")
     if not gitdir:
         exitcode = 22
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS or nothing to do')
+    loglist.append("Bad PARAMS or nothing to do")
 
 
 # ==================================================
@@ -89,8 +92,8 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append({'masterdoc_candidates': masterdoc_candidates})
-    locale = 'default'
+    loglist.append({"masterdoc_candidates": masterdoc_candidates})
+    locale = "default"
     for candidate in masterdoc_candidates:
         fpath = os.path.join(gitdir, candidate)
         if os.path.exists(fpath):
@@ -101,28 +104,34 @@ if exitcode == CONTINUE:
             masterdocs_initial[candidate] = False
 
 if exitcode == CONTINUE:
-    top = os.path.join(gitdir, 'Documentation', 'Localization.??_??')
+    top = os.path.join(gitdir, "Documentation", "Localization.??_??")
 
     candidates = glob.glob(top)
     # [u'/home/marble/Repositories/git.typo3.org/TYPO3CMS/Extensions/sphinx/Documentation/Localization.fr_FR']
 
     for candidate in candidates:
-        m = re.search('(?P<folder>Localization\.(?P<locale>[a-z][a-z]_[A-Z][A-Z]))$', candidate, re.UNICODE)
+        m = re.search(
+            "(?P<folder>Localization\.(?P<locale>[a-z][a-z]_[A-Z][A-Z]))$",
+            candidate,
+            re.UNICODE,
+        )
         if m:
-            folder = m.groupdict()['folder']
-            locale = m.groupdict()['locale']
-            locale_for_file = locale.lower().replace('_', '-')
+            folder = m.groupdict()["folder"]
+            locale = m.groupdict()["locale"]
+            locale_for_file = locale.lower().replace("_", "-")
 
             locale_folders[locale] = folder
             locale_locales.append(locale)
 
             for candi in masterdoc_candidates:
                 if not masterdoc_selected.get(locale):
-                    a = candi.split('/')
-                    if len(a) > 1 and a[0] == 'Documentation':
+                    a = candi.split("/")
+                    if len(a) > 1 and a[0] == "Documentation":
                         fpath = os.path.join(gitdir, a[0], folder, a[1])
                         if os.path.exists(fpath):
-                            masterdoc_selected[locale] = os.path.join(a[0], folder, a[1])
+                            masterdoc_selected[locale] = os.path.join(
+                                a[0], folder, a[1]
+                            )
                             locale_masterdocs.append(masterdoc_selected[locale])
 
 if 0:
@@ -143,44 +152,52 @@ if 0:
             "ter_extension": "1",
             "ter_extkey": "sphinx",
             "ter_extversion": "2.5.0",
-            "version": "2.5"
-        }}
-
+            "version": "2.5",
+        }
+    }
 
 
 # ==================================================
 # Set MILESTONE #1
 # --------------------------------------------------
 
-if 'always':
-    result['MILESTONES'].append({
-        'locale_folders': locale_folders,
-        'locale_locales': locale_locales,
-        'locale_masterdocs': locale_masterdocs,
-    })
+if "always":
+    result["MILESTONES"].append(
+        {
+            "locale_folders": locale_folders,
+            "locale_locales": locale_locales,
+            "locale_masterdocs": locale_masterdocs,
+        }
+    )
 
 if masterdoc_candidates:
-    result['MILESTONES'].append({
-        'masterdoc_candidates': masterdoc_candidates,
-    })
+    result["MILESTONES"].append(
+        {
+            "masterdoc_candidates": masterdoc_candidates,
+        }
+    )
 
 if masterdocs_initial:
-    result['MILESTONES'].append({
-        'masterdocs_initial': masterdocs_initial,
-    })
+    result["MILESTONES"].append(
+        {
+            "masterdocs_initial": masterdocs_initial,
+        }
+    )
 
 if masterdoc_selected:
-    result['MILESTONES'].append({
-        'masterdoc_selected': masterdoc_selected,
-    })
+    result["MILESTONES"].append(
+        {
+            "masterdoc_selected": masterdoc_selected,
+        }
+    )
     masterdoc = masterdoc_selected.get(localization)
     if masterdoc:
         masterdoc_no_ext = os.path.splitext(masterdoc)[0]
-        buildsettings['masterdoc'] = os.path.join(gitdir, masterdoc_no_ext)
-        hit = ''
+        buildsettings["masterdoc"] = os.path.join(gitdir, masterdoc_no_ext)
+        hit = ""
         left, right = os.path.split(masterdoc_no_ext)
-        hit_before = ''
-        localization_xx_XX = re.compile('Documentation/Localization\.[a-z]{2}_[A-Z]{2}')
+        hit_before = ""
+        localization_xx_XX = re.compile("Documentation/Localization\.[a-z]{2}_[A-Z]{2}")
         while left:
             hit_before = hit
             hit = left
@@ -188,15 +205,15 @@ if masterdoc_selected:
         if localization_xx_XX.match(hit_before):
             hit = hit_before
         if hit:
-            buildsettings['t3docdir'] = os.path.join(gitdir, hit)
+            buildsettings["t3docdir"] = os.path.join(gitdir, hit)
 
-gitdir = osp.abspath(buildsettings['gitdir'])
-t3docdir = buildsettings['t3docdir']
+gitdir = osp.abspath(buildsettings["gitdir"])
+t3docdir = buildsettings["t3docdir"]
 if not osp.isabs(t3docdir):
     t3docdir = osp.join(gitdir, t3docdir)
 t3docdir = osp.abspath(t3docdir)
-t3docdir = t3docdir[len(gitdir)+1:]
-buildsettings['t3docdir'] = t3docdir
+t3docdir = t3docdir[len(gitdir) + 1 :]
+buildsettings["t3docdir"] = t3docdir
 
 
 # ==================================================
@@ -204,14 +221,16 @@ buildsettings['t3docdir'] = t3docdir
 # --------------------------------------------------
 
 if buildsettings:
-    result['MILESTONES'].append({'buildsettings': buildsettings})
+    result["MILESTONES"].append({"buildsettings": buildsettings})
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode

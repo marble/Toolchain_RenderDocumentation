@@ -15,21 +15,29 @@ from constants import CUTTER_MARK_IMAGES
 from constants import SNIPPETS
 from constants import SECTION_UNDERLINERS
 
-asciiTable = ''.join([ chr(i) for i in range(256)])
-alphaNumericTable = ''.join([chr(i) if chr(i) in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-' else '-' for i in range(256)])
+asciiTable = "".join([chr(i) for i in range(256)])
+alphaNumericTable = "".join(
+    [
+        chr(i)
+        if chr(i) in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-"
+        else "-"
+        for i in range(256)
+    ]
+)
+
 
 def sectionToLabel(aStr):
     result = aStr.strip()
-    result = result.encode('ascii', 'ignore')
-    result = result.translate(alphaNumericTable).strip('-')
-    result = '-'.join([part for part in result.split('-') if part])
+    result = result.encode("ascii", "ignore")
+    result = result.translate(alphaNumericTable).strip("-")
+    result = "-".join([part for part in result.split("-") if part])
     return result
 
 
 def processRstFile(f1path):
-    f2path = f1path + '.temp.rst'
-    f1 = codecs.open(f1path, 'r', 'utf-8-sig')
-    f2 = codecs.open(f2path, 'w', 'utf-8-sig')
+    f2path = f1path + ".temp.rst"
+    f1 = codecs.open(f1path, "r", "utf-8-sig")
+    f2 = codecs.open(f2path, "w", "utf-8-sig")
     lines = []
     within_CUTTER_MARK_IMAGES = False
     for line in f1:
@@ -47,12 +55,16 @@ def processRstFile(f1path):
             hot = hot and (len(lines[1].strip()) != 0)
             hot = hot and (len(lines[2].strip()) != 0)
             hot = hot and (len(lines[3].strip()) == 0)
-            hot = hot and (lines[1].rstrip('\r\n') != (lines[1][0] * len(lines[1].rstrip('\r\n'))))
-            hot = hot and (lines[2].rstrip('\r\n') == (lines[2][0] * len(lines[2].rstrip('\r\n'))))
+            hot = hot and (
+                lines[1].rstrip("\r\n") != (lines[1][0] * len(lines[1].rstrip("\r\n")))
+            )
+            hot = hot and (
+                lines[2].rstrip("\r\n") == (lines[2][0] * len(lines[2].rstrip("\r\n")))
+            )
             if hot:
                 label = sectionToLabel(lines[1])
                 f2.write(lines[0])
-                f2.write('.. _%s:\n\n' % label)
+                f2.write(".. _%s:\n\n" % label)
                 f2.write(lines[1])
                 f2.write(lines[2])
                 del lines[0:3]
@@ -71,17 +83,19 @@ def processRstFile(f1path):
     os.remove(f1path)
     os.rename(f2path, f1path)
 
+
 def main(startDir):
     for path, dirs, files in os.walk(startDir):
         for fname in files:
             stem, ext = os.path.splitext(fname)
-            if ext == '.rst':
+            if ext == ".rst":
                 f1path = ospj(path, fname)
                 processRstFile(f1path)
 
+
 if __name__ == "__main__":
     if 0 and "testing at home":
-        startDir = r'D:\T3PythonDocBuilder\temp\t3pdb\Documentation'
+        startDir = r"D:\T3PythonDocBuilder\temp\t3pdb\Documentation"
         main(startDir)
     else:
         print("Please import and run main(...)")

@@ -75,87 +75,147 @@ import time
 
 
 # Update symlinks only if the OS supports not following them
-UPDATE_SYMLINKS = bool(os.utime in getattr(os, 'supports_follow_symlinks', []))
+UPDATE_SYMLINKS = bool(os.utime in getattr(os, "supports_follow_symlinks", []))
 STEPMISSING = 100
 
 
 # Command-line interface ######################################################
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="""Restore original modification time of files based on the date of the
-        most recent commit that modified them. Useful when generating release tarballs.""")
+        most recent commit that modified them. Useful when generating release tarballs."""
+    )
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--quiet', '-q', dest='loglevel',
-        action="store_const", const=logging.WARNING, default=logging.INFO,
-        help="Suppress informative messages and summary statistics.")
-    group.add_argument('--verbose', '-v', action="count",
-        help="Print additional information for each processed file.")
+    group.add_argument(
+        "--quiet",
+        "-q",
+        dest="loglevel",
+        action="store_const",
+        const=logging.WARNING,
+        default=logging.INFO,
+        help="Suppress informative messages and summary statistics.",
+    )
+    group.add_argument(
+        "--verbose",
+        "-v",
+        action="count",
+        help="Print additional information for each processed file.",
+    )
 
-    parser.add_argument('--force', '-f', action="store_true",
-        help="Force execution on trees with uncommitted changes.")
+    parser.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        help="Force execution on trees with uncommitted changes.",
+    )
 
-    parser.add_argument('--merge', '-m', action="store_true",
+    parser.add_argument(
+        "--merge",
+        "-m",
+        action="store_true",
         help="""Include merge commits. Leads to more recent mtimes and more files per
         commit, thus with the same mtime (which may or may not be what you want). Including
         merge commits may lead to less commits being evaluated (all files are found sooner),
         which improves performance, sometimes substantially. But since merge commits are
         usually huge, processing them may also take longer, sometimes substantially.
-        By default merge logs are only used for files missing from regular commit logs.""")
+        By default merge logs are only used for files missing from regular commit logs.""",
+    )
 
-    parser.add_argument('--first-parent', action="store_true",
+    parser.add_argument(
+        "--first-parent",
+        action="store_true",
         help="""Consider only the first parent, the "main branch", when parsing merge
         commit logs. Only effective when merge commits are included in the log, either
-        by --merge or to find missing files after first log parse. See --skip-missing.""")
+        by --merge or to find missing files after first log parse. See --skip-missing.""",
+    )
 
-    parser.add_argument('--skip-missing', '-s',
-        action="store_false", default=True, dest="missing",
+    parser.add_argument(
+        "--skip-missing",
+        "-s",
+        action="store_false",
+        default=True,
+        dest="missing",
         help="""Do not try to find missing files. If some files were not found in regular
         commit logs, by default it re-tries using merge commit logs for these files (if
         --merge was not already used). This option disables this behavior, which may slightly
-        improve performance, but files found only in merge commits will not be updated.""")
+        improve performance, but files found only in merge commits will not be updated.""",
+    )
 
-    parser.add_argument('--no-directories', '-D',
-        action="store_false", default=True, dest='dirs',
+    parser.add_argument(
+        "--no-directories",
+        "-D",
+        action="store_false",
+        default=True,
+        dest="dirs",
         help="""Do not update directory mtime for files created, renamed or deleted in it.
-        Note: just modifying a file will not update its directory mtime.""")
+        Note: just modifying a file will not update its directory mtime.""",
+    )
 
-    parser.add_argument('--test', '-t', action="store_true", default=False,
-        help="Test run: do not actually update any file")
+    parser.add_argument(
+        "--test",
+        "-t",
+        action="store_true",
+        default=False,
+        help="Test run: do not actually update any file",
+    )
 
-    parser.add_argument('--commit-time', '-c',
-        action='store_true', default=False, dest='commit_time',
-        help="Use commit time instead of author time")
+    parser.add_argument(
+        "--commit-time",
+        "-c",
+        action="store_true",
+        default=False,
+        dest="commit_time",
+        help="Use commit time instead of author time",
+    )
 
-    parser.add_argument('pathspec', nargs='*', metavar='PATH',
+    parser.add_argument(
+        "pathspec",
+        nargs="*",
+        metavar="PATH",
         help="""Only modify paths matching PATH, directories or files, relative to current
         directory. Default is to modify all files handled by git, ignoring untracked files
-        and submodules.""")
+        and submodules.""",
+    )
 
-    parser.add_argument('--work-tree', dest='workdir',
-        help="Path to the work tree, if not current directory or one of its parents.")
+    parser.add_argument(
+        "--work-tree",
+        dest="workdir",
+        help="Path to the work tree, if not current directory or one of its parents.",
+    )
 
-    parser.add_argument('--git-dir', dest='gitdir',
-        help="Path to the git repository, if not the default <work-tree-root>/.git")
+    parser.add_argument(
+        "--git-dir",
+        dest="gitdir",
+        help="Path to the git repository, if not the default <work-tree-root>/.git",
+    )
 
-    parser.add_argument('--skip-older-than', metavar='SECONDS', type=int,
+    parser.add_argument(
+        "--skip-older-than",
+        metavar="SECONDS",
+        type=int,
         help="""Do not modify files that are older than %(metavar)s.
         It can significantly improve performance if fewer files are processed.
         Useful on CI builds, which can eventually switch workspace to different branch,
         but mostly performs builds on the same one (e.g. master).
-        """)
+        """,
+    )
 
     return parser.parse_args()
 
 
 # Helper functions ############################################################
 
+
 def setup_logging(args):
     TRACE = logging.DEBUG // 2
     logging.Logger.trace = lambda _, m, *a, **k: _.log(TRACE, m, *a, **k)
-    level = (args.verbose and max(TRACE, logging.DEBUG // args.verbose)) or args.loglevel
-    logging.basicConfig(level=level, format='%(message)s')
+    level = (
+        args.verbose and max(TRACE, logging.DEBUG // args.verbose)
+    ) or args.loglevel
+    logging.basicConfig(level=level, format="%(message)s")
     return logging.getLogger()
 
 
@@ -176,62 +236,79 @@ def normalize(path):
     if path and path[0] == '"':
         # Python 2: path = path[1:-1].decode("string-escape")
         # Python 3: https://stackoverflow.com/a/46650050/624066
-        path = (path[1:-1]                 # Remove enclosing double quotes
-                .encode('latin1')          # Convert to bytes, required 'unicode-escape'
-                .decode('unicode-escape')  # Perform the actual octal-escaping decode
-                .encode('latin1')          # 1:1 mapping to bytes, forming UTF-8 encoding
-                .decode('utf8'))           # Decode from UTF-8
+        path = (
+            path[1:-1]  # Remove enclosing double quotes
+            .encode("latin1")  # Convert to bytes, required 'unicode-escape'
+            .decode("unicode-escape")  # Perform the actual octal-escaping decode
+            .encode("latin1")  # 1:1 mapping to bytes, forming UTF-8 encoding
+            .decode("utf8")
+        )  # Decode from UTF-8
     # Make sure the slash matches the OS; for Windows we need a backslash
     return os.path.normpath(path)
 
 
 if UPDATE_SYMLINKS:
+
     def touch(path, mtime, test=False):
         """The actual mtime update"""
-        if test: return
+        if test:
+            return
         os.utime(path, (mtime, mtime), follow_symlinks=False)
+
+
 else:
+
     def touch(path, mtime, test=False):
         """The actual mtime update"""
-        if test: return
+        if test:
+            return
         os.utime(path, (mtime, mtime))
 
 
 def isodate(secs):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(secs))
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(secs))
 
 
 # Git class and parselog(), the heart of the script ###########################
 
-class Git():
+
+class Git:
     def __init__(self, workdir=None, gitdir=None):
-        self.gitcmd = ['git']
-        if workdir: self.gitcmd.extend(('--work-tree', workdir))
-        if gitdir : self.gitcmd.extend(('--git-dir',   gitdir))
+        self.gitcmd = ["git"]
+        if workdir:
+            self.gitcmd.extend(("--work-tree", workdir))
+        if gitdir:
+            self.gitcmd.extend(("--git-dir", gitdir))
         self.workdir, self.gitdir = self._repodirs()
 
     def ls_files(self, pathlist=None):
-        return (normalize(_) for _ in self._run('ls-files --full-name', pathlist))
+        return (normalize(_) for _ in self._run("ls-files --full-name", pathlist))
 
     def is_dirty(self):
-        return bool(self._run('diff --no-ext-diff --quiet', output=False))
+        return bool(self._run("diff --no-ext-diff --quiet", output=False))
 
     def log(self, merge=False, first_parent=False, commit_time=False, pathlist=None):
-        cmd = 'whatchanged --pretty={}'.format('%ct' if commit_time else '%at')
-        if merge:        cmd += ' -m'
-        if first_parent: cmd += ' --first-parent'
+        cmd = "whatchanged --pretty={}".format("%ct" if commit_time else "%at")
+        if merge:
+            cmd += " -m"
+        if first_parent:
+            cmd += " --first-parent"
         return self._run(cmd, pathlist)
 
     def _repodirs(self):
-        return (os.path.normpath(_) for _ in
-                self._run('rev-parse --show-toplevel --absolute-git-dir', check=True))
+        return (
+            os.path.normpath(_)
+            for _ in self._run(
+                "rev-parse --show-toplevel --absolute-git-dir", check=True
+            )
+        )
 
     def _run(self, cmdstr, pathlist=None, output=True, check=False):
         cmdlist = self.gitcmd + shlex.split(cmdstr)
         if pathlist:
-            cmdlist.append('--')
+            cmdlist.append("--")
             cmdlist.extend(pathlist)
-        log.trace("Executing: %s", ' '.join(cmdlist))
+        log.trace("Executing: %s", " ".join(cmdlist))
         if not output:
             return subprocess.call(cmdlist)
         if check:
@@ -240,24 +317,28 @@ class Git():
                 return stdout.splitlines()
             except subprocess.CalledProcessError as e:
                 raise self.Error(e.returncode, e.cmd, e.output, e.stderr)
-        self.proc = subprocess.Popen(cmdlist, stdout=subprocess.PIPE, universal_newlines=True)
+        self.proc = subprocess.Popen(
+            cmdlist, stdout=subprocess.PIPE, universal_newlines=True
+        )
         return (_.strip() for _ in self.proc.stdout)
 
-    class Error(subprocess.CalledProcessError): pass
+    class Error(subprocess.CalledProcessError):
+        pass
 
 
 def parselog(filelist, dirlist, stats, git, merge=False, filterlist=None):
     mtime = 0
     for line in git.log(merge, args.first_parent, args.commit_time, filterlist):
-        stats['loglines'] += 1
+        stats["loglines"] += 1
 
         # Blank line between Date and list of files
-        if not line: continue
+        if not line:
+            continue
 
         # File line
-        if line[0] == ':':  # Faster than line.startswith(':')
+        if line[0] == ":":  # Faster than line.startswith(':')
             # If line describes a rename, linetok has three tokens, otherwise two
-            linetok = line.split('\t')
+            linetok = line.split("\t")
             status = linetok[0]
             file = linetok[-1]
 
@@ -265,48 +346,61 @@ def parselog(filelist, dirlist, stats, git, merge=False, filterlist=None):
             file = normalize(file)
 
             if file in filelist:
-                stats['files'] -= 1
-                log.debug("%d\t%d\t%d\t%s\t%s",
-                             stats['loglines'], stats['commits'], stats['files'],
-                             isodate(mtime), file)
+                stats["files"] -= 1
+                log.debug(
+                    "%d\t%d\t%d\t%s\t%s",
+                    stats["loglines"],
+                    stats["commits"],
+                    stats["files"],
+                    isodate(mtime),
+                    file,
+                )
                 filelist.remove(file)
                 try:
                     touch(os.path.join(git.workdir, file), mtime, args.test)
-                    stats['touches'] += 1
+                    stats["touches"] += 1
                 except Exception as e:
                     log.error("ERROR: %s", e)
-                    stats['errors'] += 1
+                    stats["errors"] += 1
 
             if args.dirs:
                 dirname = os.path.dirname(file)
-                if status[-1] in ('A', 'D') and dirname in dirlist:
-                    log.debug("%d\t%d\t-\t%s\t%s",
-                                 stats['loglines'], stats['commits'],
-                                 isodate(mtime), "{}/".format(dirname or '.'))
+                if status[-1] in ("A", "D") and dirname in dirlist:
+                    log.debug(
+                        "%d\t%d\t-\t%s\t%s",
+                        stats["loglines"],
+                        stats["commits"],
+                        isodate(mtime),
+                        "{}/".format(dirname or "."),
+                    )
                     dirlist.remove(dirname)
                     try:
                         touch(os.path.join(git.workdir, dirname), mtime, args.test)
-                        stats['dirtouches'] += 1
+                        stats["dirtouches"] += 1
                     except Exception as e:
                         log.error("ERROR: %s", e)
-                        stats['direrrors'] += 1
+                        stats["direrrors"] += 1
 
         # Date line
         else:
-            stats['commits'] += 1
+            stats["commits"] += 1
             mtime = int(line)
 
         # All files done?
-        if not stats['files']:
+        if not stats["files"]:
             git.proc.terminate()  # hackish, but does the job. Not needed anyway
             return
 
 
 # Main Logic ##################################################################
 
+
 def main():
     start = time.time()  # yes, Wall time. CPU time is not realistic for users.
-    stats = {_: 0 for _ in ('loglines', 'commits', 'touches', 'errors', 'dirtouches', 'direrrors')}
+    stats = {
+        _: 0
+        for _ in ("loglines", "commits", "touches", "errors", "dirtouches", "direrrors")
+    }
 
     # First things first: Where and Who are we?
     try:
@@ -318,37 +412,43 @@ def main():
     # Do not work on dirty repositories, unless --force
     if not args.force and git.is_dirty():
         log.critical(
-         "ERROR: There are local changes in the working directory.\n"
-         "This could lead to undesirable results for modified files.\n"
-         "Please, commit your changes (or use --force) and try again.\n"
-         "Aborting")
+            "ERROR: There are local changes in the working directory.\n"
+            "This could lead to undesirable results for modified files.\n"
+            "Please, commit your changes (or use --force) and try again.\n"
+            "Aborting"
+        )
         return 1
 
     # Get the files managed by git and build file and dir list to be processed
     filelist = set()
-    dirlist  = set()
+    dirlist = set()
     if UPDATE_SYMLINKS and not args.skip_older_than:
         filelist = set(git.ls_files(args.pathspec))
-        dirlist  = set(os.path.dirname(_) for _ in filelist)
+        dirlist = set(os.path.dirname(_) for _ in filelist)
     else:
         for path in git.ls_files(args.pathspec):
             fullpath = os.path.join(git.workdir, path)
 
             # Symlink (to file, to dir or broken - git handles the same way)
             if not UPDATE_SYMLINKS and os.path.islink(fullpath):
-                log.warning("WARNING: Skipping symlink, OS does not support update: %s", path)
+                log.warning(
+                    "WARNING: Skipping symlink, OS does not support update: %s", path
+                )
                 continue
 
             # skip files which are older than given threshold
-            if args.skip_older_than and start - os.path.getmtime(fullpath) > args.skip_older_than:
+            if (
+                args.skip_older_than
+                and start - os.path.getmtime(fullpath) > args.skip_older_than
+            ):
                 continue
 
             # Always add them relative to worktree root
             filelist.add(path)
             dirlist.add(os.path.dirname(path))
 
-    stats['totalfiles'] = stats['files'] = len(filelist)
-    log.info("{0:,} files to be processed in work dir".format(stats['totalfiles']))
+    stats["totalfiles"] = stats["files"] = len(filelist)
+    log.info("{0:,} files to be processed in work dir".format(stats["totalfiles"]))
 
     if not filelist:
         # Nothing to do. Exit silently and without errors, just like git does
@@ -365,8 +465,14 @@ def main():
         if args.missing and not args.merge:
             filterlist = list(filelist)
             for i in range(0, len(filterlist), STEPMISSING):
-                parselog(filelist, dirlist, stats, git,
-                         merge=True, filterlist=filterlist[i:i+STEPMISSING])
+                parselog(
+                    filelist,
+                    dirlist,
+                    stats,
+                    git,
+                    merge=True,
+                    filterlist=filterlist[i : i + STEPMISSING],
+                )
 
         # Still missing some?
         for file in filelist:
@@ -379,17 +485,22 @@ def main():
         "{:13,.2f} seconds\n"
         "{:13,} log lines processed\n"
         "{:13,} commits evaluated"
-        "".format(time.time()-start, stats['loglines'], stats['commits']))
+        "".format(time.time() - start, stats["loglines"], stats["commits"])
+    )
 
     if args.dirs:
-        if stats['direrrors']: log.info("{:13,} directory update errors".format(stats['direrrors']))
-        log.info("{:13,} directories updated".format(stats['dirtouches']))
+        if stats["direrrors"]:
+            log.info("{:13,} directory update errors".format(stats["direrrors"]))
+        log.info("{:13,} directories updated".format(stats["dirtouches"]))
 
-    if stats['touches'] != stats['totalfiles']: log.info("{:13,} files".format(stats['totalfiles']))
-    if stats['files']:                          log.info("{:13,} files missing".format(stats['files']))
-    if stats['errors']:                         log.info("{:13,} file update errors".format(stats['errors']))
+    if stats["touches"] != stats["totalfiles"]:
+        log.info("{:13,} files".format(stats["totalfiles"]))
+    if stats["files"]:
+        log.info("{:13,} files missing".format(stats["files"]))
+    if stats["errors"]:
+        log.info("{:13,} file update errors".format(stats["errors"]))
 
-    log.info("{:13,} files updated".format(stats['touches']))
+    log.info("{:13,} files updated".format(stats["touches"]))
 
     if args.test:
         log.info("TEST RUN - No files modified!")

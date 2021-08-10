@@ -10,15 +10,15 @@ from tct import deepget
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -26,13 +26,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = deepget(D, *keys, **kwdargs)
@@ -52,34 +53,27 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    ready_for_build = lookup(milestones, 'ready_for_build')
-    rebuild_needed = lookup(milestones, 'rebuild_needed')
+    ready_for_build = lookup(milestones, "ready_for_build")
+    rebuild_needed = lookup(milestones, "rebuild_needed")
 
-    if not(1
-            and ready_for_build
-            and rebuild_needed
-    ):
+    if not (1 and ready_for_build and rebuild_needed):
         exitcode = 22
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
-    disable_include_files_check = lookup(milestones,
-                                         'disable_include_files_check')
-    included_files_check_is_ok = lookup(milestones,
-                                        'included_files_check_is_ok')
-    allow_unsafe = lookup(milestones, 'allow_unsafe')
-    if not any([disable_include_files_check,
-               included_files_check_is_ok,
-               allow_unsafe]):
+    disable_include_files_check = lookup(milestones, "disable_include_files_check")
+    included_files_check_is_ok = lookup(milestones, "included_files_check_is_ok")
+    allow_unsafe = lookup(milestones, "allow_unsafe")
+    if not any([disable_include_files_check, included_files_check_is_ok, allow_unsafe]):
         exitcode = 22
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('Bad PARAMS')
+    loglist.append("Bad PARAMS")
 
 
 # ==================================================
@@ -99,7 +93,9 @@ pass
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

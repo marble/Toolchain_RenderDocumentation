@@ -12,15 +12,15 @@ from os.path import exists as ospe
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -28,13 +28,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
@@ -55,25 +56,27 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    build_html_folder = lookup(milestones, 'build_html_folder', default=None)
-    build_singlehtml_folder = lookup(milestones, 'build_singlehtml_folder',
-                                     default=None)
-    replace_static_in_html_done = lookup(milestones,
-                                         'replace_static_in_html_done',
-                                         default=None)
-    theme_module_path = lookup(milestones, 'theme_module_path')
-    if not (1
-            and (build_html_folder or build_singlehtml_folder)
-            and replace_static_in_html_done
-            and theme_module_path
-            ):
+    build_html_folder = lookup(milestones, "build_html_folder", default=None)
+    build_singlehtml_folder = lookup(
+        milestones, "build_singlehtml_folder", default=None
+    )
+    replace_static_in_html_done = lookup(
+        milestones, "replace_static_in_html_done", default=None
+    )
+    theme_module_path = lookup(milestones, "theme_module_path")
+    if not (
+        1
+        and (build_html_folder or build_singlehtml_folder)
+        and replace_static_in_html_done
+        and theme_module_path
+    ):
         CONTINUE = -2
-        reason = 'Bad PARAMS or nothing to do'
+        reason = "Bad PARAMS or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
     loglist.append(reason)
 
@@ -84,25 +87,25 @@ else:
 
 if exitcode == CONTINUE:
 
-    statics_to_keep = milestones.get('statics_to_keep', [])
+    statics_to_keep = milestones.get("statics_to_keep", [])
     for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
             continue
-        startfolder = '_static'
+        startfolder = "_static"
         fixed_part_length = len(build_folder)
         fpath = os.path.join(build_folder, startfolder)
         if os.path.exists(fpath):
             for top, dirs, files in os.walk(fpath, topdown=False):
                 for file in files:
-                    topfile = top + '/' + file
-                    relfile = topfile[fixed_part_length+1:]
-                    themefile = theme_module_path + '/' + relfile[1:]
+                    topfile = top + "/" + file
+                    relfile = topfile[fixed_part_length + 1 :]
+                    themefile = theme_module_path + "/" + relfile[1:]
                     if not (relfile in statics_to_keep) and ospe(themefile):
                         os.remove(topfile)
                 if not os.listdir(top):
                     os.rmdir(top)
 
-            loglist.append('%s, %s' % ('remove', fpath))
+            loglist.append("%s, %s" % ("remove", fpath))
             remove_static_folder_from_html_done = 1
 
 
@@ -111,16 +114,18 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if remove_static_folder_from_html_done:
-    result['MILESTONES'].append({
-        'remove_static_folder_from_html_done':
-        remove_static_folder_from_html_done})
+    result["MILESTONES"].append(
+        {"remove_static_folder_from_html_done": remove_static_folder_from_html_done}
+    )
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 
 # ==================================================

@@ -9,19 +9,19 @@ import shutil
 import sys
 import tct
 
-VERSION = '2.11.1'
+VERSION = "2.11.1"
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
-facts = tct.readjson(params['factsfile'])
-milestones = tct.readjson(params['milestonesfile'])
-reason = ''
-resultfile = params['resultfile']
+facts = tct.readjson(params["factsfile"])
+milestones = tct.readjson(params["milestonesfile"])
+reason = ""
+resultfile = params["resultfile"]
 result = tct.readjson(resultfile)
-loglist = result['loglist'] = result.get('loglist', [])
-toolname = params['toolname']
-toolname_pure = params['toolname_pure']
-workdir = params['workdir']
+loglist = result["loglist"] = result.get("loglist", [])
+toolname = params["toolname"]
+toolname_pure = params["toolname_pure"]
+workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
 
@@ -29,13 +29,14 @@ exitcode = CONTINUE = 0
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get('debug_always_make_milestones_snapshot'):
-    tct.make_snapshot_of_milestones(params['milestonesfile'], sys.argv[1])
+if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+    tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
 # ==================================================
 # Helper functions
 # --------------------------------------------------
+
 
 def lookup(D, *keys, **kwdargs):
     result = tct.deepget(D, *keys, **kwdargs)
@@ -49,7 +50,7 @@ def lookup(D, *keys, **kwdargs):
 
 lockfiles_removed = []
 removed_dirs = []
-toolchain_actions = lookup(params, 'toolchain_actions', default=[])
+toolchain_actions = lookup(params, "toolchain_actions", default=[])
 xeq_name_cnt = 0
 
 
@@ -58,19 +59,19 @@ xeq_name_cnt = 0
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-    loglist.append('CHECK PARAMS')
+    loglist.append("CHECK PARAMS")
 
-    lockfile_name = lookup(milestones, 'lockfile_name')
-    run_id = lookup(facts, 'run_id')
-    toolchain_temp_home = lookup(params, 'toolchain_temp_home')
+    lockfile_name = lookup(milestones, "lockfile_name")
+    run_id = lookup(facts, "run_id")
+    toolchain_temp_home = lookup(params, "toolchain_temp_home")
     if not (lockfile_name and run_id and toolchain_temp_home):
         exitcode = 22
-        reason = 'Bad params or nothing to do'
+        reason = "Bad params or nothing to do"
 
 if exitcode == CONTINUE:
-    loglist.append('PARAMS are ok')
+    loglist.append("PARAMS are ok")
 else:
-    loglist.append('PROBLEM with required params')
+    loglist.append("PROBLEM with required params")
 
 
 # =========================================================
@@ -86,31 +87,32 @@ if exitcode == CONTINUE:
     def cmdline(cmd, cwd=None):
         if cwd is None:
             cwd = os.getcwd()
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd)
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
+        )
         out, err = process.communicate()
         exitcode = process.returncode
         return exitcode, cmd, out, err
 
-
     def execute_cmdlist(cmdlist):
         global xeq_name_cnt
-        cmd = ' '.join(cmdlist)
-        cmd_multiline = ' \\\n   '.join(cmdlist) + '\n'
+        cmd = " ".join(cmdlist)
+        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
         exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-        loglist.append({'exitcode': exitcode, 'cmd': cmd, 'out': out, 'err': err})
+        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
         xeq_name_cnt += 1
-        filename_cmd = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'cmd')
-        filename_err = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'err')
-        filename_out = 'xeq-%s-%d-%s.txt' % (toolname_pure, xeq_name_cnt, 'out')
+        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
+        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
+        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
-        with codecs.open(os.path.join(workdir, filename_cmd), 'w', 'utf-8') as f2:
-            f2.write(cmd_multiline.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
+            f2.write(cmd_multiline.decode("utf-8", "replace"))
 
-        with codecs.open(os.path.join(workdir, filename_out), 'w', 'utf-8') as f2:
-            f2.write(out.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
+            f2.write(out.decode("utf-8", "replace"))
 
-        with codecs.open(os.path.join(workdir, filename_err), 'w', 'utf-8') as f2:
-            f2.write(err.decode('utf-8', 'replace'))
+        with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
+            f2.write(err.decode("utf-8", "replace"))
 
         return exitcode, cmd, out, err
 
@@ -122,15 +124,15 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    if 'version' in toolchain_actions:
+    if "version" in toolchain_actions:
         print(VERSION)
         exitcode = 90
-        reason = 'Just show version and stop.'
+        reason = "Just show version and stop."
 
 if exitcode == CONTINUE:
-    if 'unlock' in toolchain_actions:
+    if "unlock" in toolchain_actions:
         for top, dirs, files in os.walk(toolchain_temp_home):
-            dirs[:] = [] # stop recursion
+            dirs[:] = []  # stop recursion
             for fname in files:
                 if fname == lockfile_name:
                     lockfile = os.path.join(top, fname)
@@ -140,7 +142,7 @@ if exitcode == CONTINUE:
         reason = "Just unlock and stop."
 
 if exitcode == CONTINUE:
-    if 'clean' in toolchain_actions:
+    if "clean" in toolchain_actions:
         for top, dirs, files in os.walk(toolchain_temp_home):
             dirs.sort()
             for adir in dirs:
@@ -148,7 +150,7 @@ if exitcode == CONTINUE:
                 if not run_id in adir:
                     if os.path.isdir(fpath):
                         shutil.rmtree(fpath)
-            dirs[:] = [] # stop recursion
+            dirs[:] = []  # stop recursion
         exitcode = 90
         reason = "Just clean and stop."
 
@@ -158,18 +160,19 @@ if exitcode == CONTINUE:
 # --------------------------------------------------
 
 if exitcode == 90:
-    result['MILESTONES'].append({'FINAL_EXITCODE': 0})
+    result["MILESTONES"].append({"FINAL_EXITCODE": 0})
 
 if lockfiles_removed:
-    result['MILESTONES'].append({'lockfiles_removed': lockfiles_removed})
-
+    result["MILESTONES"].append({"lockfiles_removed": lockfiles_removed})
 
 
 # ==================================================
 # save result
 # --------------------------------------------------
 
-tct.save_the_result(result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason)
+tct.save_the_result(
+    result, resultfile, params, facts, milestones, exitcode, CONTINUE, reason
+)
 
 # ==================================================
 # Return with proper exitcode
