@@ -64,6 +64,8 @@ on trees with uncommitted changes.
 #   painfully slow. First pass without merge commits is not accurate. Maybe add a new
 #   `--accurate` mode for `--cc`?
 
+from __future__ import absolute_import
+
 if __name__ != "__main__":
     raise ImportError("{} should not be used as a module.".format(__name__))
 

@@ -10,7 +10,7 @@ facts = tct.readjson(params["factsfile"])
 milestones = tct.readjson(params["milestonesfile"])
 
 sys.path.insert(1, params["toolchain_folder"] + "/toolchain-packages")
-import tclib
+import tctlib
 
 reason = ""
 resultfile = params["resultfile"]
@@ -20,7 +20,6 @@ toolname_pure = params["toolname_pure"]
 toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 loglist = result["loglist"] = result.get("loglist", [])
-lookup = tclib.lookup_function(loglist)
 exitcode = CONTINUE = 0
 
 
@@ -45,8 +44,6 @@ show_toolchain_usage_and_exit = None
 
 if exitcode == CONTINUE:
     loglist.append("CHECK PARAMS")
-
-    abc = lookup(milestones, "a", "b", "c")
 
 if exitcode == CONTINUE:
     loglist.append("PARAMS are ok")

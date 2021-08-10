@@ -10,6 +10,8 @@ import sys
 import codecs
 import subprocess
 
+from tctlib import PY3
+
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
 milestones = tct.readjson(params["milestonesfile"])
@@ -108,7 +110,8 @@ if exitcode == CONTINUE:
         filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
         with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
+            utf8str = cmd_multiline if PY3 else cmd_multiline.decode("utf-8", "replace")
+            f2.write(utf8str)
 
         exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
 

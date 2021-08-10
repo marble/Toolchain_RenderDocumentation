@@ -8,7 +8,7 @@ import os
 import tct
 import sys
 
-from tct import deepget, logstamp_finegrained
+from tct import deepget, logstamp_finegrained, PY3
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])

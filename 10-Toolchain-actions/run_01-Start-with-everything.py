@@ -173,6 +173,8 @@ get_documentation_defaults = findRunParameter(
     ATNM,
 )
 
+# do not keep milestones that do not exist
+ATNM = {k: v for k, v in ATNM.items() if v is not None}
 
 # ==================================================
 # Check params
