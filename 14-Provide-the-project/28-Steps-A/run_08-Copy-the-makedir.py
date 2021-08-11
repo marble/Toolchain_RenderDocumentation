@@ -11,7 +11,7 @@ import sys
 import tct
 
 from os.path import exists as ospe, join as ospj
-from tct import deepget
+from tct import deepget, cmdline
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -25,6 +25,12 @@ toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
 
 
 # ==================================================
@@ -53,7 +59,6 @@ def lookup(D, *keys, **kwdargs):
 remove_docutils_conf_done = None
 TheProjectMakedir = None
 TheProjectMakedirThemes = None
-xeq_name_cnt = 0
 buildsettings_jsonfile_in_makedir = None
 
 
@@ -86,16 +91,6 @@ allow_unsafe = lookup(milestones, "allow_unsafe")
 remove_docutils_conf = lookup(milestones, "remove_docutils_conf")
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        bstdout, bstderr = process.communicate()
-        exitcode2 = process.returncode
-        return exitcode2, cmd, bstdout, bstderr
 
     def execute_cmdlist(cmdlist, cwd=None):
         global xeq_name_cnt

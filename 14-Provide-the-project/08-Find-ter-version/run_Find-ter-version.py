@@ -8,7 +8,7 @@ import os
 import subprocess
 import sys
 import tct
-
+from tctlib import execute_cmdlist
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -23,6 +23,12 @@ toolname_pure = params["toolname_pure"]
 toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 exitcode = CONTINUE = 0
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
 
 
 # ==================================================
@@ -50,7 +56,6 @@ def lookup(D, *keys, **kwdargs):
 
 buildsettings_changed = False
 ter_extversion_highest = None
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -87,44 +92,9 @@ else:
 
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
-
-    def execute_cmdlist(cmdlist):
-        global xeq_name_cnt
-        cmd = " ".join(cmdlist)
-        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-        xeq_name_cnt += 1
-        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-        with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-
-        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-        with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-            f2.write(out.decode("utf-8", "replace"))
-
-        with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-            f2.write(err.decode("utf-8", "replace"))
-
-        return exitcode, cmd, out, err
-
-
-if exitcode == CONTINUE:
-    exitcode, cmd, out, err = execute_cmdlist(["t3xutils.phar", "info", ter_extkey])
+    exitcode, cmd, out, err = execute_cmdlist(
+        ["t3xutils.phar", "info", ter_extkey], ns=XeqParams
+    )
 
 if exitcode == CONTINUE:
     example = """

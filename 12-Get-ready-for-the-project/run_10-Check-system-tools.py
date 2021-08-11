@@ -10,7 +10,7 @@ import sys
 import codecs
 import subprocess
 
-from tctlib import PY3
+from tctlib import execute_cmdlist
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -24,6 +24,12 @@ toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
 
 
 # ==================================================
@@ -81,55 +87,15 @@ list_for_which = [
 known_systemtools = {}
 known_versions = {}
 pip_freeze = None
-xeq_name_cnt = 0
 
 # ==================================================
 # prepare for shell calls
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
-
-    def execute_cmdlist(cmdlist, cwd=None):
-        global xeq_name_cnt
-        cmd = " ".join(cmdlist)
-        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-
-        xeq_name_cnt += 1
-        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-        with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-            utf8str = cmd_multiline if PY3 else cmd_multiline.decode("utf-8", "replace")
-            f2.write(utf8str)
-
-        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
-
-        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-        with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-            f2.write(out.decode("utf-8", "replace"))
-
-        with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-            f2.write(err.decode("utf-8", "replace"))
-
-        return exitcode, cmd, out, err
-
-
-if exitcode == CONTINUE:
     for k in list_for_which:
         cmdlist = ["which", k]
-        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
         if xcode == 0:
             known_systemtools[k] = out.strip()
         else:
@@ -138,7 +104,7 @@ if exitcode == CONTINUE:
 if exitcode == CONTINUE:
     if "pip" in known_systemtools:
         cmdlist = ["which freeze"]
-        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+        xcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
         if xcode == 0:
             pip_freeze = v.split("\n")
 

@@ -58,7 +58,6 @@ def params_get(name, default=None):
 
 lockfile_remove_logstamp = ""
 lockfile_removed = ""
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

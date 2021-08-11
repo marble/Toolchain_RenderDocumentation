@@ -56,7 +56,6 @@ publish_latest_file_target_old = None
 publish_stable_file = None
 publish_stable_file_created = False
 ter_extension = None
-xeq_name_cnt = 0
 
 
 # ==================================================

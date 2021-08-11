@@ -47,7 +47,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 postprocess_cleanup_files = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

@@ -43,7 +43,6 @@ if 0 or milestones.get("debug_always_make_milestones_snapshot"):
 jobfile_data = {}
 jobfile_json = None
 jobfile_json_abspath = None
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -142,6 +141,7 @@ disable_include_files_check = findRunParameter(
     "disable_include_files_check", 0, ATNM, int
 )
 force_rebuild_needed = findRunParameter("force_rebuild_needed", 1, ATNM, int)
+ignore_lockfile = findRunParameter("ignore_lockfile", 0, ATNM, int)
 latex_contrib_typo3_folder = findRunParameter("latex_contrib_typo3_folder", None, ATNM)
 lockfile_name = findRunParameter("lockfile_name", "lockfile.json", ATNM)
 make_html = findRunParameter("make_html", 1, ATNM, int)

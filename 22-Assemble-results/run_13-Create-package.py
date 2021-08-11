@@ -28,6 +28,14 @@ toolname_pure = params["toolname_pure"]
 workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
+from tctlib import execute_cmdlist
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
+
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -56,7 +64,6 @@ build_package = None
 package_file = None
 package_name = None
 TheProjectResultCopyForPackage = None
-xeq_name_cnt = 0
 
 talk = milestones.get("talk", 0)
 
@@ -86,47 +93,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        bstdout, bstderr = process.communicate()
-        exitcode2 = process.returncode
-        return exitcode2, cmd, bstdout, bstderr
-
-    def execute_cmdlist(cmdlist, cwd=None):
-        global xeq_name_cnt
-        exitcode, cmd, out, err = None, None, None, None
-        cmd = " ".join(cmdlist)
-        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-
-        xeq_name_cnt += 1
-        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-        with codecs.open(ospj(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-        exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
-
-        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-        if out:
-            with codecs.open(ospj(workdir, filename_out), "w", "utf-8") as f2:
-                f2.write(out.decode("utf-8", "replace"))
-
-        if err:
-            with codecs.open(ospj(workdir, filename_err), "w", "utf-8") as f2:
-                f2.write(err.decode("utf-8", "replace"))
-
-        return exitcode, cmd, out, err
-
-
-if exitcode == CONTINUE:
     package_folder = "html_result"
     TheProjectResultCopyForPackage = TheProjectResult + "CopyForPackage"
     the_copy = ospj(TheProjectResultCopyForPackage, package_folder)
@@ -139,7 +105,7 @@ if exitcode == CONTINUE:
         TheProjectResultVersion.rstrip("/") + "/",
         the_copy.rstrip("/") + "/",
     ]
-    exitcode, cmd, out, err = execute_cmdlist(cmd)
+    exitcode, cmd, out, err = execute_cmdlist(cmd, ns=XeqParams)
     if exitcode:
         the_copy = None
         exitcode = 22
@@ -213,7 +179,9 @@ if exitcode == CONTINUE:
         package_name = "package.zip"
     package_file = ospj(workdir, package_name)
     cmd = ["zip", "-r", "-9", "-q", package_file, package_folder]
-    exitcode, cmd, out, err = execute_cmdlist(cmd, cwd=TheProjectResultCopyForPackage)
+    exitcode, cmd, out, err = execute_cmdlist(
+        cmd, cwd=TheProjectResultCopyForPackage, ns=XeqParams
+    )
     if exitcode:
         package_name = None
         package_file = None

@@ -10,6 +10,8 @@ import subprocess
 import sys
 import tct
 
+from tctlib import cmdline
+
 ospj = os.path.join
 ospe = os.path.exists
 
@@ -53,7 +55,6 @@ build_package = None
 package_file = None
 package_name = "manual.zip"
 pdf_name = "manual.pdf"
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -108,16 +109,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
 
     language_segment = package_language.lower()
 

@@ -47,7 +47,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 masterdoc_manual_html_gifs_fixed = None
-xeq_name_cnt = 0
 
 
 # ==================================================

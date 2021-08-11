@@ -55,7 +55,6 @@ textfile = None
 htmlfile = None
 cmdline_reportlines = milestones.get("cmdline_reportlines", [])
 talk = milestones.get("talk", 1)
-xeq_name_cnt = 0
 
 
 # ==================================================

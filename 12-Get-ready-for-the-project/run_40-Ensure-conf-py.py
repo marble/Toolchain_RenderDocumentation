@@ -58,7 +58,6 @@ def params_get(name, default=None):
 conf_py_file = ""
 conf_py_masterfile = milestones_get("conf_py_masterfile")
 conf_py_symlink_created = 0
-xeq_name_cnt = 0
 
 
 # ==================================================

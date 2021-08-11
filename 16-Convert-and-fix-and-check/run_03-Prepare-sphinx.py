@@ -6,6 +6,7 @@ from __future__ import absolute_import
 import os
 import tct
 import sys
+from tctlib import cmdline
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -86,17 +87,6 @@ import subprocess
 if exitcode == CONTINUE:
     has_settingscfg = lookup(milestones, "has_settingscfg")
     rebuild_needed = lookup(milestones, "rebuild_needed")
-
-
-def cmdline(cmd, cwd=None):
-    if cwd is None:
-        cwd = os.getcwd()
-    process = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-    )
-    out, err = process.communicate()
-    exitcode = process.returncode
-    return exitcode, cmd, out, err
 
 
 if exitcode == CONTINUE:

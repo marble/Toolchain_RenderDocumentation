@@ -58,7 +58,6 @@ def lookup(D, *keys, **kwdargs):
 
 final_exitcode = 0
 talk = lookup(milestones, default=0)
-xeq_name_cnt = 0
 
 publish_dir_buildinfo = None
 publish_dir_buildinfo_exitcodes = None

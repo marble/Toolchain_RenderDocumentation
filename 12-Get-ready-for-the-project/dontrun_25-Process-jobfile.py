@@ -78,7 +78,6 @@ buildsettings_changed = False
 initial_working_dir = None
 jobfile_abspath = None
 jobfile_data = None
-xeq_name_cnt = 0
 
 
 # ==================================================

@@ -61,7 +61,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 buildinfo_latex_folder = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

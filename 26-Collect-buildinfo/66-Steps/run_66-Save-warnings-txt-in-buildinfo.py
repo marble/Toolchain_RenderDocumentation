@@ -46,7 +46,6 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
 warnings_file = None
 warnings_file_size = None
 warnings_file_dumped_to_console = None

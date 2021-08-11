@@ -49,7 +49,6 @@ def lookup(D, *keys, **kwdargs):
 
 publish_params_json_file = None
 publish_params_data = {}
-xeq_name_cnt = 0
 
 # ==================================================
 # example - just for demonstration

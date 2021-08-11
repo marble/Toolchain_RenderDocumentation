@@ -50,7 +50,6 @@ def lookup(D, *keys, **kwdargs):
 
 created = {}
 TheProjectResultBuildinfoResultJsonfile = None
-xeq_name_cnt = 0
 
 
 # ==================================================

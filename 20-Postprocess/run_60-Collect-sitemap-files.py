@@ -57,7 +57,6 @@ sitemap_files_singlehtml = []
 sitemap_files_singlehtml_count = None
 sitemap_files_singlehtml_jsonfile = None
 sitemap_files_singlehtml_txtfile = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

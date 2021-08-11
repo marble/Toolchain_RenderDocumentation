@@ -54,7 +54,6 @@ included_files_check_logfile_dumped_to_stdout = None
 pendingFiles = {}
 visitedBadFiles = {}
 visitedFiles = {}
-xeq_name_cnt = 0
 
 
 # ==================================================

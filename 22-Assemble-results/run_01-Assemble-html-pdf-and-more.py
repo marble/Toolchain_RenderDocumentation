@@ -55,7 +55,6 @@ pdf_dest_folder = None
 TheProjectResult = None
 TheProjectResult = None
 TheProjectResultVersion = None
-xeq_name_cnt = 0
 
 
 # ==================================================

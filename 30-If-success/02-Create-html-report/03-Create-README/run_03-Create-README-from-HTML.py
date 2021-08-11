@@ -52,7 +52,6 @@ def lookup(D, *keys, **kwdargs):
 
 TheProjectLogHtmlmail = ""
 TheProjectLogREADMEfile = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

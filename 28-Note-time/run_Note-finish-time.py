@@ -65,7 +65,6 @@ time_finished_at_unixtime = time.time()
 time_finished_at = tct.logstamp_finegrained(
     unixtime=time_finished_at_unixtime, fmt="%Y-%m-%d %H:%M:%S %f"
 )
-xeq_name_cnt = 0
 
 
 # ==================================================

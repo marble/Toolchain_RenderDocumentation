@@ -49,7 +49,6 @@ def lookup(D, *keys, **kwdargs):
 
 configset = None
 
-xeq_name_cnt = 0
 
 if 0:
     # defining this buildsettings here allows PyCharm to autocomplete the

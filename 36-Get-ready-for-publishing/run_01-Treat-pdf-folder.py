@@ -59,7 +59,6 @@ def params_get(name, default=None):
 
 pdf_dest_folder_htaccess = ""
 pdf_url_relpath = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

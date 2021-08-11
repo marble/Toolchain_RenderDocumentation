@@ -56,7 +56,6 @@ def lookup(D, *keys, **kwdargs):
 theme_info = None
 theme_info_json_file = None
 theme_module_path = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

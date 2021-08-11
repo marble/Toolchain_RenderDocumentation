@@ -51,7 +51,6 @@ def lookup(D, *keys, **kwdargs):
 
 objects_inv_json_path = None
 objects_inv_path = None
-xeq_name_cnt = 0
 
 
 # ==================================================

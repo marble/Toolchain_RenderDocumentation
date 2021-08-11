@@ -55,7 +55,6 @@ buildsettings_file_fixed = None
 LOGDIR_line = None
 MASTERDOC_line = None
 T3DOCDIR_line = None
-xeq_name_cnt = 0
 
 
 # ==================================================

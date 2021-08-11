@@ -12,6 +12,7 @@ import shutil
 import sys
 import tct
 
+from tctlib import cmdline
 from os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
@@ -118,16 +119,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        bstdout, bstderr = process.communicate()
-        exitcode2 = process.returncode
-        return exitcode2, cmd, bstdout, bstderr
 
     def execute_cmdlist(cmdlist, cwd=None):
         global xeq_name_cnt

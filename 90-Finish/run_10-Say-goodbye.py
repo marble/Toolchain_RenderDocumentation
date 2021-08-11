@@ -8,7 +8,7 @@ import os
 import tct
 import sys
 
-from tct import deepget, logstamp_finegrained, PY3
+from tct import deepget, logstamp_finegrained
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -56,7 +56,6 @@ time_finished_at_2 = logstamp_finegrained(
 )
 
 age_message = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

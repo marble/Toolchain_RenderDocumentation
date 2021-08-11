@@ -52,7 +52,6 @@ giturl = ""
 repositories_rootfolder = ""
 ter_extkey = ""
 ter_extversion = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

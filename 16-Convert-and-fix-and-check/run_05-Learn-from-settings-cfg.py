@@ -62,7 +62,6 @@ email_user_do_not_send = milestones_get("email_user_do_not_send")
 email_user_notify_is_turned_off = 0
 email_user_notify_setting_exists = 0
 settings_cfg_data = {}
-xeq_name_cnt = 0
 
 
 # ==================================================

@@ -53,7 +53,6 @@ def lookup(D, *keys, **kwdargs):
 
 replace_static_in_html_done = None
 replace_static_in_html_happened = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

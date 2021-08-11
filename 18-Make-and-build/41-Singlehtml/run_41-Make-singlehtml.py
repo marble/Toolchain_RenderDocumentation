@@ -13,6 +13,7 @@ import tct
 from tct import deepget
 
 from os.path import join as ospj, exists as ospe
+from tctlib import cmdline
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -124,18 +125,6 @@ else:
 
 if exitcode == CONTINUE:
     html_doctrees_folder = lookup(milestones, "html_doctrees_folder")
-
-if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        bstdout, bstderr = process.communicate()
-        exitcode2 = process.returncode
-        return exitcode2, cmd, bstdout, bstderr
 
     def execute_cmdlist(cmdlist, cwd=None):
         global xeq_name_cnt

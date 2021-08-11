@@ -69,7 +69,6 @@ sitemap_files_singlehtml = None
 statics_path = None
 statics_path_replacement = None
 statics_to_keep = ["_static/language_data.js"]
-xeq_name_cnt = 0
 
 
 # ==================================================

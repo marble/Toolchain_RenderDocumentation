@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tct
 from six.moves import range
+from tctlib import cmdline
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -130,16 +131,6 @@ if exitcode == CONTINUE:
     logDestfileTxt = (
         TheProjectLogHtmlmail + "/" + TheProjectResultBuildinfoMessageFstem + ".txt"
     )
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
 
 
 if exitcode == CONTINUE:

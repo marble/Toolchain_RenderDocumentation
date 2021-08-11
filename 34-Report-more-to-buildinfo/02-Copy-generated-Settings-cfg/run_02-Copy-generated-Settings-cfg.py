@@ -55,7 +55,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 buildinfo_settingscfg_file = None
-xeq_name_cnt = 0
 
 
 # ==================================================

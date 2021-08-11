@@ -53,7 +53,6 @@ def lookup(D, *keys, **kwdargs):
 
 copied_latex_resources = []
 run_latex_make_sh_file = None
-xeq_name_cnt = 0
 
 
 # ==================================================

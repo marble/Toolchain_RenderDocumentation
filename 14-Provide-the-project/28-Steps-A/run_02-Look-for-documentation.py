@@ -62,7 +62,6 @@ masterdoc_candidates = [
 ]
 masterdoc_selected = {}
 masterdocs_initial = {}
-xeq_name_cnt = 0
 
 
 # ==================================================

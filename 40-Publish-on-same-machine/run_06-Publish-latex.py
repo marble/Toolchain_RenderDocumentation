@@ -25,6 +25,14 @@ toolname_pure = params["toolname_pure"]
 workdir = params["workdir"]
 exitcode = CONTINUE = 0
 
+from tctlib import execute_cmdlist
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
+
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -50,7 +58,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 publish_dir_latex = None
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -79,51 +86,6 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        bstdout, bstderr = process.communicate()
-        exitcode2 = process.returncode
-        return exitcode2, cmd, bstdout, bstderr
-
-    def execute_cmdlist(cmdlist, cwd=None):
-        global xeq_name_cnt
-        cmd = " ".join(cmdlist)
-        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-
-        xeq_name_cnt += 1
-        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-        with codecs.open(ospj(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-        if 0 and "activateLocalSphinxDebugging":
-            if cmdlist[0] == "sphinx-build":
-                from sphinx.cmd.build import main as sphinx_cmd_build_main
-
-                sphinx_cmd_build_main(cmdlist[1:])
-                exitcode, cmd, out, err = 99, cmd, b"", b""
-        else:
-            exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
-
-        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-        with codecs.open(ospj(workdir, filename_out), "w", "utf-8") as f2:
-            f2.write(out.decode("utf-8", "replace"))
-
-        with codecs.open(ospj(workdir, filename_err), "w", "utf-8") as f2:
-            f2.write(err.decode("utf-8", "replace"))
-
-        return exitcode, cmd, out, err
-
-
-if exitcode == CONTINUE:
     tmp_publish_dir_Result = ospj(resultdir, "Result")
     if not os.path.exists(tmp_publish_dir_Result):
         # strange - not expected
@@ -140,7 +102,7 @@ if exitcode == CONTINUE:
         '"%s"' % builder_latex_folder.rstrip("/"),
         '"%s/"' % tmp_publish_dir_Result.rstrip("/"),
     ]
-    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
 
 if exitcode == CONTINUE:
     publish_dir_latex = ospj(

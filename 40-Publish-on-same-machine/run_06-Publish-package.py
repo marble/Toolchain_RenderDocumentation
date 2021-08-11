@@ -50,7 +50,6 @@ def lookup(D, *keys, **kwdargs):
 
 publish_package = None
 publish_dir_package = None
-xeq_name_cnt = 0
 
 
 # ==================================================

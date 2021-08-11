@@ -56,7 +56,6 @@ def params_get(name, default=None):
 # define
 # --------------------------------------------------
 
-xeq_name_cnt = 0
 TheProjectResultBuildinfoPdfLogFile = None
 TheProjectResultBuildinfoPdfFilesCnt = 0
 

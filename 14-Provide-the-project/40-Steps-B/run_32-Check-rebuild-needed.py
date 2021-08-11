@@ -12,6 +12,8 @@ import subprocess
 import time
 import six
 
+from tctlib import cmdline, ustr
+
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
 milestones = tct.readjson(params["milestonesfile"])
@@ -24,6 +26,12 @@ toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
+
+
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
 
 
 # ==================================================
@@ -59,7 +67,6 @@ rebuild_needed_because_of_change = None
 rebuild_needed_run_command = None
 rebuild_needed_tctconfig = None
 talk = milestones.get("talk", 1)
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -96,17 +103,6 @@ rebuild_needed_run_command = tct.deepget(
 rebuild_needed_tctconfig = tct.deepget(
     facts, "tctconfig", configset, "rebuild_needed", default=None
 )
-
-
-def cmdline(cmd, cwd=None):
-    if cwd is None:
-        cwd = os.getcwd()
-    process = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-    )
-    out, err = process.communicate()
-    exitcode = process.returncode
-    return exitcode, cmd, out, err
 
 
 if exitcode == CONTINUE:

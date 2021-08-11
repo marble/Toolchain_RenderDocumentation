@@ -51,7 +51,6 @@ def lookup(D, *keys, **kwdargs):
 lockfiles_removed = []
 removed_dirs = []
 toolchain_actions = lookup(params, "toolchain_actions", default=[])
-xeq_name_cnt = 0
 
 
 # ==================================================
@@ -74,54 +73,9 @@ else:
     loglist.append("PROBLEM with required params")
 
 
-# =========================================================
-# Prepare for a subprocess with perfect logging
-# ---------------------------------------------------------
-
-if exitcode == CONTINUE:
-
-    import codecs
-    import os
-    import subprocess
-
-    def cmdline(cmd, cwd=None):
-        if cwd is None:
-            cwd = os.getcwd()
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=cwd
-        )
-        out, err = process.communicate()
-        exitcode = process.returncode
-        return exitcode, cmd, out, err
-
-    def execute_cmdlist(cmdlist):
-        global xeq_name_cnt
-        cmd = " ".join(cmdlist)
-        cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-        exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-        loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-        xeq_name_cnt += 1
-        filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-        filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-        filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-        with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-        with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-            f2.write(out.decode("utf-8", "replace"))
-
-        with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-            f2.write(err.decode("utf-8", "replace"))
-
-        return exitcode, cmd, out, err
-
-    # exitcode, cmd, out, err = execute_cmdlist(cmdlist)
-
 # ==================================================
 # work
 # --------------------------------------------------
-
 
 if exitcode == CONTINUE:
     if "version" in toolchain_actions:

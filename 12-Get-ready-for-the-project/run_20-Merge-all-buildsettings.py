@@ -86,7 +86,6 @@ buildsettings_default = {
 buildsettings_from_run_command = {}
 buildsettings_from_jobfile = {}
 buildsettings_initial = {}
-xeq_name_cnt = 0
 
 
 # ==================================================

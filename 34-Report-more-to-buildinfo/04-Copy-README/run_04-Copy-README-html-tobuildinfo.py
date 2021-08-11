@@ -49,7 +49,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 TheProjectResultBuildinfoREADMEfile = None
-xeq_name_cnt = 0
 
 
 # ==================================================

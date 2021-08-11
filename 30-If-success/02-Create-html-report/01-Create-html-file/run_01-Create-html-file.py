@@ -67,7 +67,6 @@ TheProjectResultHtmlmailMessageHtml = ""
 TheProjectLogHtmlmailMessageMdTxt = ""
 TheProjectLogHtmlmailMessageRstTxt = ""
 TheProjectLogHtmlmailMessageTxt = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

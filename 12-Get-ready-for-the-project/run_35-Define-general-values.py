@@ -84,7 +84,6 @@ relative_part_of_builddir = ""
 TheProjectCacheDir = None
 url_of_webroot = "https://docs.typo3.org/"
 webroot_abspath = "/ALL/dummy_webroot"
-xeq_name_cnt = 0
 
 email_user_do_not_send = 0
 email_user_receivers_exlude_list = [

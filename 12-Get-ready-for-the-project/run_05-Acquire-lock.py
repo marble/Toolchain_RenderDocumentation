@@ -59,6 +59,11 @@ unixtime = None
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    ignore_lockfile = lookup(milestones, "ignore_lockfile")
+    if ignore_lockfile:
+        CONTINUE = -1
+
+if exitcode == CONTINUE:
     loglist.append("CHECK PARAMS")
     lockfile_name = lookup(milestones, "lockfile_name")
     toolchain_temp_home = lookup(params, "toolchain_temp_home")

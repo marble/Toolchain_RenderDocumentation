@@ -48,7 +48,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 remove_static_folder_from_html_done = None
-xeq_name_cnt = 0
 
 
 # ==================================================

@@ -50,7 +50,6 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 masterdoc_manual_005_rst_saved_images = {}
-xeq_name_cnt = 0
 
 x = {
     "masterdoc_manual_html_005_as_rst": {

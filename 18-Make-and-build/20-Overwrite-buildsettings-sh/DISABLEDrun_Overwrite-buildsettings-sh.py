@@ -43,7 +43,6 @@ def lookup(D, *keys, **kwdargs):
 
 buildsettings = {}
 buildsettings_file = ""
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

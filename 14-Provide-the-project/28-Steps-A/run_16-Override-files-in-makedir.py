@@ -53,7 +53,6 @@ def lookup(D, *keys, **kwdargs):
 fpath_buildsettings_sh = None
 fpath_overrides_cfg = None
 settings_json_file_2 = None
-xeq_name_cnt = 0
 
 
 # ==================================================

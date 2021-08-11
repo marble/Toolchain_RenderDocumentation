@@ -57,7 +57,6 @@ TheProjectResultBuildinfoSitemapFilesHtmlJson = None
 TheProjectResultBuildinfoSitemapFilesHtmlTxt = None
 TheProjectResultBuildinfoSitemapFilesSinglehtmlJson = None
 TheProjectResultBuildinfoSitemapFilesSinglehtmlTxt = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

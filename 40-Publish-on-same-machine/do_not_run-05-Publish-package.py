@@ -54,7 +54,6 @@ def lookup(D, *keys, **kwdargs):
 publish_package_dir = ""
 publish_package_file = ""
 publish_packages_xml_file = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

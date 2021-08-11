@@ -71,7 +71,6 @@ publish_project_parent_dir = None
 publish_project_parent_dir_planned = None
 publish_settings_cfg_planned = None
 publish_warnings_txt_planned = None
-xeq_name_cnt = 0
 
 # ==================================================
 # Check params

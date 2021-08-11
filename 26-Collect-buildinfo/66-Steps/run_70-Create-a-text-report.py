@@ -63,7 +63,6 @@ def params_get(name, default=None):
 # --------------------------------------------------
 
 TheProjectResultBuildinfoMessageObsolete = ""
-xeq_name_cnt = 0
 
 
 # ==================================================

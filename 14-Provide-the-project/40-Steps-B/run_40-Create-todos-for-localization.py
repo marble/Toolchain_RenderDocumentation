@@ -24,6 +24,12 @@ loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
+class XeqParams:
+    xeq_name_cnt = 0
+    workdir = workdir
+    toolname_pure = toolname_pure
+
+
 # ==================================================
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
