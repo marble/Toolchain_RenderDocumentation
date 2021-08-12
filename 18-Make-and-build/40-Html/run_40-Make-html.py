@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import codecs
 import json
 import os
-import subprocess
 import shutil
-import sys
-import tct
+from os.path import exists as ospe, join as ospj
 
+import sys
+
+import tct
 from tctlib import cmdline
-from os.path import join as ospj, exists as ospe
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -133,7 +132,7 @@ if exitcode == CONTINUE:
         filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
         with codecs.open(ospj(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
+            f2.write(cmd_multiline)
 
         if (
             1
@@ -151,11 +150,11 @@ if exitcode == CONTINUE:
 
         if out:
             with codecs.open(ospj(workdir, filename_out), "w", "utf-8") as f2:
-                f2.write(out.decode("utf-8", "replace"))
+                f2.write(out)
 
         if err:
             with codecs.open(ospj(workdir, filename_err), "w", "utf-8") as f2:
-                f2.write(err.decode("utf-8", "replace"))
+                f2.write(err)
 
         return exitcode, cmd, out, err
 

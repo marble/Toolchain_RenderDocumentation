@@ -28,12 +28,6 @@ loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
-class XeqParams:
-    xeq_name_cnt = 0
-    workdir = workdir
-    toolname_pure = toolname_pure
-
-
 # ==================================================
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
@@ -67,6 +61,7 @@ rebuild_needed_because_of_change = None
 rebuild_needed_run_command = None
 rebuild_needed_tctconfig = None
 talk = milestones.get("talk", 1)
+xeq_name_cnt = 0
 
 
 # ==================================================
@@ -159,7 +154,7 @@ if exitcode == CONTINUE:
 
     if checksum_new:
         if checksum_new != checksum_old or rebuild_needed:
-            with open(checksum_file, "wb") as f2:
+            with open(checksum_file, "w") as f2:
                 f2.write(checksum_new)
 
 

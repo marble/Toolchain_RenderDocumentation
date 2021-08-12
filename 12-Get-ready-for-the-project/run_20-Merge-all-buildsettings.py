@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import codecs
 import os
+
 import six.moves.configparser
 import sys
-import tct
 
-from tct import deepget
+import tct
+from tct import StringIO, deepget
+
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -117,32 +118,22 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
     # read Makedir/buildsettings.sh
-
-    class WithSection:
-        def __init__(self, fp, sectionname):
-            self.fp = fp
-            self.sectionname = sectionname
-            self.prepend = True
-
-        def readline(self):
-            if self.prepend:
-                self.prepend = False
-                return "[" + self.sectionname + "]\n"
-            else:
-                return self.fp.readline()
-
-    # ConfigParser needs a section. Let's invent one.
-    section = "build"
-    config = six.moves.configparser.RawConfigParser()
+    section = u"build"
+    section_data = u"[" + section + u"]\n"
     f1path = os.path.join(makedir, "buildsettings.sh")
     if not os.path.exists(f1path):
         f1path = None
     if f1path:
         with codecs.open(f1path, "r", "utf-8") as f1:
-            config.readfp(WithSection(f1, section))
+            data = f1.read()
+        section_data = section_data + data
 
-        for option in config.options(section):
-            buildsettings_initial[option] = config.get(section, option)
+    config = six.moves.configparser.RawConfigParser()
+    read_method = getattr(config, 'read_file', None) or getattr(config, 'readfp')
+    read_method(StringIO(section_data))
+
+    for option in config.options(section):
+        buildsettings_initial[option] = config.get(section, option)
 
 if exitcode == CONTINUE:
 

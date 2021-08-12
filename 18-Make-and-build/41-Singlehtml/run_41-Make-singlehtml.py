@@ -137,17 +137,17 @@ if exitcode == CONTINUE:
         filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
         with codecs.open(ospj(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
+            f2.write(cmd_multiline)
 
         exitcode, cmd, out, err = cmdline(cmd, cwd=cwd)
 
         loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
 
         with codecs.open(ospj(workdir, filename_out), "w", "utf-8") as f2:
-            f2.write(out.decode("utf-8", "replace"))
+            f2.write(out)
 
         with codecs.open(ospj(workdir, filename_err), "w", "utf-8") as f2:
-            f2.write(err.decode("utf-8", "replace"))
+            f2.write(err)
 
         return exitcode, cmd, out, err
 

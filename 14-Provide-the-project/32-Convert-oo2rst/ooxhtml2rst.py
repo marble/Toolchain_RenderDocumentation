@@ -5,12 +5,21 @@
 Convert an OpenOffice (X)HTML file to reST.
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
+
+try:
+    from htmlentitydefs import name2codepoint
+except ImportError:
+    from html.entities import name2codepoint
+
 import six
 from six import unichr
 from six.moves import range
-import htmlentitydefs
+
+try:
+    from htmlentitydefs import name2codepoint
+except ImportError:
+    from html.entities import name2codepoint
 
 __version__ = "1.2.1"
 
@@ -69,7 +78,7 @@ try:
     # So we use StringIO in any case.
     from StringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 from textwrap import TextWrapper
 
@@ -78,7 +87,7 @@ from constants import *
 import six.moves.html_entities
 
 entitydefs = six.moves.html_parser.entitydefs = {"apos": u"'"}
-for k, v in six.iteritems(htmlentitydefs.name2codepoint):
+for k, v in six.iteritems(name2codepoint):
     entitydefs[k] = unichr(v)
 
 

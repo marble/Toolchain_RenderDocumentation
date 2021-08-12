@@ -27,11 +27,6 @@ loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
-class XeqParams:
-    xeq_name_cnt = 0
-    workdir = workdir
-    toolname_pure = toolname_pure
-
 
 # ==================================================
 # Make a copy of milestones for later inspection?
@@ -82,6 +77,12 @@ if exitcode == CONTINUE:
 else:
     loglist.append("Bad PARAMS or nothing to do")
 
+# ==================================================
+# define
+# --------------------------------------------------
+
+xeq_name_cnt = 0
+
 
 # ==================================================
 # work
@@ -105,7 +106,7 @@ if exitcode == CONTINUE:
         filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
 
         with codecs.open(ospj(workdir, filename_cmd), "w", "utf-8") as f2:
-            f2.write(cmd_multiline.decode("utf-8", "replace"))
+            f2.write(cmd_multiline)
 
         if (
             0

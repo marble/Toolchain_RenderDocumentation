@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
-import codecs
 import os
-import subprocess
-import sys
-import tct
+from os.path import exists as ospe
 
+import sys
+
+import tct
 from tct import deepget
-from os.path import join as ospj, exists as ospe
+from tctlib import execute_cmdlist
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -29,9 +28,10 @@ exitcode = CONTINUE = 0
 
 
 class XeqParams:
-    xeq_name_cnt = 0
-    workdir = workdir
+    loglist = loglist
     toolname_pure = toolname_pure
+    workdir = workdir
+    xeq_name_cnt = 0
 
 
 # ==================================================0

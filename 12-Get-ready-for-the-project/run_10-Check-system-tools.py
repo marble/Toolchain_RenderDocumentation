@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import absolute_import
-import tct
+from __future__ import absolute_import, print_function
+
+import codecs
 import os
+import subprocess
 import sys
 
-#
-import codecs
-import subprocess
-
+import tct
 from tctlib import execute_cmdlist
+
+# Keeplist for PyCharm's `optimize imports`:
+codecs, os, subprocess, sys, tct, execute_cmdlist
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -27,9 +28,10 @@ exitcode = CONTINUE = 0
 
 
 class XeqParams:
-    xeq_name_cnt = 0
-    workdir = workdir
+    loglist = loglist
     toolname_pure = toolname_pure
+    workdir = workdir
+    xeq_name_cnt = 0
 
 
 # ==================================================

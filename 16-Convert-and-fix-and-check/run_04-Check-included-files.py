@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
+import codecs
 import os
 import re
-import sys
-import tct
 
+import sys
+
+import tct
 from tct import deepget
 
 params = tct.readjson(sys.argv[1])
@@ -124,11 +125,11 @@ def processRstFile(folder, fname, minimum):
     fpath = folder + "/" + fname
     if not (fpath in visitedFiles):
         error_cnt = 0
-        with open(fpath, "rb") as f1:
-            f1bytes = f1.read()
+        with codecs.open(fpath, "r", "utf-8", "replace") as f1:
+            f1data = f1.read()
         hits = re.findall(
             "^\s*\.\.\s+(literalinclude|include)::\s*(\S+)\s*$",
-            f1bytes,
+            f1data,
             flags=+re.MULTILINE,
         )
         for hit in hits:

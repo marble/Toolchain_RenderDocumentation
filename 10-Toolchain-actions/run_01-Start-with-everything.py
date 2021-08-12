@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import codecs
 import json
 import os
+from os.path import join as ospj
+
 import sys
-import tct
 import time
 
+import tct
 from tct import deepget, logstamp_finegrained
-from os.path import join as ospj
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -87,8 +87,8 @@ if jobfile_json:
 def findRunParameter(key, default=None, D=None, fconv=None):
     a = deepget(milestones, key, default=None)
     b = deepget(jobfile_data, "tctconfig", key, default=None)
-    c = deepget(facts, "run_command", key, default=None)
-    d = deepget(facts, "tctconfig", configset, key, default=None)
+    c = deepget(facts, "run_command", key.lower(), default=None)
+    d = deepget(facts, "tctconfig", configset.lower(), key.lower(), default=None)
     e = default
     f = None
     result = firstNotNone(a, b, c, d, e, f)

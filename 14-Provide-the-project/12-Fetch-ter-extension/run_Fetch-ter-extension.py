@@ -29,9 +29,10 @@ exitcode = CONTINUE = 0
 
 
 class XeqParams:
-    xeq_name_cnt = 0
-    workdir = workdir
+    loglist = loglist
     toolname_pure = toolname_pure
+    workdir = workdir
+    xeq_name_cnt = 0
 
 
 # ==================================================

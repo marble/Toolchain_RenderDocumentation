@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import codecs
 import json
 import os
 import re
+from os.path import exists as ospe
+
 import sys
 import tct
-
 from bs4 import BeautifulSoup
-from os.path import exists as ospe
-from tct import deepget
-from urlparse import urlparse
+from tct import PY3, deepget
+
+try:
+    # Python 3 only:
+    from urllib.parse import urlparse, urlencode
+except ImportError:
+    # Python 2 only:
+    from urlparse import urlparse
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -308,8 +313,12 @@ def process_html_file(folder, relpath):
                     replaced_static_paths[src] = src_new
 
     if soup_modified:
-        with open(abspath, "wb") as f2:
-            print(soup, file=f2)
+        if PY3:
+            with open(abspath, "w") as f2:
+                print(soup, file=f2)
+        else:
+            with open(abspath, "wb") as f2:
+                print(soup, file=f2)
 
 
 if exitcode == CONTINUE:
