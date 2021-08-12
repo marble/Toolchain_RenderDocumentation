@@ -2,6 +2,13 @@
 CHANGES.rst
 ===========
 
+Release v2.12-dev (2021-08-12)
+==============================
+
+*  Port to Python-3, keeping compatibility with Python-2.
+*  Requires TCT with version >= v1.2
+
+
 Release v2.11.1 (2021-01-21)
 ============================
 
