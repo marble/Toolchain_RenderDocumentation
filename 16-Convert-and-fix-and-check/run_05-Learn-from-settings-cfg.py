@@ -92,7 +92,7 @@ import six.moves.configparser
 
 if exitcode == CONTINUE:
     config = six.moves.configparser.RawConfigParser()
-    read_method = getattr(config, 'read_file', None) or getattr(config, 'readfp')
+    read_method = getattr(config, "read_file", None) or getattr(config, "readfp")
     try:
         read_method(codecs.open(settingscfg_file, "r", "utf-8"))
     except six.moves.configparser.ParsingError as e:

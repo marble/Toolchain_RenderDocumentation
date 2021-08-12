@@ -129,7 +129,7 @@ if exitcode == CONTINUE:
         section_data = section_data + data
 
     config = six.moves.configparser.RawConfigParser()
-    read_method = getattr(config, 'read_file', None) or getattr(config, 'readfp')
+    read_method = getattr(config, "read_file", None) or getattr(config, "readfp")
     read_method(StringIO(section_data))
 
     for option in config.options(section):

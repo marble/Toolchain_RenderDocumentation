@@ -27,7 +27,6 @@ loglist = result["loglist"] = result.get("loglist", [])
 exitcode = CONTINUE = 0
 
 
-
 # ==================================================
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
