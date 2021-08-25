@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 import re
 import shutil
 import stat
+from os.path import exists as ospe, join as ospj
+
 import sys
 import tct
-
-from os.path import exists as ospe, join as ospj
 from tct import deepget
 
 params = tct.readjson(sys.argv[1])
@@ -131,7 +130,7 @@ if exitcode == CONTINUE:
     makefile_original_path = makefile_path + ".original"
     if ospe(makefile_path) and not ospe(makefile_original_path):
         shutil.copy2(makefile_path, makefile_original_path)
-    with open(makefile_path, "rb") as f1:
+    with open(makefile_path, "r") as f1:
         data = f1.read()
     data, cnt = re.subn(
         "LATEXMKOPTS[ ]*=[ ]*\n",
@@ -139,7 +138,7 @@ if exitcode == CONTINUE:
         data,
     )
     if cnt:
-        with open(makefile_path, "wb") as f2:
+        with open(makefile_path, "w") as f2:
             f2.write(data)
 
 

@@ -8,9 +8,8 @@ import os
 from os.path import join as ospj
 
 import sys
-import time
-
 import tct
+import time
 from tct import deepget, logstamp_finegrained
 
 params = tct.readjson(sys.argv[1])

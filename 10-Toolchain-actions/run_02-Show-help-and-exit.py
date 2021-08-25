@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import absolute_import
-import tct
+from __future__ import absolute_import, print_function
+
 import sys
+import tct
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
 milestones = tct.readjson(params["milestonesfile"])
 
 sys.path.insert(1, params["toolchain_folder"] + "/toolchain-packages")
-import tctlib
 
 reason = ""
 resultfile = params["resultfile"]

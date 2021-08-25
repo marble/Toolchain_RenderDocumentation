@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
-import cgi
+from __future__ import absolute_import, print_function
+
 import codecs
 import os
-import shutil
+
 import sys
 import tct
 
@@ -86,8 +85,8 @@ if exitcode == CONTINUE:
         os.path.split(TheProjectLogHtmlmailMessageHtml)[0], "README.html"
     )
 
-    with codecs.open(TheProjectLogHtmlmailMessageHtml, "r", "utf-8") as f1:
-        uhtml = f1.read().decode("utf-8", "replace")
+    with codecs.open(TheProjectLogHtmlmailMessageHtml, "r", "utf-8", "replace") as f1:
+        uhtml = f1.read()
 
     replacements = [
         ('href="' + absurl_html_dir + "_buildinfo/", 'href="./'),

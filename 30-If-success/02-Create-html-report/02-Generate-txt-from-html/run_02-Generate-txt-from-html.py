@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from __future__ import print_function
-from __future__ import absolute_import
-import cgi
+from __future__ import absolute_import, print_function
+
 import codecs
 import os
 import re
-import shutil
-import subprocess
+
 import sys
 import tct
 from six.moves import range
-from tctlib import cmdline
+from tctlib import execute_cmdlist
+
+execute_cmdlist
 
 params = tct.readjson(sys.argv[1])
 binabspath = sys.argv[2]
@@ -27,6 +27,12 @@ toolname_pure = params["toolname_pure"]
 toolchain_name = facts["toolchain_name"]
 workdir = params["workdir"]
 exitcode = CONTINUE = 0
+
+class XeqParams:
+    loglist = loglist
+    toolname_pure = toolname_pure
+    workdir = workdir
+    xeq_name_cnt = 0
 
 
 # ==================================================
@@ -110,10 +116,10 @@ pattern_re = re.compile('\{.*?"\}')
 
 
 def fix_pandoc_output(fileabspath):
-    lines = open(fileabspath, "rb").readlines()
+    lines = open(fileabspath, "r").readlines()
     for i in range(len(lines)):
         lines[i] = pattern_re.sub(u"", lines[i])
-    with open(fileabspath, "wb") as f2:
+    with open(fileabspath, "w") as f2:
         f2.writelines(lines)
 
 
@@ -143,26 +149,7 @@ if exitcode == CONTINUE:
         "--output " + logDestfileRstTxt,
         TheProjectLogHtmlmailMessageHtml,
     ]
-    cmd = " ".join(cmdlist)
-    cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-
-    loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-    xeq_name_cnt += 1
-    filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-    filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-    filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-    with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-        f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-        f2.write(out.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-        f2.write(err.decode("utf-8", "replace"))
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
 
     if os.path.exists(logDestfileRstTxt):
         TheProjectLogHtmlmailMessageRstTxt = logDestfileRstTxt
@@ -178,26 +165,7 @@ if exitcode == CONTINUE:
         "--output " + logDestfileMdTxt,
         TheProjectLogHtmlmailMessageHtml,
     ]
-    cmd = " ".join(cmdlist)
-    cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
-
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-
-    loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-    xeq_name_cnt += 1
-    filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-    filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-    filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-    with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-        f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-        f2.write(out.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-        f2.write(err.decode("utf-8", "replace"))
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
 
     if os.path.exists(logDestfileMdTxt):
         fix_pandoc_output(logDestfileMdTxt)
@@ -213,26 +181,8 @@ if exitcode == CONTINUE:
         "--output " + logDestfileTxt,
         TheProjectLogHtmlmailMessageHtml,
     ]
-    cmd = " ".join(cmdlist)
-    cmd_multiline = " \\\n   ".join(cmdlist) + "\n"
+    exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir, ns=XeqParams)
 
-    exitcode, cmd, out, err = cmdline(cmd, cwd=workdir)
-
-    loglist.append({"exitcode": exitcode, "cmd": cmd, "out": out, "err": err})
-
-    xeq_name_cnt += 1
-    filename_cmd = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "cmd")
-    filename_err = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "err")
-    filename_out = "xeq-%s-%d-%s.txt" % (toolname_pure, xeq_name_cnt, "out")
-
-    with codecs.open(os.path.join(workdir, filename_cmd), "w", "utf-8") as f2:
-        f2.write(cmd_multiline.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_out), "w", "utf-8") as f2:
-        f2.write(out.decode("utf-8", "replace"))
-
-    with codecs.open(os.path.join(workdir, filename_err), "w", "utf-8") as f2:
-        f2.write(err.decode("utf-8", "replace"))
 
     if os.path.exists(logDestfileTxt):
         fix_pandoc_output(logDestfileTxt)

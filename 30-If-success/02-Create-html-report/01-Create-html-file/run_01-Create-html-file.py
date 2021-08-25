@@ -8,10 +8,12 @@ import sys
 
 #
 import copy
-import cgi
 import os
 import shutil
 import six
+
+# excpecting 'pip install future'
+from html import escape as htmlesc
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -56,7 +58,6 @@ def lookup(D, *keys, **kwdargs):
 debugkeepAllBlocks = 0
 
 HKV = html_key_values = {}
-htmlesc = lambda x: cgi.escape(x, True)
 htmlmail_template_file = None
 milestone_abc = None
 talk = milestones.get("talk", 1)
