@@ -7,17 +7,20 @@ import codecs
 import json
 import os
 import re
+import sys
 from os.path import exists as ospe
 
-import sys
+import six
 import tct
 from bs4 import BeautifulSoup
 from tct import PY3, deepget
 
-try:
+if six.PY3:
     # Python 3 only:
-    from urllib.parse import urlparse, urlencode
-except ImportError:
+    from urllib.parse import urlparse
+    # pip install future
+    from past.builtins import basestring
+elif six.PY2:
     # Python 2 only:
     from urlparse import urlparse
 
@@ -121,11 +124,11 @@ else:
 # --------------------------------------------------
 
 
-def is_valid_version(ver):
+def is_valid_version(version):
     """Make sure the version number is formally valid."""
-    result = isinstance(ver, basestring) and not not ver
+    result = isinstance(version, basestring) and not not version
     if result:
-        parts = ver.split(".")
+        parts = version.split(".")
         result = len(parts) == 3
     sum = 0
     if result:
