@@ -2,6 +2,13 @@
 CHANGES.rst
 ===========
 
+Release v2.12.dev2 (2021-11-05)
+===============================
+
+*  Update html post-processing:
+   `div.literal-block-wrapper.docutils.container` →
+   `div.literal-block-wrapper.docutils.du-container`
+
 Release v2.12.dev1 (2021-10-03)
 ===============================
 
