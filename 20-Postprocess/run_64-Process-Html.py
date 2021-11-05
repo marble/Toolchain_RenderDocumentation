@@ -198,6 +198,29 @@ def process_html_file(folder, relpath):
     with codecs.open(abspath, "r", "utf-8") as f1:
         soup = BeautifulSoup(f1, "lxml")
 
+    for elm in soup.find_all("div"):
+        # input:  div.literal-block-wrapper.docutils.container
+        # output: div.literal-block-wrapper.docutils.du-container
+        classes1 = elm.get("class", [])
+        classes2 = []
+        hits = 0
+        for v in classes1:
+            if "literal-block-wrapper" == v:
+                hits += 1
+                classes2.append(v)
+            elif "docutils" == v:
+                hits += 1
+                classes2.append(v)
+            elif "container" == v:
+                hits += 1
+                classes2.append("du-container")
+            else:
+                hits += 0
+                classes2.append(v)
+        if hits >= 3:
+            soup_modified = True
+            elm["class"] = classes2
+
     for link in soup.find_all("a"):
         href = link.get("href")
         if href is not None:
