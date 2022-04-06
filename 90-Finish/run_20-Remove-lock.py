@@ -79,8 +79,8 @@ else:
 if exitcode == CONTINUE:
     lockfile = milestones_get("lockfile")
     if not (lockfile):
-        reason = "lockfile is missing"
-        exitcode = 22
+        reason = "Lockfile does not exist."
+        CONTINUE = -1
 
 if exitcode == CONTINUE:
     if os.path.isfile(lockfile):
