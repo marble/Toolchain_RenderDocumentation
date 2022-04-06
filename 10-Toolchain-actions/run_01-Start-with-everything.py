@@ -31,7 +31,7 @@ initial_working_dir = facts["initial_working_dir"]
 # Make a copy of milestones for later inspection?
 # --------------------------------------------------
 
-if 0 or milestones.get("debug_always_make_milestones_snapshot"):
+if 1:
     tct.make_snapshot_of_milestones(params["milestonesfile"], sys.argv[1])
 
 
