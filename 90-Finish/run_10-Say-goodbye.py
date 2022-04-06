@@ -178,12 +178,11 @@ if 1:
         print(
             "ATTENTION:\n"
             "\n"
-            "   No documentation found! No documentation rendered!\n"
+            "   No documentation found!\n"
             "\n"
-            "   Reason: None of the possible starting files (called \n"
-            '   "masterdoc") could not be found. Please provide at\n'
-            "   least one of the following. They will be taken into\n"
-            "   account in this order of preference:\n"
+            "   Reason:\n"
+            '   None of the following starting files ("masterdoc") were found, no matter what\n'
+            "   mixture of lower and upper case was tried. In order of precedence:\n"
         )
         for i, masterdoc_name in enumerate(masterdoc_candidates):
             print("      %s. %s" % (i + 1, masterdoc_name))
@@ -191,7 +190,7 @@ if 1:
         print(
             "\n"
             "   Find more information at "
-            "https://docs.typo3.org/typo3cms/HowToDocument/\n"
+            "https://docs.typo3.org/m/typo3/docs-how-to-document/master/en-us/\n"
         )
 
 
@@ -205,6 +204,22 @@ if time_finished_at_2:
 if time_finished_at_2_unixtime:
     result["MILESTONES"].append(
         {"time_finished_at_2_unixtime": time_finished_at_2_unixtime}
+    )
+
+if 1:
+    print(
+        "   ------------------------------------------------\n"
+        "   INFO\n"
+        "   About 'exitcodes' and values for 'CONTINUE':\n"
+        "       0: Subprocess succeeded\n"
+        "      22: Used to skip the remaining steps of the same level and sublevels.\n"
+        "          So this doesn't indicate and error unless it is thrown by the\n"
+        "          system, which is unlikely.\n"
+        "      90..99: Skip the rest of the toolchain and terminate\n"
+        "      other 1..255: Whatever system exitcode the subprocess return with.\n"
+        "                    Will skip the rest of the same level and sublevels.\n"
+        "      FINAL STATUS is set to either 0 (html was build) or 255 (if not)\n"
+        "      CONTINUE != 0 within a step just skips the rest of that step."
     )
 
 if "html" in milestones.get("builds_successful", []):
