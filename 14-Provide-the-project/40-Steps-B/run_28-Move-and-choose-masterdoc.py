@@ -129,7 +129,26 @@ if (exitcode == CONTINUE) and masterdoc and candidate:
     if candidate.lower().startswith("documentation/index."):
         pass
 
-    elif candidate.lower().startswith("readme."):
+    # for README.
+    # would be a new way of doing it. Should we?
+    elif 0 and candidate.lower().startswith("readme."):
+        fpath, fext = os.path.splitext(candidate)
+        source = masterdoc
+
+        if not documentation_folder:
+            documentation_folder = os.path.join(TheProject, "Documentation")
+            os.mkdir(documentation_folder)
+            documentation_folder_created = documentation_folder
+
+        if documentation_folder:
+            masterdoc = os.path.join(documentation_folder, "Index" + fext)
+            shutil.copyfile(source, masterdoc)
+
+
+    # README.
+    # The old way of doing it. Let's keep that for now
+    # Copying to ./Documentation/Documentation
+    elif 1 and candidate.lower().startswith("readme."):
         fpath, fext = os.path.splitext(candidate)
         source = masterdoc
 
