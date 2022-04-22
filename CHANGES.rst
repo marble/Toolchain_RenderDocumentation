@@ -6,6 +6,9 @@ Release v2.12.dev4 (2022-04-22)
 ===============================
 
 *  Add step run_19-Try-to-derive-scm_version_info.py
+*  Insert message "No terms have been indexed yet in this documentation."
+   if gendindex.html is empty.
+*  Remove the "convert from OpenOffice" stuff
 
 
 Release v2.12.dev3 (2022-04-06)
