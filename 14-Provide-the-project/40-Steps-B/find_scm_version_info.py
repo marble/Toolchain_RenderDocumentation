@@ -70,15 +70,24 @@ def my_get_version(
         parsed_scm_version = setuptools_scm._do_parse(config)
     except LookupError:
         error = 'LookupError'
+    except ValueError:
+        error = 'ValueError'
     except:
-        error = 'Unknown error'
+        error = 'Unknown other error'
 
     if parsed_scm_version:
-        guessed_version = setuptools_scm.format_version(
-            parsed_scm_version,
-            version_scheme=version_scheme,
-            local_scheme=local_scheme,
-        )
+        try:
+            guessed_version = setuptools_scm.format_version(
+                parsed_scm_version,
+                version_scheme=version_scheme,
+                local_scheme=local_scheme,
+            )
+        except LookupError:
+            error = 'LookupError'
+        except ValueError:
+            error = 'ValueError'
+        except:
+            error = 'Unknown other error'
     return guessed_version, parsed_scm_version, error
 
 
@@ -161,6 +170,7 @@ if __name__ == "__main__":
     root = None
     if len(sys.argv) == 2:
         root = sys.argv[1]
+    root = '/home/marble/Repositories/mbnas/mbgit/Toolchains/RenderDocumentation'
     if root:
         scm_version_info = main(root=root)
         print(json.dumps(scm_version_info, indent=4, sort_keys=True))
