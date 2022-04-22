@@ -90,9 +90,8 @@ if exitcode == CONTINUE:
         "checksum_time",
         "checksum_time_decoded",
         "checksum_ttl_seconds",
-        "email_notify_about_new_build",
-        "emails_user_from_project",
         "known_versions",
+        "scm_version_info",
     ]
     R = {}
     for k in keys:
@@ -100,13 +99,6 @@ if exitcode == CONTINUE:
         if v:
             k2 = mapping.get(k, k)
             R[k2] = v
-
-    # save, even if empty
-    for k, default in (
-        ("email_notify_about_new_build", []),
-        ("emails_user_from_project", []),
-    ):
-        R[k] = milestones.get(k, default)
 
     buildsettings = milestones.get("buildsettings", {})
     for k in [
