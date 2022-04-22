@@ -2,10 +2,18 @@
 CHANGES.rst
 ===========
 
+Release v2.12.dev4 (2022-04-22)
+===============================
+
+*  Add step run_19-Try-to-derive-scm_version_info.py
+
+
 Release v2.12.dev3 (2022-04-06)
 ===============================
 
-*  ...
+*  Improve messages and saying Good bye
+*  Make snapshot of very first step too
+*  Add helper tool 'where_was_it_changed.py'
 
 
 Release v2.12.dev2 (2021-11-05)
@@ -14,6 +22,7 @@ Release v2.12.dev2 (2021-11-05)
 *  Update html post-processing:
    `div.literal-block-wrapper.docutils.container` →
    `div.literal-block-wrapper.docutils.du-container`
+
 
 Release v2.12.dev1 (2021-10-03)
 ===============================
