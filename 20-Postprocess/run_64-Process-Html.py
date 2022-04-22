@@ -78,6 +78,8 @@ statics_path = None
 statics_path_replacement = None
 statics_to_keep = ["_static/language_data.js"]
 
+empty_index_message = "No terms have been indexed yet in this documentation."
+
 
 # ==================================================
 # Check params
@@ -197,6 +199,13 @@ def process_html_file(folder, relpath):
     abspath = folder + "/" + relpath
     with codecs.open(abspath, "r", "utf-8") as f1:
         soup = BeautifulSoup(f1, "lxml")
+
+    if relpath == 'genindex.html':
+        for hit in soup.find_all("div", class_="genindex-jumpbox"):
+            if hit.string is not None and hit.string.strip() == '':
+                hit.name = 'p'
+                hit.string.replace_with(empty_index_message)
+                hit.attrs = {}
 
     for elm in soup.find_all("div"):
         # input:  div.literal-block-wrapper.docutils.container
