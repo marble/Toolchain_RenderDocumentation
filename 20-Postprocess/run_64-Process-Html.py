@@ -145,16 +145,23 @@ def is_valid_version(version):
 
 
 if exitcode == CONTINUE:
-
     html_theme_options = lookup(
         milestones, "conf_py_settings", "html_theme_options", default={}
     )
+    if not html_theme_options:
+        reason = (
+            "We don't do postprocessing, since we do not find"
+            " milestones['conf_py_settings']['html_theme_options'],"
+            " which should have been produced by conf.py"
+        )
+        loglist.append(reason)
+        CONTINUE = -2
+
+if exitcode == CONTINUE:
     if html_theme_options and not html_theme_options.get("docstypo3org"):
         reason = (
-            "We don't do postprocessing, since we do have the\n"
-            "Settings.dump.json of the Sphinx html build,\n"
-            "but 'docstypo3org' (rendering for server) is not\n"
-            "set in there.\n"
+            "We don't do postprocessing, since html_theme_options['docstypo3org']"
+            " is empty, which means, we are not rendering for the server."
         )
         loglist.append(reason)
         CONTINUE = -2
@@ -163,7 +170,11 @@ if exitcode == CONTINUE:
     postprocessing_is_required = 1
 
 if exitcode == CONTINUE:
+    # prepare replcacing
+
+    # What is this one good for?
     replace_static_in_html = lookup(milestones, "replace_static_in_html")
+
     theme_info = lookup(milestones, "theme_info")
     theme_module_path = lookup(milestones, "theme_module_path")
 
@@ -186,8 +197,11 @@ if exitcode == CONTINUE:
     if statics_path_replacement:
         if theme_info.get("module_name") != "sphinx_typo3_theme":
             statics_path_replacement = ""
-            reason = "we don't do replacements for unknown theme"
-    if statics_path_replacement:
+            reason = "We don't do replacements for themes != sphinx_typo3_theme"
+
+    if 0 and statics_path_replacement:
+        # DISABLED
+        # do replacement only, if the theme version is a valid one
         if not is_valid_version(version_scm_core):
             statics_path_replacement = ""
             reason = "no replacement - bad version '%s'" % version_scm_core
@@ -206,6 +220,7 @@ def process_html_file(folder, relpath):
                 hit.name = 'p'
                 hit.string.replace_with(empty_index_message)
                 hit.attrs = {}
+                soup_modified = True
 
     for elm in soup.find_all("div"):
         # input:  div.literal-block-wrapper.docutils.container
