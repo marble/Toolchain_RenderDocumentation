@@ -86,6 +86,8 @@ else:
 
 if exitcode == CONTINUE:
 
+    # remove all files from _static that belong to our heme,
+    # but don't remove other files, that Sphinx has placed there
     statics_to_keep = milestones.get("statics_to_keep", [])
     for build_folder in [build_html_folder, build_singlehtml_folder]:
         if not build_folder:
