@@ -2,6 +2,14 @@
 CHANGES.rst
 ===========
 
+Release v3.0.0 (2022-04-25)
+===========================
+
+* small fixes
+* switch to v3.x scheme
+* bugfix: fetch settings.dump.json from Logdir instead of Makedir
+
+
 Release v2.12.dev4 (2022-04-22)
 ===============================
 
