@@ -314,9 +314,9 @@ if exitcode == CONTINUE:
 
 
 if exitcode == CONTINUE:
-    # conf.py should have left this json file in makedir
+    # conf.py should have left this json file in logdir
     fname = "Settings.dump.json"
-    src = ospj(TheProjectMakedir, fname)
+    src = ospj(TheProjectLog, fname)
     if ospe(src):
         settings_dump_json_file = ospj(workdir, fname)
         shutil.copy2(src, settings_dump_json_file)
