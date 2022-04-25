@@ -100,6 +100,12 @@ if exitcode == CONTINUE:
             k2 = mapping.get(k, k)
             R[k2] = v
 
+    # save, even if empty
+    for k, default in (
+        ("scm_version_info", {}),
+    ):
+        R[k] = milestones.get(k, default)
+
     buildsettings = milestones.get("buildsettings", {})
     for k in [
         "builddir",
