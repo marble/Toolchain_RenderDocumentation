@@ -2,12 +2,24 @@
 CHANGES.rst
 ===========
 
+Release v3.1.0 (2022-05-09)
+===========================
+
+*  95501d7 Pass arg 'sphinx_build_options' to Sphinx singlehtml build
+*  78d4bf6 Make if-clause easier to read
+*  766f169 Add 'sphinx_build_options' to 'html' Sphinx command
+*  c110cd9 Make if-clause easier to read
+*  3022a16 Add hto theme options of cmdline to Makedir/Settings.json
+*  d0b5c6b Start using docutils_unsafe.conf in 'Copy-the-makedir.py'
+*  26f752a Add runParameter option 'sphinx_build_options'
+
+
 Release v3.0.0 (2022-04-25)
 ===========================
 
-* small fixes
-* switch to v3.x scheme
-* bugfix: fetch settings.dump.json from Logdir instead of Makedir
+*  small fixes
+*  switch to v3.x scheme
+*  bugfix: fetch settings.dump.json from Logdir instead of Makedir
 
 
 Release v2.12.dev4 (2022-04-22)
