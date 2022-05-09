@@ -79,22 +79,48 @@ else:
 
 if exitcode == CONTINUE:
 
-    # looks like a candidate to be deprecated
-    fpath_buildsettings_sh = lookup(facts, "run_command", "buildsettings_sh")
-    if fpath_buildsettings_sh:
-        destfile = ospj(TheProjectMakedir, "buildsettings.sh")
-        shutil.copy2(fpath_buildsettings_sh, destfile)
+    if 1:
+        # this seems deprecated and not needed any more
+        fpath_buildsettings_sh = lookup(facts, "run_command", "buildsettings_sh")
+        if fpath_buildsettings_sh:
+            destfile = ospj(TheProjectMakedir, "buildsettings.sh")
+            shutil.copy2(fpath_buildsettings_sh, destfile)
 
-    fpath_overrides_cfg = lookup(facts, "run_command", "overrides_cfg")
-    if fpath_overrides_cfg:
-        destfile = os.path.join(TheProjectMakedir, "Overrides.cfg")
-        shutil.copy2(fpath_overrides_cfg, destfile)
+    if 1:
+        # this seems deprecated and not needed any more
+        fpath_overrides_cfg = lookup(facts, "run_command", "overrides_cfg")
+        if fpath_overrides_cfg:
+            destfile = os.path.join(TheProjectMakedir, "Overrides.cfg")
+            shutil.copy2(fpath_overrides_cfg, destfile)
 
-    # save jobfile_data['Overrides_cfg'] as 'MAKEDIR/Settings.json'
-    settings_json_data = lookup(milestones, "jobfile_data", "Overrides_cfg")
+    if 1:
+        # jobfile.json -> Settings.json
+        # only the html_theme_options named ['Overrides_cfg']
+        settings_json_data = lookup(milestones, "jobfile_data", "Overrides_cfg", default={})
+
+    if 1:
+        # Overlay with what we got from the command line
+        # like: --hto docstypo3org=  --hto showlegal=1
+        hto_dict = {}
+        for kv in lookup(facts, "run_command", "hto", default=[]):
+            splitted = kv.split('=', 1)
+            k = splitted[0].strip()
+            if len(splitted) > 1:
+                v = splitted[1].strip()
+            else:
+                v = ''
+            if k:
+                hto_dict[k] = v
+        if hto_dict:
+            if not 'html_theme_options' in settings_json_data:
+                settings_json_data['html_theme_options'] = {}
+            settings_json_data['html_theme_options'].update(hto_dict)
+
     if settings_json_data:
         settings_json_data["COMMENT"] = (
-            "This is what we found in" " jobfile_data['Overrides']"
+            "These are 'html_theme_options' we found in jobfile.json as "
+            "'Overrides_cfg' PLUS the hto options from the command line "
+            "facts['run_command']['hto']"
         )
         settings_json_file_2 = ospj(TheProjectMakedir, "Settings.json")
         if ospe(settings_json_file_2):
