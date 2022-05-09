@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 import codecs
 import os
+import shlex
 import subprocess
 import sys
 import tct
@@ -161,6 +162,7 @@ if exitcode == CONTINUE:
     documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
     localization_bs = lookup(milestones, "buildsettings", "localization", default="")
     localization_bs_as_path = localization_bs.lower().replace("_", "-")
+    sphinx_build_options = lookup(milestones, "sphinx_build_options", default="")
     t3docdir = lookup(milestones, "buildsettings", "t3docdir", default="")
     TheProjectCacheDir = lookup(milestones, "TheProjectCacheDir", default=None)
     if localization_bs_as_path == "default":
@@ -240,37 +242,18 @@ if exitcode == CONTINUE:
         cmdlist = [
             "sphinx-build",
         ]
-    if milestones.get("activateLocalSphinxDebugging"):
-        cmdlist.extend(["-v", "-v", "-v"])
-    else:
-        cmdlist.extend(["-v"])
-    if 0:
-        cmdlist.extend(
-            [
-                "-a",  # write all files; default is to only write new and changed files
-            ]
-        )
-    if 0:
-        cmdlist.extend(
-            [
-                "-E",  # don't use a saved environment, always read all files
-            ]
-        )
     if 1:
         if t3docdir:
             t3docdir_relpath = "/" + t3docdir
         else:
             t3docdir_relpath = ""
+        cmdlist.extend(shlex.split(sphinx_build_options))
         cmdlist.extend(
             [
                 "-b",
                 builder,  # builder to use; default is html
                 "-c",
                 SYMLINK_THE_MAKEDIR,  # path where configuration file(conf.py) is located (default: same as sourcedir)
-                # '-d ', doctree_folder,     # path for the cached environment and doctree files (default: outdir /.doctrees)
-                "-n",  # nit-picky mode, warn about all missing references
-                "-N",  # do not emit colored output
-                "-T",  # show full traceback on exception
                 "-w",
                 warnings_file,  # write warnings (and errors) to given file
                 SYMLINK_THE_PROJECT
