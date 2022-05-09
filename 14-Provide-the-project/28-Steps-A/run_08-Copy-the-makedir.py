@@ -6,6 +6,7 @@ from __future__ import absolute_import
 import codecs
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tct
@@ -81,7 +82,8 @@ else:
 # --------------------------------------------------
 
 xeq_name_cnt = 0
-
+docutils_conf_use_unsafe_done = None
+docutils_conf_remove_done = None
 
 # ==================================================
 # work
@@ -163,17 +165,17 @@ if exitcode == CONTINUE:
 
 if exitcode == CONTINUE:
 
+    do_themesdir = True
     if not themesdir:
         reason = "No themes to copy, because 'themesdir' is not given"
         loglist.append(reason)
-        CONTINUE = -2
-    if exitcode == CONTINUE:
+        do_themesdir = False
+    if do_themesdir:
         if not ospe(themesdir):
             reason = "themesdir '" + themesdir + "' does not exist."
             loglist.append(reason)
-            CONTINUE = -2
-
-    if exitcode == CONTINUE:
+            do_themesdir = False
+    if do_themesdir:
         destthemes = TheProjectMakedir + "/_themes"
         if ospe(destthemes):
             reason = (
@@ -181,9 +183,9 @@ if exitcode == CONTINUE:
                 '"TheProjectMakedir/_themes" folder'
             )
             loglist.append(reason)
-            CONTINUE = -2
+            do_themesdir = False
 
-    if exitcode == CONTINUE:
+    if do_themesdir:
         cmdlist = [
             # run rsync
             "rsync",
@@ -196,20 +198,25 @@ if exitcode == CONTINUE:
             # destdir - slash at the end!
             destthemes.rstrip("/") + "/",
         ]
-
         exitcode, cmd, out, err = execute_cmdlist(cmdlist, cwd=workdir)
 
-    if exitcode == CONTINUE:
-        TheProjectMakedirThemes = destthemes
+        if exitcode == CONTINUE:
+            TheProjectMakedirThemes = destthemes
 
 if exitcode == CONTINUE:
-    if remove_docutils_conf or allow_unsafe:
+    if allow_unsafe:
+        docutils_conf_file = ospj(TheProjectMakedir, "docutils.conf")
+        docutils_unsafe_conf_file = ospj(TheProjectMakedir, "docutils_unsafe.conf")
+        if ospe(docutils_conf_file) and ospe(docutils_unsafe_conf_file):
+            shutil.copy2(docutils_unsafe_conf_file, docutils_conf_file)
+            docutils_conf_use_unsafe_done = 1
+
+    if remove_docutils_conf:
         docutils_conf_file = ospj(TheProjectMakedir, "docutils.conf")
         if ospe(docutils_conf_file):
             os.remove(docutils_conf_file)
-            remove_docutils_conf_done = 1
+            docutils_conf_remove_done = 1
 
-if exitcode == CONTINUE:
     buildsettings_jsonfile_in_makedir = ospj(TheProjectMakedir, "buildsettings.json")
     with codecs.open(buildsettings_jsonfile_in_makedir, "w", "utf-8") as f2:
         json.dump(buildsettings, f2, indent=4, sort_keys=True)
@@ -225,9 +232,14 @@ if TheProjectMakedir:
 if TheProjectMakedirThemes:
     result["MILESTONES"].append({"TheProjectMakedirThemes": TheProjectMakedirThemes})
 
-if remove_docutils_conf_done:
+if docutils_conf_use_unsafe_done:
     result["MILESTONES"].append(
-        {"remove_docutils_conf_done": remove_docutils_conf_done}
+        {"docutils_conf_use_unsafe_done": docutils_conf_use_unsafe_done}
+    )
+
+if docutils_conf_remove_done:
+    result["MILESTONES"].append(
+        {"docutils_conf_remove_done": docutils_conf_remove_done}
     )
 
 if buildsettings_jsonfile_in_makedir:
