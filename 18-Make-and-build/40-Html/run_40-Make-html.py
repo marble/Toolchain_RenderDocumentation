@@ -6,6 +6,7 @@ from __future__ import absolute_import, print_function
 import codecs
 import json
 import os
+import shlex
 import shutil
 from os.path import exists as ospe, join as ospj
 
@@ -167,6 +168,7 @@ if exitcode == CONTINUE:
     documentation_folder_for_sphinx = os.path.split(masterdoc)[0]
     localization_bs = lookup(milestones, "buildsettings", "localization", default="")
     localization_bs_as_path = localization_bs.lower().replace("_", "-")
+    sphinx_build_options = lookup(milestones, "sphinx_build_options", default="")
     t3docdir = lookup(milestones, "buildsettings", "t3docdir", default="")
     TheProjectCacheDir = lookup(milestones, "TheProjectCacheDir", default=None)
     if localization_bs_as_path == "default":
@@ -237,51 +239,34 @@ if exitcode == CONTINUE:
     )
 
 if exitcode == CONTINUE:
-    if 1:
-        cmdlist = [
-            "sphinx-build",
-        ]
-    v_cnt = milestones.get("sphinxVerboseLevel")
-    if not isinstance(v_cnt, int):
-        v_cnt = None
-    if milestones.get("activateLocalSphinxDebugging"):
-        if v_cnt is None:
-            v_cnt = 3
-    else:
-        if v_cnt is None:
-            v_cnt = 1
-    v_cnt = max(0, min(6, v_cnt))
-    if v_cnt:
-        cmdlist.extend(["-v"] * v_cnt)
+    cmdlist = ["sphinx-build"]
     if 0:
-        cmdlist.extend(
-            [
-                "-a",  # write all files; default is to only write new and changed files
-            ]
-        )
-    if 0:
-        cmdlist.extend(
-            [
-                "-E",  # don't use a saved environment, always read all files
-            ]
-        )
+        # now the we have the 'sphinx_build_options' option at the command line
+        # this if-clause isn't needed any more and should be removed
+        v_cnt = milestones.get("sphinxVerboseLevel")
+        if not isinstance(v_cnt, int):
+            v_cnt = None
+        if milestones.get("activateLocalSphinxDebugging"):
+            if v_cnt is None:
+                v_cnt = 3
+        else:
+            if v_cnt is None:
+                v_cnt = 1
+        v_cnt = max(0, min(6, v_cnt))
+        if v_cnt:
+            cmdlist.extend(["-v"] * v_cnt)
     if 1:
         if t3docdir:
             t3docdir_relpath = "/" + t3docdir
         else:
             t3docdir_relpath = ""
+        cmdlist.extend(shlex.split(sphinx_build_options))
         cmdlist.extend(
-            [
+           [
                 "-b",
                 builder,  # builder to use; default is html
                 "-c",
                 SYMLINK_THE_MAKEDIR,  # path where configuration file(conf.py) is located (default: same as sourcedir)
-                #'-d ', doctree_folder,# path for the cached environment and doctree files (default: outdir /.doctrees)
-                "-j",
-                "auto",  # try to build in parallel
-                "-n",  # nit-picky mode, warn about all missing references
-                "-N",  # do not emit colored output
-                "-T",  # show full traceback on exception
                 "-w",
                 warnings_file,  # write warnings (and errors) to given file
                 SYMLINK_THE_PROJECT
