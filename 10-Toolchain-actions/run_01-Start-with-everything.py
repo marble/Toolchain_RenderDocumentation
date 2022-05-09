@@ -155,6 +155,13 @@ resultdir = findRunParameter("resultdir", None, ATNM)
 reveal_exitcodes = findRunParameter("reveal_exitcodes", 1, ATNM, int)
 reveal_milestones = findRunParameter("reveal_milestones", 1, ATNM, int)
 smtp_host = findRunParameter("smtp_host", None, ATNM)
+sphinx_build_options = findRunParameter("sphinx_build_options", (
+    " -j auto"  # try to build in parallel
+    " -n"       # nit-picky mode, warn about all missing references
+    " -N"       # do not emit colored output
+    " -T"       # show full traceback on exception
+    " -v"       # verbose
+).strip(), ATNM)
 sphinxVerboseLevel = findRunParameter("sphinxVerboseLevel", 1, ATNM, int)
 talk = findRunParameter("talk", 1, ATNM, int)
 themesdir = findRunParameter("themesdir", "/THEMES", ATNM)
