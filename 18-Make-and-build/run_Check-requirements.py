@@ -64,9 +64,11 @@ if exitcode == CONTINUE:
     disable_include_files_check = lookup(milestones, "disable_include_files_check")
     included_files_check_is_ok = lookup(milestones, "included_files_check_is_ok")
     allow_unsafe = lookup(milestones, "allow_unsafe")
-    if not any([disable_include_files_check, included_files_check_is_ok, allow_unsafe]):
-        exitcode = 22
-        reason = "Bad params or nothing to do"
+    if not allow_unsafe:
+        if not disable_include_files_check:
+            if not included_files_check_is_ok:
+                exitcode = 22
+                reason = "included_files_check is not ok"
 
 if exitcode == CONTINUE:
     loglist.append("PARAMS are ok")
