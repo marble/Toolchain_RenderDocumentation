@@ -2,6 +2,17 @@
 CHANGES.rst
 ===========
 
+Release v3.2.0 (2023-05-09)
+===========================
+
+*  Update HTML postprocessing. Rename css class `container` to css
+   class `du-container` for all DIVs that also have the `docutils`
+   class. `docutils.conf` did not help to prevent the `"docutils container"`
+   classes from being generated. Note that HTML postprocessing is done
+   only when rendering for the server `--hto docstypo3org=yes` or
+   when `-c force_html_postprocessing 1` is set.
+
+
 Release v3.1.0 (2022-05-09)
 ===========================
 

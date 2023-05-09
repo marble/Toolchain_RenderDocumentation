@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function
 
 import sys
 import tct
+import json
 
 params = tct.readjson(sys.argv[1])
 facts = tct.readjson(params["factsfile"])
@@ -54,7 +55,7 @@ else:
 # work
 # --------------------------------------------------
 
-toolchain_usage = """\
+toolchain_usage = """
 Usage: tct run [OPTIONS] %(toolchain_name)s
 
   Run the toolchain '%(toolchain_name)s'.
@@ -103,20 +104,26 @@ Toolchain options:
 
   -c jobfile PATH/TO/JOBFILE.JSON  pass in all kind of settings
 
-  -c email_user_to_instead  "email1,email2,..."  instead of real user
-  -c email_user_cc  "email1,email2,..."  additionally, publicly
-  -c email_user_bcc "email1,email2,..."  additionally, secretly
-  -c email_user_send_to_admin_too  1     like it says
-
 """ % {
     "toolchain_name": toolchain_name
 }
 
+def print_milestones_content():
+    print(f"\nSee also the knowledge we have collected so far in 'milestones'.\n"
+          f"Several of the values can be given as command line option.\n"
+          f"Try `-c NAME VALUE` to see if it has effect.\n"
+          f"Example: `-c make_singlehtml 1`.\n"
+          f"'milestones' collected so far:\n")
+    print(json.dumps(milestones, sort_keys=True, indent=4))
+
+
 if exitcode == CONTINUE:
-    if params.get("toolchain_help") or ("help" in params.get("toolchain_actions", [])):
+    if (milestones.get("toolchain_help") or params.get("toolchain_help") or (
+            "help" in params.get("toolchain_actions", []))):
         show_toolchain_usage_and_exit = 1
         if show_toolchain_usage_and_exit:
             print(toolchain_usage)
+            print_milestones_content()
             exitcode = 90
             reason = "Just show toolchain usage and stop."
 

@@ -158,16 +158,16 @@ if exitcode == CONTINUE:
         CONTINUE = -2
 
 if exitcode == CONTINUE:
-    if html_theme_options and not html_theme_options.get("docstypo3org"):
+    force_html_postprocessing = milestones.get("force_html_postprocessing")
+    postprocessing_is_required = (force_html_postprocessing or (html_theme_options and html_theme_options.get("docstypo3org")))
+    if not postprocessing_is_required:
         reason = (
             "We don't do postprocessing, since html_theme_options['docstypo3org']"
-            " is empty, which means, we are not rendering for the server."
+            " is empty, which means, we are not rendering for the server and"
+            " option 'force_html_postprocessing' was not set."
         )
         loglist.append(reason)
         CONTINUE = -2
-
-if exitcode == CONTINUE:
-    postprocessing_is_required = 1
 
 if exitcode == CONTINUE:
     # prepare replcacing
@@ -223,15 +223,14 @@ def process_html_file(folder, relpath):
                 soup_modified = True
 
     for elm in soup.find_all("div"):
+        # Rename docutils 'container' class to 'du-container' to
+        # not collide with Bootstrap's 'container' class.
+        #
         # input:  div.literal-block-wrapper.docutils.container
         # output: div.literal-block-wrapper.docutils.du-container
         classes1 = elm.get("class", [])
         if "docutils" in classes1 and "container" in classes1:
-            classes2 = []
-            for v in classes1:
-                if v == "container":
-                    v = "du-container"
-                classes2.append(v)
+            classes2 = ["du-container" if v=="container" else v  for v in classes1]
             elm["class"] = classes2
             soup_modified = True
 

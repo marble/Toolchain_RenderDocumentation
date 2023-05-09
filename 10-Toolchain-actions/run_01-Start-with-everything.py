@@ -140,6 +140,7 @@ disable_include_files_check = findRunParameter(
     "disable_include_files_check", 0, ATNM, int
 )
 force_rebuild_needed = findRunParameter("force_rebuild_needed", 1, ATNM, int)
+force_html_postprocessing = findRunParameter("force_html_postprocessing", 0, ATNM, int)
 ignore_lockfile = findRunParameter("ignore_lockfile", 0, ATNM, int)
 latex_contrib_typo3_folder = findRunParameter("latex_contrib_typo3_folder", None, ATNM)
 lockfile_name = findRunParameter("lockfile_name", "lockfile.json", ATNM)
@@ -165,6 +166,7 @@ sphinx_build_options = findRunParameter("sphinx_build_options", (
 sphinxVerboseLevel = findRunParameter("sphinxVerboseLevel", 1, ATNM, int)
 talk = findRunParameter("talk", 1, ATNM, int)
 themesdir = findRunParameter("themesdir", "/THEMES", ATNM)
+toolchain_help = findRunParameter("toolchain_help", 0, ATNM, int)
 try_pdf_build_from_published_latex = findRunParameter(
     "try_pdf_build_from_published_latex", 0, ATNM, int
 )
