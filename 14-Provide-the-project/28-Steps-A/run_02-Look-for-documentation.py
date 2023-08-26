@@ -46,6 +46,7 @@ def lookup(D, *keys, **kwdargs):
 # --------------------------------------------------
 
 buildsettings = {}
+global_include_file = lookup(milestones, "global_include_file", default="")
 locale_folders = {"": "", "default": ""}  # 'fr_FR':'Localization.fr_FR'
 locale_locales = []
 locale_masterdocs = []
@@ -91,6 +92,10 @@ else:
 # --------------------------------------------------
 
 if exitcode == CONTINUE:
+    candidate = os.path.join(gitdir, "Documentation/Includes.rst.txt")
+    if not global_include_file and os.path.exists(candidate):
+        global_include_file = "/Includes.rst.txt"
+
     loglist.append({"masterdoc_candidates": masterdoc_candidates})
     locale = "default"
     for candidate in masterdoc_candidates:
@@ -133,27 +138,27 @@ if exitcode == CONTINUE:
                             )
                             locale_masterdocs.append(masterdoc_selected[locale])
 
-if 0:
-    {
-        "buildsettings": {
-            "builddir": "/home/marble/htdocs/docs-typo3-org/typo3cms/extensions/sphinx/2.5",
-            "gitbranch": "",
-            "gitdir": "",
-            "giturl": "",
-            "localization": "fr_FR",
-            "logdir": ".",
-            "masterdoc": "",
-            "package_key": "typo3cms.extensions.sphinx",
-            "package_language": "fr-fr",
-            "package_zip": "1",
-            "project": "sphinx",
-            "t3docdir": "",
-            "ter_extension": "1",
-            "ter_extkey": "sphinx",
-            "ter_extversion": "2.5.0",
-            "version": "2.5",
-        }
-    }
+# if 0:
+#     {
+#         "buildsettings": {
+#             "builddir": "/home/marble/htdocs/docs-typo3-org/typo3cms/extensions/sphinx/2.5",
+#             "gitbranch": "",
+#             "gitdir": "",
+#             "giturl": "",
+#             "localization": "fr_FR",
+#             "logdir": ".",
+#             "masterdoc": "",
+#             "package_key": "typo3cms.extensions.sphinx",
+#             "package_language": "fr-fr",
+#             "package_zip": "1",
+#             "project": "sphinx",
+#             "t3docdir": "",
+#             "ter_extension": "1",
+#             "ter_extkey": "sphinx",
+#             "ter_extversion": "2.5.0",
+#             "version": "2.5",
+#         }
+#     }
 
 
 # ==================================================
@@ -168,6 +173,9 @@ if "always":
             "locale_masterdocs": locale_masterdocs,
         }
     )
+
+if global_include_file:
+    result["MILESTONES"].append({"global_include_file": global_include_file})
 
 if masterdoc_candidates:
     result["MILESTONES"].append(
