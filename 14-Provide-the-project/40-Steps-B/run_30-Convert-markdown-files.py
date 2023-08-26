@@ -6,8 +6,8 @@ import os
 import tct
 import sys
 
-#
-import shutil
+from tctlib import execute_cmdlist
+from pathlib import Path
 
 ospe = os.path.exists
 ospj = os.path.join
@@ -49,6 +49,11 @@ def lookup(D, *keys, **kwdargs):
 # define
 # --------------------------------------------------
 
+class XeqParams:
+    loglist = loglist
+    toolname_pure = toolname_pure
+    workdir = workdir
+    xeq_name_cnt = 0
 
 # ==================================================
 # Check params
@@ -75,6 +80,7 @@ else:
 
 markdown_files = []
 result_list = []
+global_include_file = lookup(milestones, "global_include_file", default="")
 
 if exitcode == CONTINUE:
     for relpath, dirs, files in os.walk(documentation_folder):
@@ -91,7 +97,8 @@ if exitcode == CONTINUE:
                 converted = 0
             else:
                 thisexitcode, cmd, out, err = execute_cmdlist(
-                    [pandoc, "--from markdown --to rst", mdfile, "-o", rstfile]
+                    [pandoc, "--from markdown --to rst", mdfile, "-o", rstfile],
+                    ns=XeqParams,
                 )
                 if thisexitcode == 0:
                     reason = ""
@@ -99,6 +106,18 @@ if exitcode == CONTINUE:
                 else:
                     reason = "exitcode " + str(thisexitcode)
                     converted = 0
+                if converted and global_include_file:
+                    info = f"converted from Markdown:\n   pandoc --from markdown --to rst {Path(mdfile).name} -o {Path(rstfile).name}"
+                    f3path = Path(f"{rstfile}.temp.rst")
+                    with open(f3path, "w") as f3:
+                        f3.write(f".. include:: {global_include_file}\n\n")
+                        f3.write(f".. {info}\n\n")
+                        with open(rstfile) as f1:
+                            for line in f1:
+                                f3.write(line)
+                    Path(rstfile).unlink()
+                    f3path.rename(rstfile)
+
             result_list.append((converted, fpath, reason))
     loglist.append((len(result_list), "found"))
 
