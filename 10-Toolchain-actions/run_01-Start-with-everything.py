@@ -83,7 +83,7 @@ if jobfile_json:
 # --------------------------------------------------
 
 
-def findRunParameter(key, default=None, D=None, fconv=None):
+def findRunParameter(key, default=None, D=None, fconv=None, *, descr=None):
     a = deepget(milestones, key, default=None)
     b = deepget(jobfile_data, "tctconfig", key, default=None)
     c = deepget(facts, "run_command", key.lower(), default=None)
@@ -141,6 +141,18 @@ disable_include_files_check = findRunParameter(
 )
 force_rebuild_needed = findRunParameter("force_rebuild_needed", 1, ATNM, int)
 force_html_postprocessing = findRunParameter("force_html_postprocessing", 0, ATNM, int)
+global_include_file = findRunParameter("global_include_file", "", ATNM, str,
+                                       descr=(
+"By default this option starts as empty string and automatically is set to"
+"' \Includes.rst.txt' as value if file 'Documentation/Includes.rst.txt' is"
+" present in the repository. If there is a non-empty value the toolchain"
+" will do a reST include like '.. include:: /Includes.rst.txt'"
+" at the beginning of rst-files"
+" that have been generated from Markdown using 'pandoc'. Otherwise these files would"
+" would not take the general include file into account."
+" However, if for some reason you set the option to some non-empty value"
+" manually, the toolchain will not change that value but still insert the include line."
+                                       ))
 ignore_lockfile = findRunParameter("ignore_lockfile", 0, ATNM, int)
 latex_contrib_typo3_folder = findRunParameter("latex_contrib_typo3_folder", None, ATNM)
 lockfile_name = findRunParameter("lockfile_name", "lockfile.json", ATNM)
