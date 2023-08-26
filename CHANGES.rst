@@ -2,6 +2,18 @@
 CHANGES.rst
 ===========
 
+Release v3.3.0 (2023-08-26)
+===========================
+
+*  Fix `Bug: Toolchain fails for Markdown file
+   <https://github.com/t3docs/docker-render-documentation/issues/132>`__.
+
+*  Introduce run parameter (option) 'global_include_file'.
+
+*  Insert reST include directive at the beginning of reST files generated
+   by 'pandoc'.
+
+
 Release v3.2.0 (2023-05-09)
 ===========================
 
