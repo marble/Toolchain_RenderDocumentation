@@ -144,7 +144,7 @@ force_html_postprocessing = findRunParameter("force_html_postprocessing", 0, ATN
 global_include_file = findRunParameter("global_include_file", "", ATNM, str,
                                        descr=(
 "By default this option starts as empty string and automatically is set to"
-"' \Includes.rst.txt' as value if file 'Documentation/Includes.rst.txt' is"
+"' \\Includes.rst.txt' as value if file 'Documentation/Includes.rst.txt' is"
 " present in the repository. If there is a non-empty value the toolchain"
 " will do a reST include like '.. include:: /Includes.rst.txt'"
 " at the beginning of rst-files"
